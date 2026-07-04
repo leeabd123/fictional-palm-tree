@@ -22,6 +22,9 @@ const ARCHIVED_MODES = ['mc', 'deepquiz', 'flow', 'trans', 'vocab', 'ref'];
 
 const _originalSetMode = setMode;
 setMode = function(m){
+  // retrigger the page-enter transition so mode switches feel like navigation
+  const ca = document.getElementById('content-area');
+  if(ca){ ca.classList.remove('page-enter'); void ca.offsetWidth; ca.classList.add('page-enter'); }
   _originalSetMode(m);
   if(ARCHIVED_MODES.includes(m) && !archiveOpen){
     toggleArchive();

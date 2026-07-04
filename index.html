@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/refresh.css">
 <link rel="stylesheet" href="css/coach.css">
+<link rel="stylesheet" href="css/modern.css">
 </head>
 <body>
 
@@ -64,6 +65,12 @@
       <button class="nav-btn" onclick="setModeAndClose('convo')" id="nav-convo">
         <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z"/><path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z"/></svg>
         Conversation mode
+      </button>
+
+      <div class="sidebar-label" style="margin-top:10px">④ Preserve it</div>
+      <button class="nav-btn" onclick="setModeAndClose('contribute')" id="nav-contribute">
+        <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M10 3.5c-3.6-2.4-8 .1-8 4.2 0 3.1 2.6 5.6 6.3 9l1.7 1.6 1.7-1.6c3.7-3.4 6.3-5.9 6.3-9 0-4.1-4.4-6.6-8-4.2z"/></svg>
+        Contribute
       </button>
 
       <!-- ═══ ARCHIVED — collapsed by default, nothing deleted ═══ -->
@@ -190,6 +197,7 @@
 <script src="js/modes/conversation.js"></script>
 <script src="js/modes/starred.js"></script>
 <script src="js/modes/listen.js"></script>
+<script src="js/modes/contribute.js"></script>
 
 <!-- ═══ App entry ═══ -->
 <script src="js/app.js"></script>

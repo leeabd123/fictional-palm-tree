@@ -1,5 +1,5 @@
 // First-time intro screens per mode
-let introShown = {flash:false,deep:false,shadow:false,mc:false,build:false,flow:false,speak:false,ref:true,trans:true,vocab:true,deepquiz:false,convo:false,starred:true,listen:false};
+let introShown = {flash:false,deep:false,shadow:false,mc:false,build:false,flow:false,speak:false,ref:true,trans:true,vocab:true,deepquiz:false,convo:false,starred:true,listen:false,contribute:false};
 
 function renderIntro(m){
   _currentIntroMode=m;
