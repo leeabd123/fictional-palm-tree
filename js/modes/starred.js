@@ -1,99 +1,85 @@
-// Starred items — star infrastructure (persisted) + review list
-let starredSet=new Set();
-try{ starredSet=new Set(JSON.parse(localStorage.getItem('tariga_starred_v1')||'[]')); }catch(e){}
+// Starred items — original implementation, restored from the author's prototype.
+// One addition over the original: the set persists in localStorage so stars
+// survive a page refresh, and the sidebar count restores on load.
+let starredItems = new Set(); // stores item.a keys
+try { starredItems = new Set(JSON.parse(localStorage.getItem('tariga_starred_v1') || '[]')); } catch (e) {}
 
 function saveStarred(){
-  try{ localStorage.setItem('tariga_starred_v1',JSON.stringify([...starredSet])); }catch(e){}
+  try { localStorage.setItem('tariga_starred_v1', JSON.stringify([...starredItems])); } catch (e) {}
 }
 
 function escAttr(s){
-  return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-function starBtnHTML(a){
-  const on=starredSet.has(a);
-  return `<button class="star-btn ${on?'starred':''}" data-star="${escAttr(a)}" onclick="event.stopPropagation();toggleStar(this.dataset.star)" title="${on?'Remove from starred':'Star to review later'}">${on?'★':'☆'}</button>`;
-}
-
-function toggleStar(a){
-  if(starredSet.has(a)) starredSet.delete(a); else starredSet.add(a);
-  saveStarred();
-  const on=starredSet.has(a);
-  document.querySelectorAll('.star-btn').forEach(btn=>{
-    if(btn.dataset.star===a){
-      btn.classList.toggle('starred',on);
-      btn.textContent=on?'★':'☆';
-      btn.title=on?'Remove from starred':'Star to review later';
-    }
-  });
-  updateStarredNav();
-  if(mode==='starred') renderStarred();
+  return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 function updateStarredNav(){
-  const el=document.getElementById('starred-nav-label');
-  if(!el)return;
-  const n=starredSet.size;
-  el.innerHTML=`Starred items${n?` <span class="star-count">${n}</span>`:''}`;
+  const lbl = document.getElementById('starred-nav-label');
+  if (lbl) lbl.textContent = starredItems.size > 0 ? `Starred (${starredItems.size})` : 'Starred items';
 }
 
-function clearStarred(){
-  starredSet.clear();
+function starBtnHTML(itemA){
+  const isStarred=starredItems.has(itemA);
+  const enc=encodeURIComponent(itemA);
+  return `<button class="star-btn ${isStarred?'starred':''}" id="star-btn-current" onclick="toggleStarEnc('${enc}');event.stopPropagation()" title="${isStarred?'Unstar':'Star for later'}">${isStarred?'\u2605':'\u2606'}</button>`;
+}
+
+function toggleStarEnc(enc){
+  const itemA=decodeURIComponent(enc);
+  toggleStar(itemA);
+}
+
+function toggleStar(itemA){
+  if(starredItems.has(itemA)) starredItems.delete(itemA);
+  else starredItems.add(itemA);
   saveStarred();
-  updateStarredNav();
-  renderStarred();
+  const lbl=document.getElementById('starred-nav-label');
+  if(lbl) lbl.textContent=starredItems.size>0?`Starred (${starredItems.size})`:'Starred items';
+  const btn=document.getElementById('star-btn-current');
+  if(btn){
+    const now=starredItems.has(itemA);
+    btn.textContent=now?'\u2605':'\u2606';
+    btn.classList.toggle('starred',now);
+    btn.title=now?'Unstar':'Star for later';
+  }
 }
 
 function renderStarred(){
   const ca=document.getElementById('content-area');
-  const all=[...V1,...V2,...P2,...EXTRA];
-  const seen=new Set();
-  const items=all.filter(x=>{
-    if(!starredSet.has(x.a)||seen.has(x.a))return false;
-    seen.add(x.a);return true;
-  });
-
-  if(!items.length){
-    ca.innerHTML=`
-      <div class="starred-empty">
-        <div class="starred-empty-icon">☆</div>
-        <div class="starred-empty-title">Nothing starred yet</div>
-        <div class="starred-empty-body">Tap the ☆ on any flashcard or deep card to collect the words you want to come back to.<br>They'll wait for you here — saved even after you close the page.</div>
-      </div>
-    `;
+  if(starredItems.size===0){
+    ca.innerHTML=`<div class="starred-empty">
+      <div class="starred-empty-icon">☆</div>
+      <div class="starred-empty-title">No starred items yet</div>
+      <div class="starred-empty-body">While using any mode, tap the ☆ star icon on any card to save it here for review.</div>
+    </div>`;
     return;
   }
-
-  const groups=[
-    {label:'From Video 1 — Solja',src:'v1'},
-    {label:'From Video 2 — Ala',src:'v2'},
-    {label:'From the glossary',src:'p2'},
-  ];
-
-  ca.innerHTML=`
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-      <div style="font-size:13px;color:var(--text2)">${items.length} starred ${items.length===1?'item':'items'} — your personal review deck</div>
-      <button class="starred-clear-btn" onclick="clearStarred()">Clear all</button>
-    </div>
-    ${groups.map(g=>{
-      const gi=items.filter(x=>x.src===g.src);
-      if(!gi.length)return '';
-      return `
-        <div class="starred-section-head">${g.label}</div>
-        ${gi.map(it=>`
-          <div class="starred-item">
-            <div class="starred-item-body">
-              <div class="starred-item-ar">${it.a}</div>
-              <div class="starred-item-ph">${it.p}</div>
-              <div class="starred-item-en">${it.e}</div>
-              <div class="starred-item-src">${it.cat} · ${it.type}</div>
-            </div>
-            ${starBtnHTML(it.a)}
-          </div>`).join('')}
-      `;
-    }).join('')}
-  `;
+  const all=[...V1,...V2,...P2,...EXTRA];
+  const starred=all.filter(x=>starredItems.has(x.a));
+  const byCat={};
+  starred.forEach(it=>{if(!byCat[it.cat])byCat[it.cat]=[];byCat[it.cat].push(it);});
+  let html=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+    <div style="font-size:14px;color:var(--text2)">${starred.length} starred item${starred.length!==1?'s':''}</div>
+    <button class="starred-clear-btn" onclick="if(confirm('Clear all starred items?')){starredItems.clear();saveStarred();const l=document.getElementById('starred-nav-label');if(l)l.textContent='Starred items';renderStarred();}">Clear all</button>
+  </div>`;
+  Object.keys(byCat).sort().forEach(cat=>{
+    html+=`<div class="starred-section-head">${cat}</div>`;
+    byCat[cat].forEach(it=>{
+      const srcLbl=it.src==='v1'?'Video 1':it.src==='v2'?'Video 2':'Glossary';
+      html+=`<div class="starred-item">
+        <div class="starred-item-body">
+          <div class="starred-item-ar">${it.a}</div>
+          <div class="starred-item-ph">${it.p}</div>
+          <div class="starred-item-en">${it.e}</div>
+          <div class="ctx-block" style="margin-top:8px;font-size:12px">${it.ctx}</div>
+          <div class="deep-ex-block" style="margin-top:8px"><div class="deep-ex-ar">${it.ex}</div><div class="ex-ph-line">${getExPh(it)}</div><div class="deep-ex-en">${it.exen}</div></div>
+          <div class="starred-item-src">${srcLbl} · ${it.type}</div>
+        </div>
+        <button class="star-btn starred" onclick="toggleStar(${JSON.stringify(it.a)});renderStarred()">★</button>
+      </div>`;
+    });
+  });
+  ca.innerHTML=html;
 }
 
-// Reflect any previously-saved stars in the sidebar on load
+// Restore sidebar count on load
 updateStarredNav();
