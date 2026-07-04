@@ -13,11 +13,11 @@ function setSrc(s){
 
 function setMode(m){
   mode=m;
-  ['flash','deep','shadow','mc','build','flow','speak','ref','trans','vocab','deepquiz','convo','starred'].forEach(x=>{
+  ['flash','deep','shadow','mc','build','flow','speak','ref','trans','vocab','deepquiz','convo','starred','listen'].forEach(x=>{
     const el=document.getElementById('nav-'+x);
     if(el) el.className='nav-btn'+(x===m?' on':'');
   });
-  const titles={flash:'Flashcards',deep:'Deep cards + synonyms',shadow:'Shadowing',mc:'Quiz',build:'Sentence builder',flow:'Flow translation',speak:'Speak & respond',ref:'Full reference',trans:'Transitions guide',vocab:'Vocab lists',deepquiz:'Deep quiz',convo:'Conversation mode',starred:'Starred items'};
+  const titles={flash:'Flashcards',deep:'Deep cards + synonyms',shadow:'Shadowing',mc:'Quiz',build:'Sentence builder',flow:'Flow translation',speak:'Speak & respond — your coach',ref:'Full reference',trans:'Transitions guide',vocab:'Vocab lists',deepquiz:'Deep quiz',convo:'Conversation mode',listen:'Tune your ear',starred:'Starred items'};
   document.getElementById('top-title').textContent=titles[m]||m;
   deck=getSrc();idx=0;flipped=false;mcAns=false;revShown=false;
   deepDeck=[];deepIdx=0;
@@ -39,6 +39,7 @@ function render(){
   if(mode==='vocab'){renderVocabList();return;}
   if(mode==='deepquiz'){renderDeepQuiz();return;}
   if(mode==='convo'){renderConvo();return;}
+  if(mode==='listen'){renderListen();return;}
   if(mode==='deep'){renderDeepCards();return;}
   if(mode==='starred'){renderStarred();return;}
   renderFlash();
