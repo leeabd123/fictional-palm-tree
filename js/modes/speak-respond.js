@@ -27,9 +27,56 @@ function renderSpeak() {
   const ta = document.getElementById('coach-input');
   if (ta) {
     ta.value = coachText;
-    ta.addEventListener('input', () => { coachText = ta.value; coachAutosize(ta); });
+    ta.addEventListener('input', () => { coachText = ta.value; coachAutosize(ta); coachUpdateWeave(); });
     coachAutosize(ta);
+    coachUpdateWeave();
   }
+}
+
+// Light up the vocab chips the learner has already woven in (Arabic-script
+// match only — the AI does the authoritative accounting, Arabizi included).
+function coachUpdateWeave() {
+  document.querySelectorAll('.coach-weave-chip').forEach(chip => {
+    const ar = chip.dataset.ar || '';
+    const core = ar.split('/')[0].trim();
+    chip.classList.toggle('hit', !!core && coachText.includes(core));
+  });
+}
+
+// ── Rough voice input (§ tiered response modes — demo-grade browser STT).
+// Whisper-quiet speech works; accuracy on Sudanese is limited by design of
+// the underlying models, which is exactly why text mode ships first.
+let coachRecognizer = null;
+function coachMicSupported() {
+  return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+}
+function coachToggleMic() {
+  const btn = document.getElementById('coach-mic');
+  if (coachRecognizer) { coachRecognizer.stop(); return; }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  coachRecognizer = new SR();
+  coachRecognizer.lang = 'ar-SA';
+  coachRecognizer.interimResults = false;
+  coachRecognizer.continuous = true;
+  coachRecognizer.onresult = (ev) => {
+    for (let i = ev.resultIndex; i < ev.results.length; i++) {
+      if (ev.results[i].isFinal) {
+        coachText = (coachText ? coachText.trimEnd() + ' ' : '') + ev.results[i][0].transcript.trim();
+      }
+    }
+    const ta = document.getElementById('coach-input');
+    if (ta) { ta.value = coachText; coachAutosize(ta); coachUpdateWeave(); }
+  };
+  coachRecognizer.onend = () => {
+    coachRecognizer = null;
+    document.getElementById('coach-mic')?.classList.remove('listening');
+  };
+  coachRecognizer.onerror = () => {
+    coachRecognizer = null;
+    document.getElementById('coach-mic')?.classList.remove('listening');
+  };
+  coachRecognizer.start();
+  if (btn) btn.classList.add('listening');
 }
 
 function coachAutosize(ta) {
@@ -72,12 +119,19 @@ function coachPromptHTML() {
 
       <div class="coach-input-block">
         <div class="coach-input-label">How would <em>you</em> answer? <span class="coach-input-hint">Arabic script or Arabizi (saraha, 3ashan…) — both count.</span></div>
+        <div class="coach-weave">
+          <div class="coach-weave-label">Try to weave these in — they light up as you use them</div>
+          <div class="coach-weave-row">
+            ${it.required.map(v => `<span class="coach-weave-chip" data-ar="${esc(v)}" dir="auto">${esc(v)}</span>`).join('')}
+            ${it.bonus.map(v => `<span class="coach-weave-chip bonus" data-ar="${esc(v)}" dir="auto">${esc(v)}</span>`).join('')}
+          </div>
+        </div>
         <textarea id="coach-input" class="coach-textarea" dir="auto" rows="3"
           placeholder="اكتب ردك هنا… or type it in Arabizi"></textarea>
         <div class="coach-actions">
           <button class="btn btn-accent coach-submit" onclick="coachSubmit()" ${configured ? '' : 'disabled title="Connect the coach below first"'}>Get coaching →</button>
+          ${coachMicSupported() ? `<button class="coach-mic" id="coach-mic" onclick="coachToggleMic()" title="Rough voice input (browser speech-to-text — Sudanese accuracy is limited, edit freely). Whisper-quiet works too.">🎙️</button>` : `<span class="coach-voice-note" title="Voice input is the next tier — text first, on purpose.">🎙️ voice coming soon</span>`}
           <button class="coach-reveal-link" onclick="coachToggleModels()">${coachModelsRevealed ? 'Hide' : 'Peek at'} natural examples</button>
-          <span class="coach-voice-note" title="Voice input is the next tier — text first, on purpose.">🎙️ voice coming soon</span>
         </div>
         ${coachError ? `<div class="coach-error">${esc(coachError)}</div>` : ''}
       </div>

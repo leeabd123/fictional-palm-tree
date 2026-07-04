@@ -1,0 +1,319 @@
+/* ══════════════════════════════════════════════════════════
+   MODERN — full shell redesign, loaded last so it wins.
+   Direction: quietly futuristic. Ambient depth, gradient gold
+   accents, purposeful motion, refined type — never neon,
+   never glassmorphism-for-its-own-sake. The dark/gold/serif
+   cultural soul stays; everything around it gets sharper.
+   ══════════════════════════════════════════════════════════ */
+
+:root {
+  --radius: 14px;
+  --radius-sm: 9px;
+  --glow-gold: 0 0 24px rgba(201, 169, 110, .18);
+  --ease: cubic-bezier(.22, .8, .35, 1);
+}
+
+/* ── Ambient stage: layered glow + vignette behind everything ── */
+body {
+  background:
+    radial-gradient(1100px 600px at 85% -10%, rgba(201, 169, 110, .07), transparent 60%),
+    radial-gradient(900px 700px at -15% 110%, rgba(139, 127, 199, .05), transparent 55%),
+    var(--bg);
+  background-attachment: fixed;
+}
+
+::selection { background: rgba(201, 169, 110, .3); color: var(--text); }
+
+/* Accessible, on-brand focus rings everywhere */
+:focus-visible {
+  outline: 2px solid rgba(201, 169, 110, .55);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ── Sidebar: floating rail ── */
+.sidebar {
+  background: linear-gradient(180deg, rgba(24, 24, 27, .92), rgba(14, 14, 15, .96));
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-right: 1px solid var(--border);
+  box-shadow: inset -1px 0 0 rgba(201, 169, 110, .06);
+}
+
+.sidebar-logo { padding: 20px 16px 16px; border-radius: var(--radius-sm); }
+.logo-ar {
+  background: linear-gradient(120deg, var(--accent2) 20%, var(--accent) 60%, #9a7d4e);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 18px rgba(201, 169, 110, .25));
+}
+
+.sidebar-label {
+  font-size: 9.5px;
+  letter-spacing: .16em;
+  color: var(--text3);
+  margin-top: 4px;
+}
+
+.nav-btn {
+  border-radius: 10px;
+  margin: 1px 6px;
+  padding-top: 9px;
+  padding-bottom: 9px;
+  transition: background .18s var(--ease), color .18s var(--ease), transform .18s var(--ease);
+}
+.nav-btn::before {
+  left: -6px;
+  width: 3px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, var(--accent2), var(--accent));
+  box-shadow: 0 0 10px rgba(201, 169, 110, .5);
+}
+.nav-btn.on {
+  background: linear-gradient(90deg, rgba(201, 169, 110, .14), rgba(201, 169, 110, .04));
+  color: var(--accent2);
+}
+.nav-btn:hover:not(.on) { background: rgba(255, 255, 255, .04); transform: translateX(3px); }
+.nav-icon { opacity: .75; transition: opacity .18s; }
+.nav-btn.on .nav-icon, .nav-btn:hover .nav-icon { opacity: 1; }
+
+/* Coach entry gets a live gold pulse — it's the product */
+#nav-speak::after {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  margin-left: auto;
+  background: var(--accent);
+  box-shadow: 0 0 8px rgba(201, 169, 110, .8);
+  animation: coachPulse 2.6s ease-in-out infinite;
+}
+@keyframes coachPulse {
+  0%, 100% { opacity: .5; transform: scale(.85); }
+  50%      { opacity: 1;  transform: scale(1.15); }
+}
+
+/* Deck source buttons: quieter, tab-like */
+.src-btn {
+  border-radius: 9px;
+  transition: all .16s var(--ease);
+}
+.src-btn:hover { transform: translateX(2px); }
+
+/* ── Top bar + stats: floating header with stat pills ── */
+.stats-strip {
+  gap: 10px;
+  padding: 12px 18px;
+  background: transparent;
+  border-bottom: none;
+}
+.stats-strip > div {
+  background: linear-gradient(180deg, var(--surface), rgba(24, 24, 27, .6));
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 8px;
+  transition: border-color .2s var(--ease);
+}
+.stats-strip > div:hover { border-color: var(--border2); }
+.stat-n { font-size: 20px; }
+
+.topbar, .top-bar {
+  position: relative;
+}
+.top-title {
+  font-size: 22px;
+  letter-spacing: .01em;
+}
+/* hairline gradient under the header zone */
+.content-area::before {
+  content: '';
+  display: block;
+  height: 1px;
+  margin: -12px 0 24px;
+  background: linear-gradient(90deg, transparent, rgba(201, 169, 110, .25), transparent);
+}
+
+.content-area { max-width: 820px; padding: 28px 32px 60px; }
+
+/* ── Mode-switch page transition ── */
+.content-area.page-enter > * {
+  animation: pageIn .45s var(--ease) both;
+}
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(12px) scale(.995); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── Buttons: gradient primary, ghost secondary ── */
+.btn {
+  border-radius: 10px;
+  letter-spacing: .015em;
+  transition: transform .16s var(--ease), box-shadow .2s var(--ease), border-color .2s, background .2s;
+}
+.btn-accent {
+  background: linear-gradient(135deg, var(--accent2), var(--accent) 55%, #ab8a55);
+  color: #17130c;
+  border: none;
+  font-weight: 600;
+  box-shadow: 0 2px 14px rgba(201, 169, 110, .28), inset 0 1px 0 rgba(255, 255, 255, .25);
+}
+.btn-accent:hover {
+  box-shadow: 0 4px 22px rgba(201, 169, 110, .4), inset 0 1px 0 rgba(255, 255, 255, .25);
+  transform: translateY(-1px);
+}
+.btn-accent:active { transform: translateY(0) scale(.99); }
+
+/* ── Cards: crisper elevation + top light ── */
+.mode-card, .card-face, .card-static, .speak-question-card, .coach-q-card,
+.listen-line-card, .coach-connect, .trans-intro, .coach-fb-card {
+  border-radius: var(--radius);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 12px 32px -18px rgba(0, 0, 0, .7);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, .025), transparent 90px);
+}
+.mode-card-footer, .card-footer { border-radius: 0 0 var(--radius) var(--radius); }
+
+/* flagship cards get a whisper of gold in the border */
+.coach-q-card, .coach-fb-suggestion, .coach-journey-now {
+  border-color: rgba(201, 169, 110, .28);
+}
+
+/* ── Inputs ── */
+.coach-textarea, .coach-connect-input {
+  border-radius: 12px;
+  background: rgba(14, 14, 15, .7);
+}
+
+/* chips get lift */
+.vocab-chip, .speak-chip, .coach-chip, .coach-layer-chip, .trans-tab, .vl-tab, .ref-filter {
+  transition: all .16s var(--ease);
+}
+.vocab-chip:hover, .speak-chip:hover { transform: translateY(-1px); }
+
+/* ── Coach "weave these in" live chips ── */
+.coach-weave { margin: 12px 0 4px; }
+.coach-weave-label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--text3); margin-bottom: 7px;
+}
+.coach-weave-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.coach-weave-chip {
+  font-size: 13px; padding: 4px 12px; border-radius: 20px;
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--text2); font-family: var(--serif);
+  transition: all .3s var(--ease);
+}
+.coach-weave-chip.bonus { opacity: .65; font-size: 12px; }
+.coach-weave-chip.hit {
+  background: var(--accent-dim);
+  border-color: rgba(201, 169, 110, .5);
+  color: var(--accent2);
+  opacity: 1;
+  box-shadow: 0 0 12px rgba(201, 169, 110, .25);
+  transform: translateY(-1px);
+}
+.coach-weave-chip.hit::after { content: ' ✓'; font-size: 10px; }
+
+/* ── Mic button (rough voice input) ── */
+.coach-mic {
+  width: 42px; height: 42px; border-radius: 50%;
+  border: 1px solid var(--border2); background: var(--surface);
+  color: var(--text2); cursor: pointer; font-size: 17px;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: all .2s var(--ease);
+}
+.coach-mic:hover { border-color: rgba(201, 169, 110, .5); color: var(--accent); }
+.coach-mic.listening {
+  border-color: var(--red); color: var(--red);
+  animation: micPulse 1.2s ease-in-out infinite;
+}
+@keyframes micPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(217, 107, 90, .35); }
+  50%      { box-shadow: 0 0 0 8px rgba(217, 107, 90, 0); }
+}
+
+/* ── Listen mode: exercise-kind switch ── */
+.listen-kind-row {
+  display: flex; gap: 6px; justify-content: center; margin-bottom: 18px;
+}
+.listen-kind {
+  padding: 6px 16px; border-radius: 20px; font-size: 12px; cursor: pointer;
+  font-family: var(--sans); background: transparent;
+  border: 1px solid var(--border); color: var(--text3);
+  transition: all .18s var(--ease);
+}
+.listen-kind.on {
+  background: var(--accent-dim); border-color: rgba(201, 169, 110, .45); color: var(--accent);
+}
+.listen-context-line {
+  background: var(--surface2); border-radius: var(--radius-sm);
+  padding: 10px 14px; margin-bottom: 10px;
+  font-size: 13px; color: var(--text3); line-height: 1.7;
+}
+.listen-context-line b { color: var(--text2); font-weight: 500; }
+
+/* ── Contribute (community pipeline mockup) ── */
+.contrib-hero { text-align: center; margin: 8px 0 26px; }
+.contrib-hero-title {
+  font-family: var(--serif); font-size: 30px; font-style: italic;
+  background: linear-gradient(120deg, var(--accent2), var(--accent));
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+}
+.contrib-hero-sub { font-size: 13.5px; color: var(--text2); margin-top: 8px; line-height: 1.7; }
+.contrib-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px 22px; margin-bottom: 14px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.35), 0 12px 32px -18px rgba(0,0,0,.7);
+}
+.contrib-step {
+  font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 8px; font-weight: 500;
+}
+.contrib-q {
+  font-size: 16px; color: var(--text); line-height: 1.7; margin-bottom: 4px;
+}
+.contrib-q-ar { font-family: var(--serif); font-size: 20px; direction: rtl; color: var(--text2); margin-top: 6px; line-height: 1.8; }
+.contrib-textarea {
+  width: 100%; min-height: 88px; resize: vertical;
+  background: rgba(14,14,15,.7); border: 1px solid var(--border2); border-radius: 12px;
+  padding: 13px 15px; color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.8;
+  transition: border-color .2s, box-shadow .2s;
+}
+.contrib-textarea:focus { outline: none; border-color: rgba(201,169,110,.5); box-shadow: 0 0 0 3px rgba(201,169,110,.1); }
+.contrib-tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.contrib-tag {
+  padding: 5px 13px; border-radius: 20px; font-size: 12px; cursor: pointer;
+  background: transparent; border: 1px solid var(--border); color: var(--text3);
+  font-family: var(--sans); transition: all .16s var(--ease);
+}
+.contrib-tag.on { background: var(--accent-dim); border-color: rgba(201,169,110,.45); color: var(--accent); }
+.contrib-note { font-size: 11.5px; color: var(--text3); margin-top: 8px; line-height: 1.6; }
+.contrib-pending {
+  display: flex; align-items: flex-start; gap: 12px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 13px 16px; margin-bottom: 8px;
+}
+.contrib-pending-text { flex: 1; font-size: 14px; color: var(--text); line-height: 1.7; }
+.contrib-pending-meta { font-size: 11px; color: var(--text3); margin-top: 3px; }
+.contrib-status {
+  font-size: 10px; padding: 3px 10px; border-radius: 20px; white-space: nowrap;
+  background: rgba(139, 127, 199, .14); border: 1px solid rgba(139, 127, 199, .35); color: var(--purple);
+}
+.contrib-thanks {
+  text-align: center; padding: 30px 20px;
+  animation: coachRise .45s var(--ease);
+}
+.contrib-thanks-icon { font-size: 40px; margin-bottom: 12px; }
+.contrib-thanks-title { font-family: var(--serif); font-size: 22px; font-style: italic; color: var(--accent); }
+.contrib-thanks-body { font-size: 13px; color: var(--text2); margin-top: 8px; line-height: 1.7; }
+
+/* ── Scrollbar + odds and ends ── */
+.sidebar::-webkit-scrollbar, .content-area::-webkit-scrollbar, body::-webkit-scrollbar { width: 5px; }
+body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+.tip-bar { border-radius: var(--radius-sm); }
+.prog-fill { border-radius: 4px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .content-area.page-enter > *, .coach-stagger, .coach-thinking-orb,
+  #nav-speak::after, .coach-mic.listening { animation: none !important; }
+}
