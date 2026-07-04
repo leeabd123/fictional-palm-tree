@@ -4,6 +4,7 @@ let flashDir='ar'; // 'ar' = Arabic first (recognition), 'en' = English first (p
 let knowSet=new Set(), learnSet=new Set();
 let mcAns=false, mcOpts=[], revShown=false, refFilt='All', streak=[];
 let usedVocabChips=new Set();
+let tipIdx=0;
 
 // ── Extra cards — deep cuts from both transcripts + expanded glossary ──
 function shuf(a){let b=[...a];for(let i=b.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
