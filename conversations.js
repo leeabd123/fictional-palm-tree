@@ -1,0 +1,47 @@
+// setMode, render routing, source switching
+function setSrc(s){
+  src=s;
+  ['v1','v2','all','p2','extra'].forEach(x=>{
+    const el=document.getElementById('src-'+x);
+    if(el) el.className='src-btn'+(x===s?' on-'+s:'');
+  });
+  deck=getSrc();idx=0;flipped=false;mcAns=false;revShown=false;
+  deepDeck=[];deepIdx=0;
+  knowSet.clear();learnSet.clear();streak=[];usedVocabChips=new Set();
+  updStats();render();
+}
+
+function setMode(m){
+  mode=m;
+  ['flash','deep','shadow','mc','build','flow','speak','ref','trans','vocab','deepquiz','convo','starred'].forEach(x=>{
+    const el=document.getElementById('nav-'+x);
+    if(el) el.className='nav-btn'+(x===m?' on':'');
+  });
+  const titles={flash:'Flashcards',deep:'Deep cards + synonyms',shadow:'Shadowing',mc:'Quiz',build:'Sentence builder',flow:'Flow translation',speak:'Speak & respond',ref:'Full reference',trans:'Transitions guide',vocab:'Vocab lists',deepquiz:'Deep quiz',convo:'Conversation mode',starred:'Starred items'};
+  document.getElementById('top-title').textContent=titles[m]||m;
+  deck=getSrc();idx=0;flipped=false;mcAns=false;revShown=false;
+  deepDeck=[];deepIdx=0;
+  knowSet.clear();learnSet.clear();streak=[];usedVocabChips=new Set();shadowArHidden=true;buildArHidden=true;
+  updStats();tipIdx++;
+  // Show intro screen first time for each mode
+  if(!introShown[m]){ renderIntro(m); return; }
+  render();
+}
+
+function render(){
+  if(mode==='ref'){renderRef();return;}
+  if(mode==='shadow'){renderShadow();return;}
+  if(mode==='mc'){renderMC();return;}
+  if(mode==='build'){renderBuild();return;}
+  if(mode==='flow'){renderFlow();return;}
+  if(mode==='speak'){renderSpeak();return;}
+  if(mode==='trans'){renderTrans();return;}
+  if(mode==='vocab'){renderVocabList();return;}
+  if(mode==='deepquiz'){renderDeepQuiz();return;}
+  if(mode==='convo'){renderConvo();return;}
+  if(mode==='deep'){renderDeepCards();return;}
+  if(mode==='starred'){renderStarred();return;}
+  renderFlash();
+}
+
+
