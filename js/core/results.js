@@ -21,6 +21,7 @@ function showRev(){revShown=true;render();}
 
 function mark(know){
   streak.push(know);
+  recordActivity();
   const it=deck[idx];
   if(know)knowSet.add(it.a);else learnSet.add(it.a);
   idx++;flipped=false;revShown=false;mcAns=false;usedVocabChips=new Set();shadowArHidden=true;buildArHidden=true;
