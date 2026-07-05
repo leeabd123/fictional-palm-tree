@@ -1,0 +1,1641 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>طريقة — Tariga</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&family=Noto+Naskh+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    html, body { margin:0; padding:0; background:#0f0d0b; }
+    body { font-family:'DM Sans',sans-serif; -webkit-font-smoothing:antialiased; }
+    * { box-sizing:border-box; }
+    textarea { outline:none; }
+    button { -webkit-tap-highlight-color:transparent; }
+    @keyframes floaty { 0%,100% { transform:translateY(0px); } 50% { transform:translateY(-11px); } }
+    @keyframes shadowPulse { 0%,100% { transform:scaleX(1); opacity:.55; } 50% { transform:scaleX(.86); opacity:.3; } }
+    @keyframes screenIn { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes materialize { from { opacity:0; transform:translateY(14px); filter:blur(2px); } to { opacity:1; transform:translateY(0); filter:blur(0); } }
+    @keyframes drift1 { 0%,100% { transform:translate(0,0) scale(1); } 50% { transform:translate(60px,40px) scale(1.15); } }
+    @keyframes drift2 { 0%,100% { transform:translate(0,0) scale(1); } 50% { transform:translate(-50px,-30px) scale(1.1); } }
+    @keyframes sweepA { 0% { transform:translateX(-160%) rotate(10deg); opacity:0; } 25% { opacity:.5; } 100% { transform:translateX(160%) rotate(10deg); opacity:0; } }
+    @keyframes sweepB { 0% { transform:translateX(-160%) rotate(10deg); opacity:0; } 25% { opacity:.5; } 100% { transform:translateX(160%) rotate(10deg); opacity:0; } }
+    @keyframes glowPulse { 0%,100% { opacity:.7; } 50% { opacity:1; } }
+    @keyframes barGrow { from { width:0; } }
+    @keyframes ringDraw { from { stroke-dashoffset: 326; } }
+    @keyframes dotBounce { 0%,100% { transform:scaleY(.4); } 50% { transform:scaleY(1); } }
+  </style>
+</helmet>
+
+<div style="min-height:100vh; background:#0f0d0b; color:#f0ede8; position:relative; overflow:hidden;">
+
+  <!-- ambient background -->
+  <div style="position:fixed; inset:0; pointer-events:none; z-index:0;">
+    <div style="position:absolute; top:-180px; right:-140px; width:520px; height:520px; border-radius:50%; background:radial-gradient(circle, rgba(201,169,110,0.14), transparent 65%); filter:blur(40px); animation:drift1 44s ease-in-out infinite;"></div>
+    <div style="position:absolute; bottom:-220px; left:-160px; width:560px; height:560px; border-radius:50%; background:radial-gradient(circle, rgba(79,216,196,0.10), transparent 65%); filter:blur(50px); animation:drift2 56s ease-in-out infinite;"></div>
+    <div style="position:absolute; top:38%; left:55%; width:380px; height:380px; border-radius:50%; background:radial-gradient(circle, rgba(139,110,220,0.09), transparent 65%); filter:blur(46px); animation:drift1 62s ease-in-out infinite reverse;"></div>
+  </div>
+
+  <div style="position:relative; z-index:1; max-width:560px; margin:0 auto; padding:24px 20px 120px;">
+
+    <!-- ═══ HOME ═══ -->
+    <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+      <div data-screen-label="Home dashboard" style="animation:screenIn .5s cubic-bezier(.2,.8,.2,1) both; position:relative;">
+        <!-- ambient connection globe -->
+        <div style="position:absolute; top:-100px; left:50%; transform:translateX(-50%); width:640px; height:520px; pointer-events:none; z-index:-1; opacity:.85; mask-image:radial-gradient(ellipse 60% 55% at 50% 45%, black 35%, transparent 78%); -webkit-mask-image:radial-gradient(ellipse 60% 55% at 50% 45%, black 35%, transparent 78%);">
+          <x-import component-from-global-scope="tariga-globe" from="./globe.js" hint-size="100%,100%" style="width:100%; height:100%;"></x-import>
+        </div>
+        <div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:28px;">
+          <div>
+            <div style="font-family:'Instrument Serif','Noto Naskh Arabic',serif; font-size:34px; color:#c9a96e; line-height:1.1; direction:rtl; text-align:left; text-shadow:0 0 30px rgba(201,169,110,0.35);">طريقة</div>
+            <div style="font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:#7a756e; margin-top:5px;">Sudanese Arabic Trainer</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px; padding:8px 14px; border-radius:100px; background:rgba(79,216,196,0.08); border:1px solid rgba(79,216,196,0.22);">
+            <div style="width:7px; height:7px; border-radius:50%; background:#4fd8c4; box-shadow:0 0 10px rgba(79,216,196,0.9); animation:glowPulse 2.6s ease-in-out infinite;"></div>
+            <span style="font-size:12px; font-weight:600; color:#4fd8c4; font-variant-numeric:tabular-nums; white-space:nowrap;">6-day streak</span>
+          </div>
+        </div>
+
+        <div style="text-align:center; padding:14px 0 4px;">
+          <div style="font-size:10px; letter-spacing:.3em; text-transform:uppercase; color:#4fd8c4; margin-bottom:12px; text-shadow:0 0 18px rgba(79,216,196,0.55);">طريقة كلامك · tarigat kalamak · the way you speak</div>
+          <div style="font-family:'Instrument Serif','Noto Naskh Arabic',serif; font-size:46px; direction:rtl; color:#f0ede8; line-height:1.45; text-wrap:balance; text-shadow:0 4px 40px rgba(0,0,0,0.7);">مساء النور يا زول</div>
+          <div style="font-size:13px; font-style:italic; color:#a78bfa; margin-top:8px;">masa an-noor ya zool</div>
+          <div style="font-size:14px; color:#a09e9a; margin-top:8px; margin-bottom:26px;">Good evening — your family's dialect is waiting for you.</div>
+        </div>
+
+        <button onClick="{{ goVoice }}" style="display:flex; align-items:center; gap:14px; width:100%; text-align:left; padding:12px 18px 12px 12px; border-radius:100px; background:rgba(255,250,242,0.05); border:1px solid rgba(167,139,250,0.3); backdrop-filter:blur(18px); cursor:pointer; color:#f0ede8; font-family:'DM Sans',sans-serif; box-shadow:0 18px 44px -22px rgba(0,0,0,0.85), 0 0 40px -16px rgba(167,139,250,0.4); margin-bottom:16px; transition:transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s;" style-hover="transform:translateY(-2px); box-shadow:0 24px 50px -20px rgba(0,0,0,0.9), 0 0 50px -12px rgba(167,139,250,0.55);">
+          <x-import component-from-global-scope="tariga-orb" from="./orb.js" mode="idle" hint-size="54px,54px" style="width:54px; height:54px; flex-shrink:0;"></x-import>
+          <span style="flex:1;">
+            <span style="display:block; font-size:14.5px; font-weight:600;">Practice out loud</span>
+            <span style="display:block; font-size:11.5px; color:#a09e9a; margin-top:2px;">Your coach is always listening — يلا نتكلم (yalla nitkallam)</span>
+          </span>
+          <span style="color:#c4b5fd; font-size:18px;">›</span>
+        </button>
+
+        <!-- progress ring card -->
+        <div style="display:flex; align-items:center; gap:22px; padding:22px; border-radius:20px; background:rgba(255,250,242,0.035); border:1px solid rgba(255,255,255,0.08); backdrop-filter:blur(18px); box-shadow:0 24px 50px -28px rgba(0,0,0,0.8); margin-bottom:14px;">
+          <div style="position:relative; width:118px; height:118px; flex-shrink:0;">
+            <svg width="118" height="118" viewBox="0 0 118 118" style="transform:rotate(-90deg);">
+              <circle cx="59" cy="59" r="52" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="7"></circle>
+              <circle cx="59" cy="59" r="52" fill="none" stroke="url(#ringGrad)" stroke-width="7" stroke-linecap="round" stroke-dasharray="326" stroke-dashoffset="124" style="animation:ringDraw 1.6s cubic-bezier(.3,.8,.3,1) both; filter:drop-shadow(0 0 8px rgba(201,169,110,0.5));"></circle>
+              <defs>
+                <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#e8c99a"></stop>
+                  <stop offset="100%" stop-color="#4fd8c4"></stop>
+                </linearGradient>
+              </defs>
+            </svg>
+            <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+              <div style="font-size:27px; font-weight:700; font-variant-numeric:tabular-nums; background:linear-gradient(120deg,#e8c99a,#4fd8c4); -webkit-background-clip:text; background-clip:text; color:transparent;">62%</div>
+              <div style="font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:#7a756e;">deck</div>
+            </div>
+          </div>
+          <div style="flex:1; display:flex; flex-direction:column; gap:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:baseline;">
+              <span style="font-size:13px; color:#a09e9a;">Mastered</span>
+              <span style="font-size:20px; font-weight:700; color:#56c98f; font-variant-numeric:tabular-nums; text-shadow:0 0 16px rgba(86,201,143,0.5);">34</span>
+            </div>
+            <div style="height:1px; background:rgba(255,255,255,0.06);"></div>
+            <div style="display:flex; justify-content:space-between; align-items:baseline;">
+              <span style="font-size:13px; color:#a09e9a;">Still learning</span>
+              <span style="font-size:20px; font-weight:700; color:#e8c99a; font-variant-numeric:tabular-nums; text-shadow:0 0 16px rgba(232,201,154,0.4);">12</span>
+            </div>
+            <div style="height:1px; background:rgba(255,255,255,0.06);"></div>
+            <div style="display:flex; justify-content:space-between; align-items:baseline;">
+              <span style="font-size:13px; color:#a09e9a;">Coached scenarios</span>
+              <span style="font-size:20px; font-weight:700; color:#4fd8c4; font-variant-numeric:tabular-nums; text-shadow:0 0 16px rgba(79,216,196,0.5);">7</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- deck source -->
+        <div style="display:flex; align-items:center; gap:10px; padding:12px 16px; border-radius:14px; background:rgba(201,169,110,0.06); border:1px solid rgba(201,169,110,0.18); margin-bottom:26px;">
+          <div style="width:8px; height:8px; border-radius:50%; background:#c9a96e; box-shadow:0 0 10px rgba(201,169,110,0.8); flex-shrink:0;"></div>
+          <div style="flex:1;">
+            <div style="font-size:13px; font-weight:600; color:#e8c99a;">Solja episode</div>
+            <div style="font-size:11px; color:#7a756e;">89 phrases from ونسا مع أس (Wansa ma3 Us)</div>
+          </div>
+          <span style="font-size:11px; color:#7a756e;">switch ›</span>
+        </div>
+
+        <div style="font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#7a756e; margin-bottom:12px;">Your path</div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <button onClick="{{ goCards }}" style="display:flex; flex-direction:column; align-items:flex-start; gap:14px; text-align:left; padding:18px; border-radius:20px; background:rgba(255,250,242,0.04); border:1px solid rgba(201,169,110,0.24); cursor:pointer; color:#f0ede8; font-family:'DM Sans',sans-serif; backdrop-filter:blur(14px); box-shadow:0 20px 44px -26px rgba(0,0,0,0.85); transition:transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s, border-color .3s;" style-hover="transform:translateY(-3px); border-color:rgba(201,169,110,0.5); box-shadow:0 28px 54px -24px rgba(0,0,0,0.9), 0 0 34px -10px rgba(201,169,110,0.4);">
+            <div style="width:42px; height:42px; border-radius:12px; background:rgba(201,169,110,0.12); border:1px solid rgba(201,169,110,0.3); display:flex; align-items:center; justify-content:center; box-shadow:inset 0 0 18px rgba(201,169,110,0.15);">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="#e8c99a"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"></path></svg>
+            </div>
+            <div>
+              <div style="font-size:15px; font-weight:600;">Flashcards</div>
+              <div style="font-size:11px; color:#a09e9a; margin-top:3px;">① Build vocab · 17 due</div>
+            </div>
+          </button>
+
+          <button onClick="{{ goCoach }}" style="display:flex; flex-direction:column; align-items:flex-start; gap:14px; text-align:left; padding:18px; border-radius:20px; background:linear-gradient(150deg, rgba(79,216,196,0.08), rgba(255,250,242,0.03)); border:1px solid rgba(79,216,196,0.3); cursor:pointer; color:#f0ede8; font-family:'DM Sans',sans-serif; backdrop-filter:blur(14px); box-shadow:0 20px 44px -26px rgba(0,0,0,0.85), 0 0 34px -14px rgba(79,216,196,0.3); transition:transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s, border-color .3s;" style-hover="transform:translateY(-3px); border-color:rgba(79,216,196,0.55); box-shadow:0 28px 54px -24px rgba(0,0,0,0.9), 0 0 44px -8px rgba(79,216,196,0.5);">
+            <div style="width:42px; height:42px; border-radius:12px; background:rgba(79,216,196,0.1); border:1px solid rgba(79,216,196,0.35); display:flex; align-items:center; justify-content:center; box-shadow:inset 0 0 18px rgba(79,216,196,0.18);">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="#4fd8c4"><path fill-rule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clip-rule="evenodd"></path></svg>
+            </div>
+            <div>
+              <div style="font-size:15px; font-weight:600;">Your coach</div>
+              <div style="font-size:11px; color:#a09e9a; margin-top:3px;">② Speak it · scenario 2</div>
+            </div>
+          </button>
+
+          <button onClick="{{ navListen }}" style="position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:14px; text-align:left; padding:18px; border-radius:20px; background:rgba(255,250,242,0.025); border:1px solid rgba(255,255,255,0.07); cursor:pointer; color:#f0ede8; font-family:'DM Sans',sans-serif; backdrop-filter:blur(14px);">
+            <span style="position:absolute; top:14px; right:14px; font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:#7a756e; border:1px solid rgba(255,255,255,0.1); border-radius:100px; padding:3px 8px;">next</span>
+            <div style="width:42px; height:42px; border-radius:12px; background:rgba(139,110,220,0.1); border:1px solid rgba(139,110,220,0.25); display:flex; align-items:center; justify-content:center;">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="#a78bfa"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+            </div>
+            <div>
+              <div style="font-size:15px; font-weight:600;">Tune your ear</div>
+              <div style="font-size:11px; color:#a09e9a; margin-top:3px;">③ Immerse · podcast lines</div>
+            </div>
+          </button>
+
+          <button onClick="{{ goJourney }}" style="display:flex; flex-direction:column; align-items:flex-start; gap:14px; text-align:left; padding:18px; border-radius:20px; background:rgba(255,250,242,0.04); border:1px solid rgba(201,169,110,0.2); cursor:pointer; color:#f0ede8; font-family:'DM Sans',sans-serif; backdrop-filter:blur(14px); box-shadow:0 20px 44px -26px rgba(0,0,0,0.85); transition:transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s, border-color .3s;" style-hover="transform:translateY(-3px); border-color:rgba(201,169,110,0.45); box-shadow:0 28px 54px -24px rgba(0,0,0,0.9), 0 0 34px -10px rgba(201,169,110,0.35);">
+            <div style="width:42px; height:42px; border-radius:12px; background:rgba(232,201,154,0.1); border:1px solid rgba(232,201,154,0.28); display:flex; align-items:center; justify-content:center;">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="#e8c99a"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+            </div>
+            <div>
+              <div style="font-size:15px; font-weight:600;">Your journey</div>
+              <div style="font-size:11px; color:#a09e9a; margin-top:3px;">Then → now · +38 natural</div>
+            </div>
+          </button>
+
+          <button onClick="{{ navMap }}" style="grid-column:1 / -1; display:flex; align-items:center; gap:14px; text-align:left; padding:16px 18px; border-radius:20px; background:linear-gradient(150deg, rgba(79,216,196,0.06), rgba(255,250,242,0.03)); border:1px solid rgba(79,216,196,0.24); cursor:pointer; color:#f0ede8; font-family:'DM Sans',sans-serif; backdrop-filter:blur(14px); box-shadow:0 20px 44px -26px rgba(0,0,0,0.85); transition:transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s, border-color .3s;" style-hover="transform:translateY(-3px); border-color:rgba(79,216,196,0.5); box-shadow:0 28px 54px -24px rgba(0,0,0,0.9), 0 0 34px -10px rgba(79,216,196,0.4);">
+            <div style="width:42px; height:42px; border-radius:12px; background:rgba(79,216,196,0.08); border:1px solid rgba(79,216,196,0.3); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="#4fd8c4"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM2 10h16M10 2c2.5 2.5 2.5 13.5 0 16-2.5-2.5-2.5-13.5 0-16z" stroke="#4fd8c4" stroke-width="1.3" fill="none"></path></svg>
+            </div>
+            <div style="flex:1;">
+              <div style="font-size:15px; font-weight:600;">Word origins — map of Sudan</div>
+              <div style="font-size:11px; color:#a09e9a; margin-top:3px;">See which region every phrase comes from</div>
+            </div>
+            <span style="color:#4fd8c4; font-size:16px;">›</span>
+          </button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ═══ FLASHCARDS ═══ -->
+    <sc-if value="{{ isCards }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Flashcards" style="animation:screenIn .5s cubic-bezier(.2,.8,.2,1) both;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+          <div>
+            <div style="font-family:'Instrument Serif','Noto Naskh Arabic',serif; font-style:italic; font-size:23px; color:#c9a96e;">Flashcards</div>
+            <div style="font-size:11px; color:#7a756e; margin-top:2px; font-variant-numeric:tabular-nums;">{{ cardCounter }} · Solja episode</div>
+          </div>
+          <div style="display:flex; gap:4px; padding:4px; border-radius:100px; background:rgba(255,250,242,0.04); border:1px solid rgba(255,255,255,0.08);">
+            <button onClick="{{ setDirAr }}" style="font-size:11px; font-weight:600; padding:6px 12px; border-radius:100px; background:{{ dirArBg }}; color:{{ dirArColor }}; border:1px solid {{ dirArBorder }}; white-space:nowrap; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all .25s;">عربي → EN</button>
+            <button onClick="{{ setDirEn }}" style="font-size:11px; font-weight:600; padding:6px 12px; border-radius:100px; background:{{ dirEnBg }}; color:{{ dirEnColor }}; border:1px solid {{ dirEnBorder }}; white-space:nowrap; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all .25s;">EN → عربي</button>
+          </div>
+        </div>
+
+        <!-- floating card scene -->
+        <div onTouchStart="{{ swipeStart }}" onTouchEnd="{{ swipeEnd }}" onMouseDown="{{ swipeStartM }}" onMouseUp="{{ swipeEndM }}" style="perspective:1500px; position:relative; height:426px; padding-top:14px; user-select:none; -webkit-user-select:none;">
+          <sc-for list="{{ deck }}" as="dc" hint-placeholder-count="3">
+            <div style="position:absolute; left:50%; top:14px; width:min(86%, 380px); height:400px; transform-style:preserve-3d; transition:transform .65s cubic-bezier(.25,.9,.3,1), opacity .5s ease; transform:{{ dc.wrapTf }}; opacity:{{ dc.op }}; z-index:{{ dc.z }}; pointer-events:{{ dc.pe }};">
+              <div style="height:100%; transform-style:preserve-3d; animation:{{ dc.floatAnim }};">
+                <div onClick="{{ dc.onTap }}" style="position:relative; height:100%; transform-style:preserve-3d; transition:transform .75s cubic-bezier(.25,.9,.3,1); cursor:pointer; transform:{{ dc.flipTf }};">
+
+              <!-- front -->
+              <div style="position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden; border-radius:24px; background:linear-gradient(160deg, rgba(46,42,36,0.92), rgba(28,25,21,0.96)); border:1px solid rgba(232,201,154,0.16); box-shadow:0 34px 70px -30px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,255,255,0.07), 0 0 50px -22px rgba(201,169,110,0.4); padding:28px; display:flex; flex-direction:column; overflow:hidden;">
+                <div style="position:absolute; top:0; left:0; width:55%; height:100%; background:linear-gradient(100deg, transparent 30%, rgba(255,245,225,0.07) 50%, transparent 70%); pointer-events:none; animation:{{ dc.sweep }};"></div>
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                  <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                    <span style="font-size:10px; padding:4px 10px; border-radius:100px; background:rgba(201,169,110,0.14); color:#e8c99a; border:1px solid rgba(201,169,110,0.28); letter-spacing:.04em;">Video 1</span>
+                    <span style="font-size:10px; padding:4px 10px; border-radius:100px; background:rgba(255,255,255,0.05); color:#a09e9a; border:1px solid rgba(255,255,255,0.09); letter-spacing:.04em;">{{ dc.cat }}</span>
+                  </div>
+                  <span style="display:inline-flex; gap:4px; align-items:center;"><button onClick="{{ dc.onSay }}" title="hear it" style="background:transparent; border:none; cursor:pointer; padding:3px; line-height:0;"><svg width="16" height="16" viewBox="0 0 20 20" fill="#a09e9a"><path d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.784L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.797-3.784a1 1 0 011.617.076z"></path><path d="M14.657 5.343a1 1 0 011.414 0A7.975 7.975 0 0118.4 11a7.975 7.975 0 01-2.329 5.657 1 1 0 01-1.414-1.414A5.975 5.975 0 0016.4 11c0-1.594-.62-3.09-1.743-4.243a1 1 0 010-1.414z"></path></svg></button><span style="color:#7a756e; font-size:17px;">☆</span></span>
+                </div>
+                <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:16px 0;">
+                  <sc-if value="{{ dirAr }}" hint-placeholder-val="{{ true }}">
+                    <div style="font-family:'Noto Naskh Arabic','Instrument Serif',serif; font-size:40px; direction:rtl; text-align:center; line-height:1.7; color:#f6f1e8; text-shadow:0 2px 24px rgba(232,201,154,0.18); text-wrap:balance;">{{ dc.ar }}</div>
+                    <div style="font-size:14px; font-style:italic; color:#a78bfa;">{{ dc.ph }}</div>
+                  </sc-if>
+                  <sc-if value="{{ dirEn }}" hint-placeholder-val="{{ false }}">
+                    <div style="font-size:23px; font-weight:600; text-align:center; line-height:1.55; color:#f6f1e8; text-wrap:balance;">{{ dc.en }}</div>
+                    <div style="font-size:12px; color:#7a756e;">say it in Arabic below — or flip anytime</div>
+                  </sc-if>
+                </div>
+                <div style="text-align:center; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#7a756e;">tap to flip · swipe to browse</div>
+              </div>
+
+              <!-- back -->
+              <div style="position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden; transform:rotateY(180deg); border-radius:24px; background:linear-gradient(160deg, rgba(40,38,34,0.94), rgba(26,24,21,0.97)); border:1px solid rgba(79,216,196,0.18); box-shadow:0 34px 70px -30px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,255,255,0.07), 0 0 50px -22px rgba(79,216,196,0.35); padding:26px; display:flex; flex-direction:column; gap:12px; overflow:hidden;">
+                <div style="display:flex; justify-content:space-between; align-items:baseline; gap:12px;">
+                  <div style="font-family:'Noto Naskh Arabic','Instrument Serif',serif; font-size:24px; direction:rtl; color:#f6f1e8; line-height:1.6;">{{ dc.ar }}</div>
+                  <span style="display:inline-flex; gap:6px; align-items:center;"><span style="font-size:12px; font-style:italic; color:#a78bfa; white-space:nowrap;">{{ dc.ph }}</span><button onClick="{{ dc.onSayEx }}" title="hear it" style="background:transparent; border:none; cursor:pointer; padding:3px; line-height:0;"><svg width="16" height="16" viewBox="0 0 20 20" fill="#a09e9a"><path d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.784L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.797-3.784a1 1 0 011.617.076z"></path><path d="M14.657 5.343a1 1 0 011.414 0A7.975 7.975 0 0118.4 11a7.975 7.975 0 01-2.329 5.657 1 1 0 01-1.414-1.414A5.975 5.975 0 0016.4 11c0-1.594-.62-3.09-1.743-4.243a1 1 0 010-1.414z"></path></svg></button></span>
+                </div>
+                <div style="font-size:16px; font-weight:600; color:#e8c99a; line-height:1.5;">{{ dc.en }}</div>
+                <div style="font-size:12.5px; color:#a09e9a; line-height:1.7; padding:11px 14px; border-radius:12px; background:rgba(201,169,110,0.06); border:1px solid rgba(201,169,110,0.14);">{{ dc.ctx }}</div>
+                <div style="padding:12px 14px; border-radius:12px; background:rgba(255,255,255,0.035); border:1px solid rgba(255,255,255,0.07);">
+                  <div style="font-family:'Noto Naskh Arabic','Instrument Serif',serif; font-size:16px; direction:rtl; text-align:right; color:#f0ede8; line-height:1.9;">{{ dc.ex }}</div>
+                  <div style="font-size:11px; font-style:italic; color:#a78bfa; margin-top:3px;">{{ dc.exph }}</div>
+                  <div style="font-size:11.5px; color:#7a756e; margin-top:4px;">{{ dc.exen }}</div>
+                </div>
+              </div>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <!-- floating shadow -->
+        <div style="width:56%; height:20px; margin:2px auto 0; border-radius:50%; background:radial-gradient(ellipse, rgba(0,0,0,0.65), transparent 70%); animation:shadowPulse 6.5s ease-in-out infinite;"></div>
+        <div style="display:flex; gap:7px; justify-content:center; align-items:center; margin-top:14px;">
+          <sc-for list="{{ dots }}" as="dot" hint-placeholder-count="5">
+            <div style="height:6px; border-radius:100px; transition:all .4s; width:{{ dot.w }}; background:{{ dot.bg }}; box-shadow:{{ dot.glow }};"></div>
+          </sc-for>
+        </div>
+
+        <!-- practice panel — word & sentence, works in both directions -->
+        <div style="margin-top:14px; padding:18px; border-radius:20px; background:rgba(255,250,242,0.03); border:1px solid rgba(255,255,255,0.08); backdrop-filter:blur(16px);">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px;">
+            <span style="font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:#4fd8c4; white-space:nowrap;">{{ pTitle }}</span>
+            <span style="display:inline-flex; gap:4px; padding:3px; border-radius:100px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);">
+              <button onClick="{{ pSetWord }}" style="font-size:11px; font-weight:600; padding:5px 12px; border-radius:100px; background:{{ pWordBg }}; color:{{ pWordColor }}; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; white-space:nowrap; transition:all .25s;">Word</button>
+              <button onClick="{{ pSetSentence }}" style="font-size:11px; font-weight:600; padding:5px 12px; border-radius:100px; background:{{ pSentBg }}; color:{{ pSentColor }}; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; white-space:nowrap; transition:all .25s;">Sentence</button>
+            </span>
+          </div>
+
+          <div style="padding:12px 14px; border-radius:12px; background:rgba(255,255,255,0.035); border:1px solid rgba(255,255,255,0.08); margin-bottom:12px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                <div dir="auto" style="flex:1; font-size:15px; font-style:italic; color:#e8c99a; line-height:1.8; font-family:'DM Sans','Noto Naskh Arabic',sans-serif;">"{{ pPromptText }}"</div>
+                <sc-if value="{{ pSentMultiple }}" hint-placeholder-val="{{ false }}">
+                  <span style="display:inline-flex; gap:5px; align-items:center;">
+                    <button onClick="{{ pPrevEx }}" style="width:26px; height:26px; border-radius:50%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#a09e9a; font-size:13px; cursor:pointer; font-family:'DM Sans',sans-serif;">‹</button>
+                    <span style="font-size:10px; color:#7a756e; white-space:nowrap; font-variant-numeric:tabular-nums;">{{ pExCounter }}</span>
+                    <button onClick="{{ pNextEx }}" style="width:26px; height:26px; border-radius:50%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#a09e9a; font-size:13px; cursor:pointer; font-family:'DM Sans',sans-serif;">›</button>
+                  </span>
+                </sc-if>
+              </div>
+              <sc-if value="{{ pShowPromptPh }}" hint-placeholder-val="{{ false }}">
+                <div style="font-size:11px; font-style:italic; color:#a78bfa; margin-top:4px;">{{ pPromptPh }}</div>
+              </sc-if>
+          </div>
+
+          <sc-if value="{{ pNotCompared }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <button onClick="{{ pMic }}" style="width:50px; height:50px; flex-shrink:0; border-radius:50%; background:linear-gradient(140deg, rgba(167,139,250,0.25), rgba(240,166,216,0.18)); border:1px solid {{ pMicBorder }}; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 0 30px -8px rgba(167,139,250,0.55); transition:all .3s;" style-hover="transform:scale(1.06);">
+                <svg width="19" height="19" viewBox="0 0 20 20" fill="#dcd2ff"><path fill-rule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clip-rule="evenodd"></path></svg>
+              </button>
+              <input dir="auto" placeholder="{{ pPlaceholder }}" onInput="{{ pOnType }}" value="{{ pInput }}" style="flex:1; border:1px solid rgba(255,255,255,0.12); border-radius:100px; background:rgba(255,255,255,0.04); color:#f0ede8; font-family:'DM Sans','Noto Naskh Arabic',sans-serif; font-size:14.5px; padding:12px 18px; min-width:0; outline:none;">
+              <button onClick="{{ pGo }}" style="flex-shrink:0; padding:12px 18px; border-radius:100px; background:linear-gradient(120deg, #c9a96e, #b8935a); border:none; color:#1a1206; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:700; cursor:pointer; box-shadow:0 8px 26px -8px rgba(201,169,110,0.6);">Check</button>
+            </div>
+            <div style="text-align:center; font-size:11px; color:#7a756e; margin-top:8px;">{{ pHint }}</div>
+          </sc-if>
+
+          <sc-if value="{{ pCompared }}" hint-placeholder-val="{{ false }}">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; padding:14px 16px; border-radius:14px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); animation:materialize .4s both;">
+              <div>
+                <div style="font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:#7a756e; margin-bottom:8px;">You said</div>
+                <div dir="auto" style="font-size:13.5px; color:#e6e1d8; line-height:1.8;">{{ pInput }}</div>
+              </div>
+              <div style="border-left:1px solid rgba(255,255,255,0.08); padding-left:14px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;"><span style="font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:#4fd8c4;">The card</span><button onClick="{{ pSayTarget }}" title="hear it" style="background:transparent; border:none; cursor:pointer; padding:3px; line-height:0;"><svg width="16" height="16" viewBox="0 0 20 20" fill="#4fd8c4"><path d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.784L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.797-3.784a1 1 0 011.617.076z"></path><path d="M14.657 5.343a1 1 0 011.414 0A7.975 7.975 0 0118.4 11a7.975 7.975 0 01-2.329 5.657 1 1 0 01-1.414-1.414A5.975 5.975 0 0016.4 11c0-1.594-.62-3.09-1.743-4.243a1 1 0 010-1.414z"></path></svg></button></div>
+                <div dir="auto" style="font-family:'Noto Naskh Arabic','Instrument Serif',serif; font-size:16px; color:#f6f1e8; line-height:1.9;">{{ pTarget }}</div>
+                <sc-if value="{{ pShowTargetPh }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size:10.5px; font-style:italic; color:#a78bfa; margin-top:3px;">{{ pTargetPh }}</div>
+                </sc-if>
+              </div>
+            </div>
+            <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-top:12px; animation:materialize .4s .1s both;">
+              <span style="font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:#7a756e;">{{ pScore }}</span>
+              <sc-for list="{{ pChips }}" as="c" hint-placeholder-count="4">
+                <span dir="auto" style="font-family:'Noto Naskh Arabic','DM Sans',serif; font-size:13px; padding:4px 11px; border-radius:100px; background:{{ c.bg }}; border:1px solid {{ c.border }}; color:{{ c.color }};">{{ c.label }}</span>
+              </sc-for>
+            </div>
+            <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:14px; animation:materialize .4s .2s both;">
+              <button onClick="{{ pTryAgain }}" style="padding:11px 18px; border-radius:100px; background:transparent; border:1px solid rgba(255,255,255,0.14); color:#c9c4bc; font-family:'DM Sans',sans-serif; font-size:12.5px; font-weight:600; cursor:pointer;">↻ Try again</button>
+              <sc-if value="{{ pSentMultiple }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ pNextEx }}" style="padding:11px 18px; border-radius:100px; background:rgba(79,216,196,0.1); border:1px solid rgba(79,216,196,0.35); color:#4fd8c4; font-family:'DM Sans',sans-serif; font-size:12.5px; font-weight:600; cursor:pointer;">Next sentence →</button>
+              </sc-if>
+              <button onClick="{{ nextCard }}" style="padding:11px 18px; border-radius:100px; background:rgba(201,169,110,0.1); border:1px solid rgba(201,169,110,0.35); color:#e8c99a; font-family:'DM Sans',sans-serif; font-size:12.5px; font-weight:600; cursor:pointer;">Next word →</button>
+            </div>
+          </sc-if>
+        </div>
+
+        <!-- mark row / card nav -->
+        <sc-if value="{{ flipped }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex; gap:10px; justify-content:center; margin-top:16px; animation:materialize .45s cubic-bezier(.2,.8,.2,1) both;">
+            <button onClick="{{ markLearn }}" style="flex:1; max-width:150px; padding:13px 10px; border-radius:100px; background:transparent; border:1px solid rgba(217,107,90,0.45); color:#e08a7a; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer; transition:all .25s;" style-hover="background:rgba(217,107,90,0.1); box-shadow:0 0 24px -8px rgba(217,107,90,0.5);">Still learning</button>
+            <button onClick="{{ markGot }}" style="flex:1; max-width:150px; padding:13px 10px; border-radius:100px; background:rgba(86,201,143,0.1); border:1px solid rgba(86,201,143,0.5); color:#56c98f; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer; box-shadow:0 0 24px -10px rgba(86,201,143,0.55); transition:all .25s;" style-hover="background:rgba(86,201,143,0.18); box-shadow:0 0 34px -8px rgba(86,201,143,0.7); transform:translateY(-1px);">Got it ✓</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{ notFlipped }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex; gap:14px; justify-content:center; margin-top:16px;">
+            <button onClick="{{ prevCard }}" style="width:46px; height:46px; border-radius:50%; background:rgba(255,250,242,0.04); border:1px solid rgba(255,255,255,0.1); color:#a09e9a; font-size:20px; cursor:pointer; transition:all .25s;" style-hover="background:rgba(255,250,242,0.08); color:#f0ede8;">‹</button>
+            <button onClick="{{ nextCard }}" style="width:46px; height:46px; border-radius:50%; background:rgba(255,250,242,0.04); border:1px solid rgba(255,255,255,0.1); color:#a09e9a; font-size:20px; cursor:pointer; transition:all .25s;" style-hover="background:rgba(255,250,242,0.08); color:#f0ede8;">›</button>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <!-- ═══ COACH ═══ -->
+    <sc-if value="{{ isCoach }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="AI coach" style="animation:screenIn .5s cubic-bezier(.2,.8,.2,1) both;">
+
+        <sc-if value="{{ coachPromptPhase }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+            <div>
+              <div style="font-family:'Instrument Serif','Noto Naskh Arabic',serif; font-style:italic; font-size:23px; color:#4fd8c4;">Your coach</div>
+              <div style="font-size:11px; color:#7a756e; margin-top:2px;">Scenario 2 of 22 · answered twice before</div>
+            </div>
+            <button onClick="{{ goJourney }}" style="display:flex; align-items:center; gap:6px; padding:8px 14px; border-radius:100px; background:rgba(201,169,110,0.08); border:1px solid rgba(201,169,110,0.25); color:#e8c99a; font-size:11.5px; font-weight:600; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all .25s;" style-hover="background:rgba(201,169,110,0.15); box-shadow:0 0 24px -8px rgba(201,169,110,0.4);">✦ your journey</button>
+          </div>
+
+          <div style="padding:30px 24px 22px; border-radius:22px; background:rgba(255,250,242,0.035); border:1px solid rgba(255,255,255,0.09); backdrop-filter:blur(20px); box-shadow:0 24px 50px -28px rgba(0,0,0,0.85); margin-bottom:18px; text-align:center;">
+            <div style="font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:#4fd8c4; margin-bottom:16px;">Say it in Sudanese Arabic</div>
+            <div style="font-size:21px; color:#f6f1e8; line-height:1.6; text-wrap:balance; font-weight:500;">"How do you deal with hate comments and people who don't like your content?"</div>
+            <button onClick="{{ toggleHint }}" style="margin-top:16px; padding:6px 14px; border-radius:100px; background:transparent; border:1px solid rgba(255,255,255,0.12); color:#7a756e; font-size:11px; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all .25s;" style-hover="color:#e8c99a; border-color:rgba(201,169,110,0.4);">{{ hintLabel }}</button>
+            <sc-if value="{{ hintOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:16px; padding-top:16px; border-top:1px solid rgba(255,255,255,0.07); animation:materialize .35s cubic-bezier(.2,.8,.2,1) both;">
+                <div style="font-family:'Noto Naskh Arabic','Instrument Serif',serif; font-size:20px; direction:rtl; color:#e8c99a; line-height:1.9;">كيف بتتعامل مع الهيت كومنتس والناس اللي ما بحبوا محتواك؟</div>
+                <div style="font-size:12px; font-style:italic; color:#a78bfa; margin-top:4px;">kif bita3amal ma3 al-hate comments w-an-nas alli ma bihibbu muhtawak?</div>
+              </div>
+            </sc-if>
+          </div>
+
+          <div style="display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; margin-bottom:26px;">
+            <span style="font-size:11px; color:#7a756e;">try using</span>
+            <sc-for list="{{ weaveChips }}" as="chip" hint-placeholder-count="3">
+              <span dir="auto" style="font-family:'Noto Naskh Arabic',serif; font-size:14px; padding:6px 14px; border-radius:100px; background:{{ chip.bg }}; border:1px solid {{ chip.border }}; color:{{ chip.color }}; transition:all .4s; box-shadow:{{ chip.glow }};">{{ chip.word }}<span style="display:block; font-size:9.5px; font-style:italic; opacity:.75; text-align:center; font-family:'DM Sans',sans-serif;">{{ chip.ph }}</span></span>
+            </sc-for>
+          </div>
+
+          <sc-if value="{{ voiceFirst }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex; flex-direction:column; align-items:center; gap:14px; padding:6px 0 4px;">
+              <button onClick="{{ goVoice }}" style="width:94px; height:94px; border-radius:50%; background:linear-gradient(140deg, rgba(167,139,250,0.28), rgba(240,166,216,0.2)); border:1px solid rgba(167,139,250,0.5); cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 0 46px -8px rgba(167,139,250,0.55), 0 20px 44px -20px rgba(0,0,0,0.9); transition:all .3s cubic-bezier(.2,.8,.2,1);" style-hover="transform:scale(1.07); box-shadow:0 0 58px -4px rgba(167,139,250,0.75), 0 24px 50px -18px rgba(0,0,0,0.95);">
+                <svg width="30" height="30" viewBox="0 0 20 20" fill="#dcd2ff"><path fill-rule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clip-rule="evenodd"></path></svg>
+              </button>
+              <div style="font-size:13px; color:#a09e9a;">Tap and say it out loud</div>
+              <button onClick="{{ useText }}" style="background:transparent; border:none; color:#7a756e; font-size:12px; font-family:'DM Sans',sans-serif; cursor:pointer; text-decoration:underline; text-underline-offset:3px; transition:color .25s;" style-hover="color:#e8c99a;">or type it instead</button>
+            </div>
+          </sc-if>
+          <sc-if value="{{ textFirst }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:6px; border-radius:22px; background:rgba(255,250,242,0.035); border:1px solid rgba(79,216,196,0.2); backdrop-filter:blur(20px); box-shadow:0 20px 44px -26px rgba(0,0,0,0.85); margin-bottom:14px; animation:materialize .35s cubic-bezier(.2,.8,.2,1) both;">
+              <textarea dir="auto" rows="3" placeholder="اكتب هنا… Arabic script or Arabizi (saraha, 3ashan…)" onInput="{{ onType }}" value="{{ typed }}" style="width:100%; border:none; background:transparent; color:#f0ede8; font-family:'DM Sans','Noto Naskh Arabic',sans-serif; font-size:16px; line-height:1.7; padding:14px 16px; resize:none; min-height:88px;"></textarea>
+              <div style="display:flex; align-items:center; gap:10px; padding:6px 8px 8px;">
+                <button onClick="{{ goVoice }}" title="Answer by voice" style="width:44px; height:44px; border-radius:50%; background:linear-gradient(140deg, rgba(167,139,250,0.2), rgba(240,166,216,0.15)); border:1px solid rgba(167,139,250,0.4); cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 0 26px -8px rgba(167,139,250,0.55); transition:all .3s;" style-hover="transform:scale(1.07);">
+                  <svg width="18" height="18" viewBox="0 0 20 20" fill="#c4b5fd"><path fill-rule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clip-rule="evenodd"></path></svg>
+                </button>
+                <div style="flex:1;"></div>
+                <button onClick="{{ submitCoach }}" style="padding:12px 22px; border-radius:100px; background:linear-gradient(120deg, #c9a96e, #b8935a); border:none; color:#1a1206; font-family:'DM Sans',sans-serif; font-size:13.5px; font-weight:700; cursor:pointer; box-shadow:0 8px 28px -8px rgba(201,169,110,0.6); transition:all .3s;" style-hover="transform:translateY(-1px);">Compare →</button>
+              </div>
+            </div>
+          </sc-if>
+          <div style="font-size:11.5px; color:#7a756e; text-align:center; line-height:1.6; margin-top:14px;">No "correct answer" here — just how your family says it.</div>
+        </sc-if>
+
+        <sc-if value="{{ coachThinkingPhase }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex; flex-direction:column; align-items:center; padding:48px 0 20px; text-align:center; position:relative;">
+            <div style="position:absolute; top:0; left:50%; transform:translateX(-50%); width:340px; height:340px; border-radius:50%; background:radial-gradient(circle, rgba(79,216,196,0.16), transparent 62%); filter:blur(54px); pointer-events:none; animation:glowPulse 4s ease-in-out infinite;"></div>
+            <x-import component-from-global-scope="tariga-orb" from="./orb.js" mode="thinking" hint-size="170px,170px" style="width:170px; height:170px; position:relative;"></x-import>
+            <div style="font-family:'Instrument Serif','Noto Naskh Arabic',serif; font-style:italic; font-size:22px; color:#4fd8c4; margin-top:26px; text-shadow:0 0 26px rgba(79,216,196,0.4);">Your coach is listening…</div>
+            <div style="font-size:13px; color:#a09e9a; margin-top:8px; max-width:300px; line-height:1.6;">comparing your answer with how Sudanese speakers naturally say it</div>
+            <div dir="auto" style="margin-top:26px; padding:14px 20px; border-radius:16px; background:rgba(255,250,242,0.035); border:1px solid rgba(255,255,255,0.08); font-size:14px; color:#c9c4bc; max-width:380px; line-height:1.7;">{{ answerShown }}</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ coachFeedbackPhase }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex; flex-direction:column; gap:14px;">
+            <div style="animation:materialize .5s .05s cubic-bezier(.2,.8,.2,1) both;">
+              <div style="font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:#4fd8c4; margin-bottom:8px;">Coaching · scenario 2</div>
+              <div style="font-family:'Instrument Serif','Noto Naskh Arabic',serif; font-size:24px; line-height:1.4; color:#f0ede8;">{{ fbOverall }}</div>
+            </div>
+
+            <div style="padding:20px; border-radius:20px; background:rgba(255,250,242,0.03); border:1px solid rgba(255,255,255,0.08); backdrop-filter:blur(18px); animation:materialize .5s .15s cubic-bezier(.2,.8,.2,1) both;">
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                <div>
+                  <div style="font-size:9.5px; letter-spacing:.16em; text-transform:uppercase; color:#7a756e; margin-bottom:10px;">You</div>
+                  <div dir="auto" style="font-size:14px; color:#e6e1d8; line-height:1.8;">{{ answerShown }}</div>
+                </div>
+                <div style="border-left:1px solid rgba(255,255,255,0.08); padding-left:16px;">
+                  <div style="font-size:9.5px; letter-spacing:.16em; text-transform:uppercase; color:#4fd8c4; margin-bottom:10px;">A native speaker</div>
+                  <div dir="rtl" style="font-family:'Noto Naskh Arabic','Instrument Serif',serif; font-size:16px; color:#f6f1e8; line-height:1.9;">{{ fbNativeAr }}</div>
+                  <div style="font-size:11px; font-style:italic; color:#a78bfa; margin-top:4px;">{{ fbNativePh }}</div>
+                </div>
+              </div>
+              <div style="display:flex; flex-wrap:wrap; gap:7px; margin-top:16px; padding-top:14px; border-top:1px solid rgba(255,255,255,0.06); align-items:center;">
+                <sc-if value="{{ hasKept }}" hint-placeholder-val="{{ true }}">
+                  <span style="font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:#56c98f;">✦ kept</span>
+                  <sc-for list="{{ fbKept }}" as="k" hint-placeholder-count="2">
+                    <span dir="auto" style="font-family:'Noto Naskh Arabic',serif; font-size:13px; padding:4px 12px; border-radius:100px; background:rgba(86,201,143,0.1); border:1px solid rgba(86,201,143,0.3); color:#7fdcaa;">{{ k.ar }} <i style="font-size:10px; opacity:.75; font-family:'DM Sans',sans-serif;">{{ k.ph }}</i></span>
+                  </sc-for>
+                </sc-if>
+                <sc-if value="{{ hasSwaps }}" hint-placeholder-val="{{ true }}">
+                  <span style="font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:#a09e9a; margin-left:10px;">swap</span>
+                  <sc-for list="{{ fbSwaps }}" as="sw" hint-placeholder-count="1">
+                    <span style="display:inline-flex; align-items:center; gap:6px;">
+                      <span style="font-size:12px; padding:4px 12px; border-radius:100px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#8a857e; text-decoration:line-through;">{{ sw.from }}</span>
+                      <span style="color:#7a756e; font-size:12px;">→</span>
+                      <span dir="auto" style="font-family:'Noto Naskh Arabic',serif; font-size:13px; padding:4px 12px; border-radius:100px; background:rgba(79,216,196,0.1); border:1px solid rgba(79,216,196,0.35); color:#4fd8c4; box-shadow:0 0 18px -8px rgba(79,216,196,0.6);">{{ sw.toAr }} <i style="font-size:10px; opacity:.75; font-family:'DM Sans',sans-serif;">{{ sw.toPh }}</i></span>
+                    </span>
+                  </sc-for>
+                </sc-if>
+              </div>
+            </div>
+
+            <div style="padding:20px; border-radius:18px; background:linear-gradient(150deg, rgba(201,169,110,0.09), rgba(201,169,110,0.03)); border:1px solid rgba(201,169,110,0.3); box-shadow:0 0 44px -18px rgba(201,169,110,0.4); animation:materialize .5s .45s cubic-bezier(.2,.8,.2,1) both;">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:12px;"><span style="font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:#e8c99a;">Your answer, upgraded — one natural way to say it</span><button onClick="{{ saySuggestion }}" title="hear it" style="background:transparent; border:none; cursor:pointer; padding:3px; line-height:0;"><svg width="16" height="16" viewBox="0 0 20 20" fill="#e8c99a"><path d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.784L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.797-3.784a1 1 0 011.617.076z"></path><path d="M14.657 5.343a1 1 0 011.414 0A7.975 7.975 0 0118.4 11a7.975 7.975 0 01-2.329 5.657 1 1 0 01-1.414-1.414A5.975 5.975 0 0016.4 11c0-1.594-.62-3.09-1.743-4.243a1 1 0 010-1.414z"></path></svg></button></div>
+              <div dir="rtl" style="font-family:'Noto Naskh Arabic','Instrument Serif',serif; font-size:21px; color:#f6f1e8; line-height:2; text-align:right;">{{ fbSugAr }}</div>
+              <div style="font-size:12.5px; font-style:italic; color:#a78bfa; margin-top:6px;">{{ fbSugPh }}</div>
+              <div style="font-size:13px; color:#a09e9a; margin-top:4px;">{{ fbSugEn }}</div>
+              <div style="font-size:12.5px; color:#e8c99a; margin-top:14px; padding-top:12px; border-top:1px solid rgba(201,169,110,0.18);">Now say it out loud. Twice. That's the whole trick.</div>
+            </div>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:6px; animation:materialize .5s .55s cubic-bezier(.2,.8,.2,1) both;">
+              <button onClick="{{ tryAgain }}" style="padding:12px 20px; border-radius:100px; background:transparent; border:1px solid rgba(255,255,255,0.14); color:#c9c4bc; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer; transition:all .25s;" style-hover="background:rgba(255,255,255,0.05);">↻ Answer again</button>
+              <button onClick="{{ goJourney }}" style="padding:12px 20px; border-radius:100px; background:rgba(201,169,110,0.1); border:1px solid rgba(201,169,110,0.35); color:#e8c99a; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer; box-shadow:0 0 26px -10px rgba(201,169,110,0.5); transition:all .25s;" style-hover="background:rgba(201,169,110,0.18);">✦ See your journey</button>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <!-- ═══ VOICE ═══ -->
+    <sc-if value="{{ isVoice }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Voice listening orb" style="animation:screenIn .5s cubic-bezier(.2,.8,.2,1) both; display:flex; flex-direction:column; align-items:center; text-align:center; min-height:70vh; justify-content:center; position:relative;">
+        <!-- blurred iridescent color field behind the orb -->
+        <div style="position:absolute; inset:0; pointer-events:none; overflow:hidden;">
+          <div style="position:absolute; top:2%; left:-10%; width:380px; height:380px; border-radius:50%; background:radial-gradient(circle, rgba(167,139,250,0.45), transparent 65%); filter:blur(52px); animation:drift1 26s ease-in-out infinite;"></div>
+          <div style="position:absolute; top:16%; right:-12%; width:360px; height:360px; border-radius:50%; background:radial-gradient(circle, rgba(240,166,216,0.36), transparent 65%); filter:blur(56px); animation:drift2 32s ease-in-out infinite;"></div>
+          <div style="position:absolute; bottom:8%; left:16%; width:340px; height:340px; border-radius:50%; background:radial-gradient(circle, rgba(79,216,196,0.28), transparent 65%); filter:blur(52px); animation:drift1 38s ease-in-out infinite reverse;"></div>
+          <div style="position:absolute; bottom:-6%; right:6%; width:300px; height:300px; border-radius:50%; background:radial-gradient(circle, rgba(201,169,110,0.22), transparent 65%); filter:blur(56px); animation:drift2 44s ease-in-out infinite reverse;"></div>
+        </div>
+        <div style="position:relative; width:310px; height:310px; border-radius:50%; background:rgba(255,250,245,0.05); border:1px solid rgba(255,255,255,0.16); backdrop-filter:blur(14px); box-shadow:0 30px 80px -30px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.14); display:flex; align-items:center; justify-content:center;">
+          <x-import component-from-global-scope="tariga-orb" from="./orb.js" mode="listening" hint-size="256px,256px" style="width:256px; height:256px;"></x-import>
+        </div>
+        <div style="display:flex; align-items:center; gap:9px; margin-top:24px;">
+          <div style="display:flex; align-items:center; gap:3px; height:16px;">
+            <div style="width:3px; height:14px; border-radius:2px; background:#c4b5fd; animation:dotBounce 1s ease-in-out infinite;"></div>
+            <div style="width:3px; height:14px; border-radius:2px; background:#c4b5fd; animation:dotBounce 1s .15s ease-in-out infinite;"></div>
+            <div style="width:3px; height:14px; border-radius:2px; background:#c4b5fd; animation:dotBounce 1s .3s ease-in-out infinite;"></div>
+            <div style="width:3px; height:14px; border-radius:2px; background:#c4b5fd; animation:dotBounce 1s .45s ease-in-out infinite;"></div>
+          </div>
+          <span style="font-size:13px; letter-spacing:.16em; text-transform:uppercase; color:#c4b5fd;">Listening</span>
+        </div>
+        <div dir="rtl" style="font-family:'Noto Naskh Arabic','Instrument Serif',serif; font-size:24px; color:#f6f1e8; line-height:2; margin-top:22px; min-height:96px; max-width:420px; text-wrap:balance;">{{ voiceText }}</div>
+        <div style="font-size:13px; font-style:italic; color:#c4b5fd; margin-top:6px; max-width:420px;">{{ voicePh }}</div>
+        <div style="font-size:12.5px; color:#7a756e; margin-top:4px; max-width:300px; line-height:1.6;">Speak the way you'd say it to family — Arabizi counts too.</div>
+        <div style="display:flex; align-items:center; gap:6px; margin-top:32px; padding:8px; border-radius:100px; background:rgba(24,21,18,0.62); border:1px solid rgba(255,255,255,0.12); backdrop-filter:blur(22px); box-shadow:0 18px 50px -18px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,255,255,0.07);">
+          <button onClick="{{ stopVoice }}" style="display:flex; align-items:center; gap:8px; padding:12px 18px; border-radius:100px; background:rgba(255,255,255,0.07); border:none; color:#e6e1d8; font-family:'DM Sans',sans-serif; font-size:12.5px; font-weight:600; cursor:pointer; transition:all .25s;" style-hover="background:rgba(255,255,255,0.12);"><span style="font-size:10px; letter-spacing:1px;">❚❚</span> Stop</button>
+          <button onClick="{{ doneVoice }}" style="padding:12px 22px; border-radius:100px; background:linear-gradient(120deg, rgba(167,139,250,0.92), rgba(240,166,216,0.82)); border:none; color:#170f2e; font-family:'DM Sans',sans-serif; font-size:12.5px; font-weight:700; cursor:pointer; box-shadow:0 8px 26px -8px rgba(167,139,250,0.6); transition:all .3s;" style-hover="transform:translateY(-1px); box-shadow:0 12px 32px -6px rgba(167,139,250,0.75);">Compare with a native ✓</button>
+          <button onClick="{{ cancelVoice }}" style="width:42px; height:42px; border-radius:50%; background:rgba(255,255,255,0.07); border:none; color:#a09e9a; font-size:16px; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all .25s;" style-hover="background:rgba(255,255,255,0.12); color:#f0ede8;">×</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ═══ JOURNEY ═══ -->
+    <sc-if value="{{ isJourney }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Journey — then vs now" style="animation:screenIn .5s cubic-bezier(.2,.8,.2,1) both;">
+        <button onClick="{{ goCoach }}" style="background:transparent; border:none; color:#7a756e; font-family:'DM Sans',sans-serif; font-size:12.5px; cursor:pointer; padding:0; margin-bottom:18px; transition:color .2s;" style-hover="color:#e8c99a;">← back to the scenario</button>
+
+        <div style="text-align:center; margin-bottom:24px; animation:materialize .5s .05s cubic-bezier(.2,.8,.2,1) both;">
+          <div style="font-family:'Instrument Serif','Noto Naskh Arabic',serif; font-size:28px; color:#f0ede8;">You're getting there.</div>
+          <div style="font-size:13px; color:#a09e9a; margin-top:6px; line-height:1.6; text-wrap:balance;">You've answered this scenario 4 times over 7 weeks:<br>"How do you deal with hate comments?"</div>
+        </div>
+
+        <!-- score: then vs now -->
+        <div style="border-radius:20px; background:rgba(255,250,242,0.035); border:1px solid rgba(79,216,196,0.2); backdrop-filter:blur(16px); margin-bottom:6px; overflow:hidden; animation:materialize .5s .15s cubic-bezier(.2,.8,.2,1) both;">
+          <div style="display:grid; grid-template-columns:1fr auto 1fr;">
+            <div style="padding:18px 14px; text-align:center;">
+              <div style="font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:#7a756e; margin-bottom:6px; white-space:nowrap;">First try · May 12</div>
+              <div style="font-size:34px; font-weight:600; color:#7a756e; font-variant-numeric:tabular-nums;">38</div>
+              <div style="height:6px; border-radius:4px; background:rgba(255,255,255,0.07); margin-top:10px; overflow:hidden;"><div style="height:100%; width:38%; background:rgba(255,255,255,0.2); border-radius:4px;"></div></div>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:center;"><span style="color:#4fd8c4; font-size:20px; text-shadow:0 0 18px rgba(79,216,196,0.7);">→</span></div>
+            <div style="padding:18px 14px; text-align:center; background:rgba(79,216,196,0.05); border-left:1px solid rgba(79,216,196,0.15);">
+              <div style="font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:#4fd8c4; margin-bottom:6px; white-space:nowrap;">Latest · Jul 3</div>
+              <div style="font-size:34px; font-weight:700; color:#4fd8c4; font-variant-numeric:tabular-nums; text-shadow:0 0 24px rgba(79,216,196,0.6);">76</div>
+              <div style="height:6px; border-radius:4px; background:rgba(255,255,255,0.07); margin-top:10px; overflow:hidden;"><div style="height:100%; width:76%; background:linear-gradient(90deg, rgba(79,216,196,0.5), #4fd8c4); border-radius:4px; box-shadow:0 0 14px rgba(79,216,196,0.7); animation:barGrow 1.3s .4s cubic-bezier(.3,.8,.3,1) both;"></div></div>
+            </div>
+          </div>
+          <div style="text-align:center; padding:8px; border-top:1px solid rgba(255,255,255,0.06); font-size:11.5px; color:#56c98f;">✦ +38 more natural since your first try · out of 100</div>
+        </div>
+
+        <!-- side by side: your words, highlighted -->
+        <div style="font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:#7a756e; margin:22px 0 10px; text-align:center;">Your words, side by side</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; animation:materialize .5s .25s cubic-bezier(.2,.8,.2,1) both;">
+          <div style="padding:16px; border-radius:16px; background:rgba(255,250,242,0.025); border:1px solid rgba(255,255,255,0.07);">
+            <div style="font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:#7a756e; margin-bottom:10px;">Then</div>
+            <div dir="auto" style="font-size:13px; color:#b5b0a8; line-height:2;"><span style="background:rgba(217,107,90,0.14); border-bottom:1px solid rgba(217,107,90,0.4); border-radius:3px; padding:0 3px;">honestly</span> the hate comments they <span style="background:rgba(217,107,90,0.14); border-bottom:1px solid rgba(217,107,90,0.4); border-radius:3px; padding:0 3px;">affect me</span> but I try to <span style="background:rgba(217,107,90,0.14); border-bottom:1px solid rgba(217,107,90,0.4); border-radius:3px; padding:0 3px;">ignore</span>, <span style="background:rgba(86,201,143,0.14); border-bottom:1px solid rgba(86,201,143,0.45); border-radius:3px; padding:0 3px;">يعني ما بخليها توقفني</span></div>
+            <div style="font-size:10.5px; font-style:italic; color:#a78bfa; margin-top:5px;">(ya3ni ma bakhaliha tawagifni)</div>
+            <div style="margin-top:12px; font-size:10.5px; color:#e08a7a;">▨ 3 English crutches · 1 Sudanese phrase</div>
+          </div>
+          <div style="padding:16px; border-radius:16px; background:rgba(79,216,196,0.05); border:1px solid rgba(79,216,196,0.28); box-shadow:0 0 36px -16px rgba(79,216,196,0.4);">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;"><span style="font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:#4fd8c4;">Now</span><button onClick="{{ sayNow }}" title="hear it" style="background:transparent; border:none; cursor:pointer; padding:3px; line-height:0;"><svg width="16" height="16" viewBox="0 0 20 20" fill="#4fd8c4"><path d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.784L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.797-3.784a1 1 0 011.617.076z"></path><path d="M14.657 5.343a1 1 0 011.414 0A7.975 7.975 0 0118.4 11a7.975 7.975 0 01-2.329 5.657 1 1 0 01-1.414-1.414A5.975 5.975 0 0016.4 11c0-1.594-.62-3.09-1.743-4.243a1 1 0 010-1.414z"></path></svg></button></div>
+            <div dir="rtl" style="font-family:'Noto Naskh Arabic','Instrument Serif',serif; font-size:15.5px; color:#f6f1e8; line-height:2.1;"><span style="background:rgba(86,201,143,0.14); border-bottom:1px solid rgba(86,201,143,0.45); border-radius:3px; padding:0 3px;">صراحة</span> <span style="background:rgba(86,201,143,0.14); border-bottom:1px solid rgba(86,201,143,0.45); border-radius:3px; padding:0 3px;">بتأثر فيني</span>، بس برجع وبقول لنفسي <span style="background:rgba(86,201,143,0.14); border-bottom:1px solid rgba(86,201,143,0.45); border-radius:3px; padding:0 3px;">من حقه</span> يقول رأيه — عشان <span style="background:rgba(86,201,143,0.14); border-bottom:1px solid rgba(86,201,143,0.45); border-radius:3px; padding:0 3px;">نفسيتي</span> ترتاح</div>
+            <div style="font-size:10.5px; font-style:italic; color:#a78bfa; margin-top:5px;">saraha bita'athar finni, bas barji3 w-baqool li-nafsi min haqquh yaqool ra'yuh…</div>
+            <div style="margin-top:12px; font-size:10.5px; color:#56c98f;">✦ 4 Sudanese key phrases · 0 English</div>
+          </div>
+        </div>
+
+        <!-- metrics -->
+        <div style="font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:#7a756e; margin:22px 0 10px; text-align:center;">The numbers</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; animation:materialize .5s .35s cubic-bezier(.2,.8,.2,1) both;">
+          <div style="padding:14px 10px; border-radius:16px; background:rgba(255,250,242,0.03); border:1px solid rgba(255,255,255,0.08); text-align:center;">
+            <div style="font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:#7a756e; margin-bottom:8px; line-height:1.4;">Sudanese phrases</div>
+            <div style="display:flex; align-items:flex-end; justify-content:center; gap:10px; height:58px;">
+              <div style="display:flex; flex-direction:column; align-items:center; gap:3px;"><span style="font-size:11px; color:#7a756e; font-variant-numeric:tabular-nums;">1</span><div style="width:13px; height:8px; background:rgba(255,255,255,0.18); border-radius:4px 4px 2px 2px;"></div></div>
+              <div style="display:flex; flex-direction:column; align-items:center; gap:3px;"><span style="font-size:11px; color:#56c98f; font-weight:700; font-variant-numeric:tabular-nums;">4</span><div style="width:13px; height:44px; background:#56c98f; border-radius:4px 4px 2px 2px; box-shadow:0 0 12px rgba(86,201,143,0.6); animation:barGrow 1s .5s cubic-bezier(.3,.8,.3,1) both;"></div></div>
+            </div>
+            <div style="display:flex; justify-content:center; gap:14px; margin-top:6px;"><span style="font-size:9px; color:#7a756e;">then</span><span style="font-size:9px; color:#56c98f;">now</span></div>
+          </div>
+          <div style="padding:14px 10px; border-radius:16px; background:rgba(255,250,242,0.03); border:1px solid rgba(255,255,255,0.08); text-align:center;">
+            <div style="font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:#7a756e; margin-bottom:8px; line-height:1.4;">English words</div>
+            <div style="display:flex; align-items:flex-end; justify-content:center; gap:10px; height:58px;">
+              <div style="display:flex; flex-direction:column; align-items:center; gap:3px;"><span style="font-size:11px; color:#7a756e; font-variant-numeric:tabular-nums;">7</span><div style="width:13px; height:44px; background:rgba(255,255,255,0.18); border-radius:4px 4px 2px 2px;"></div></div>
+              <div style="display:flex; flex-direction:column; align-items:center; gap:3px;"><span style="font-size:11px; color:#56c98f; font-weight:700; font-variant-numeric:tabular-nums;">0</span><div style="width:13px; height:3px; background:#56c98f; border-radius:4px 4px 2px 2px; box-shadow:0 0 12px rgba(86,201,143,0.6); animation:barGrow 1s .5s cubic-bezier(.3,.8,.3,1) both;"></div></div>
+            </div>
+            <div style="display:flex; justify-content:center; gap:14px; margin-top:6px;"><span style="font-size:9px; color:#7a756e;">then</span><span style="font-size:9px; color:#56c98f;">now</span></div>
+          </div>
+          <div style="padding:14px 10px; border-radius:16px; background:rgba(255,250,242,0.03); border:1px solid rgba(255,255,255,0.08); text-align:center;">
+            <div style="font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:#7a756e; margin-bottom:8px; line-height:1.4;">Natural score</div>
+            <div style="display:flex; align-items:flex-end; justify-content:center; gap:10px; height:58px;">
+              <div style="display:flex; flex-direction:column; align-items:center; gap:3px;"><span style="font-size:11px; color:#7a756e; font-variant-numeric:tabular-nums;">38</span><div style="width:13px; height:22px; background:rgba(255,255,255,0.18); border-radius:4px 4px 2px 2px;"></div></div>
+              <div style="display:flex; flex-direction:column; align-items:center; gap:3px;"><span style="font-size:11px; color:#4fd8c4; font-weight:700; font-variant-numeric:tabular-nums;">76</span><div style="width:13px; height:44px; background:#4fd8c4; border-radius:4px 4px 2px 2px; box-shadow:0 0 12px rgba(79,216,196,0.6); animation:barGrow 1s .5s cubic-bezier(.3,.8,.3,1) both;"></div></div>
+            </div>
+            <div style="display:flex; justify-content:center; gap:14px; margin-top:6px;"><span style="font-size:9px; color:#7a756e;">then</span><span style="font-size:9px; color:#4fd8c4;">now</span></div>
+          </div>
+        </div>
+
+        <!-- the swaps -->
+        <div style="font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:#7a756e; margin:22px 0 10px; text-align:center;">The swaps — English → Sudanese</div>
+        <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:22px; animation:materialize .5s .45s cubic-bezier(.2,.8,.2,1) both;">
+          <div style="display:grid; grid-template-columns:1fr auto 1.3fr; align-items:center; gap:10px; padding:11px 16px; border-radius:14px; background:rgba(255,250,242,0.025); border:1px solid rgba(255,255,255,0.07);">
+            <span style="text-align:right; font-size:13px; color:#8a857e; text-decoration:line-through;">affect me</span>
+            <span style="color:#4fd8c4; font-size:14px; text-shadow:0 0 12px rgba(79,216,196,0.6);">→</span>
+            <span dir="auto" style="font-family:'Noto Naskh Arabic',serif; font-size:15px; color:#7fdcaa;">بتأثر فيني <i style="font-size:10.5px; color:#a78bfa; font-family:'DM Sans',sans-serif;">bita'athar finni</i></span>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr auto 1.3fr; align-items:center; gap:10px; padding:11px 16px; border-radius:14px; background:rgba(255,250,242,0.025); border:1px solid rgba(255,255,255,0.07);">
+            <span style="text-align:right; font-size:13px; color:#8a857e; text-decoration:line-through;">honestly</span>
+            <span style="color:#4fd8c4; font-size:14px; text-shadow:0 0 12px rgba(79,216,196,0.6);">→</span>
+            <span dir="auto" style="font-family:'Noto Naskh Arabic',serif; font-size:15px; color:#7fdcaa;">صراحة <i style="font-size:10.5px; color:#a78bfa; font-family:'DM Sans',sans-serif;">saraha</i></span>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr auto 1.3fr; align-items:center; gap:10px; padding:11px 16px; border-radius:14px; background:rgba(255,250,242,0.025); border:1px solid rgba(255,255,255,0.07);">
+            <span style="text-align:right; font-size:13px; color:#8a857e; text-decoration:line-through;">ignore</span>
+            <span style="color:#4fd8c4; font-size:14px; text-shadow:0 0 12px rgba(79,216,196,0.6);">→</span>
+            <span dir="auto" style="font-family:'Noto Naskh Arabic',serif; font-size:15px; color:#7fdcaa;">برجع وبقول لنفسي <i style="font-size:10.5px; color:#a78bfa; font-family:'DM Sans',sans-serif;">barji3 w-baqool li-nafsi</i></span>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr auto 1.3fr; align-items:center; gap:10px; padding:11px 16px; border-radius:14px; background:rgba(86,201,143,0.05); border:1px solid rgba(86,201,143,0.22);">
+            <span style="text-align:right; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:#56c98f;">new ✦</span>
+            <span style="color:#56c98f; font-size:14px;">+</span>
+            <span dir="auto" style="font-family:'Noto Naskh Arabic',serif; font-size:15px; color:#7fdcaa;">عشان نفسيتي ترتاح <i style="font-size:10.5px; color:#a78bfa; font-family:'DM Sans',sans-serif;">3ashan nafseeyti tirtah</i></span>
+          </div>
+        </div>
+
+        <div style="text-align:center; animation:materialize .5s .65s cubic-bezier(.2,.8,.2,1) both;">
+          <button onClick="{{ goCoach }}" style="padding:14px 28px; border-radius:100px; background:linear-gradient(120deg, #c9a96e, #b8935a); border:none; color:#1a1206; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:700; cursor:pointer; box-shadow:0 10px 30px -8px rgba(201,169,110,0.6); transition:all .3s;" style-hover="transform:translateY(-1px); box-shadow:0 14px 36px -6px rgba(201,169,110,0.75);">Answer it again →</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ═══ WORD ORIGINS MAP ═══ -->
+    <sc-if value="{{ isMap }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Word origins map" style="animation:screenIn .5s cubic-bezier(.2,.8,.2,1) both;">
+        <button onClick="{{ goHome }}" style="background:transparent; border:none; color:#7a756e; font-family:'DM Sans',sans-serif; font-size:12.5px; cursor:pointer; padding:0; margin-bottom:16px;">← home</button>
+        <div style="display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:4px;">
+          <div style="font-family:'Instrument Serif','Noto Naskh Arabic',serif; font-style:italic; font-size:23px; color:#c9a96e;">Word origins</div>
+          <div dir="rtl" style="font-family:'Noto Naskh Arabic',serif; font-size:15px; color:#7a756e;">وين اللهجة عايشة؟</div>
+        </div>
+        <div style="font-size:12px; color:#a09e9a; margin-bottom:16px; line-height:1.6;">Where the dialect lives — watch the globe find Sudan, then tap a region.</div>
+
+        <div style="padding:16px; border-radius:22px; background:rgba(255,250,242,0.035); border:1px solid rgba(79,216,196,0.18); backdrop-filter:blur(18px); box-shadow:0 24px 50px -28px rgba(0,0,0,0.85), 0 0 40px -20px rgba(79,216,196,0.3); margin-bottom:12px;">
+          <x-import component-from-global-scope="sudan-map" from="./sudan-map.js" highlight="khartoum" hint-size="100%,470px" style="width:100%; height:470px; display:block;"></x-import>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+          <div style="border-radius:16px; background:rgba(201,169,110,0.06); border:1px solid rgba(201,169,110,0.22); overflow:hidden;">
+            <button onClick="{{ toggleMapC1 }}" style="display:flex; align-items:center; justify-content:space-between; width:100%; padding:11px 14px; background:transparent; border:none; cursor:pointer; font-family:'DM Sans',sans-serif;">
+              <span style="font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:#e8c99a;">Featured word</span>
+              <span style="color:#7a756e; font-size:13px;">{{ mapC1Icon }}</span>
+            </button>
+            <sc-if value="{{ mapC1Open }}" hint-placeholder-val="{{ true }}">
+              <div style="padding:0 14px 14px; animation:materialize .3s both;">
+                <div dir="rtl" style="font-family:'Noto Naskh Arabic','Instrument Serif',serif; font-size:24px; color:#f6f1e8; text-align:left;">فاهماني</div>
+                <div style="font-size:10.5px; font-style:italic; color:#a78bfa; margin-top:2px;">fahimani</div>
+                <div style="font-size:11px; color:#a09e9a; margin-top:6px; line-height:1.55;">Most heard in <span style="color:#e8c99a;">Khartoum &amp; Omdurman</span> — glowing gold on the map.</div>
+              </div>
+            </sc-if>
+          </div>
+          <div style="border-radius:16px; background:rgba(255,250,242,0.03); border:1px solid rgba(255,255,255,0.08); overflow:hidden;">
+            <button onClick="{{ toggleMapC2 }}" style="display:flex; align-items:center; justify-content:space-between; width:100%; padding:11px 14px; background:transparent; border:none; cursor:pointer; font-family:'DM Sans',sans-serif;">
+              <span style="font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:#4fd8c4;">Phrases by region</span>
+              <span style="color:#7a756e; font-size:13px;">{{ mapC2Icon }}</span>
+            </button>
+            <sc-if value="{{ mapC2Open }}" hint-placeholder-val="{{ true }}">
+              <div style="padding:0 14px 14px; display:flex; flex-direction:column; gap:7px; animation:materialize .3s both;">
+                <div style="display:flex; align-items:center; gap:8px;"><span style="font-size:10.5px; color:#a09e9a; width:64px;">Khartoum</span><div style="flex:1; height:5px; border-radius:3px; background:rgba(255,255,255,0.06);"><div style="width:88%; height:100%; border-radius:3px; background:#4fd8c4; box-shadow:0 0 8px rgba(79,216,196,0.6); animation:barGrow 1s .3s both;"></div></div><span style="font-size:10px; color:#4fd8c4; font-variant-numeric:tabular-nums;">32</span></div>
+                <div style="display:flex; align-items:center; gap:8px;"><span style="font-size:10.5px; color:#a09e9a; width:64px;">Red Sea</span><div style="flex:1; height:5px; border-radius:3px; background:rgba(255,255,255,0.06);"><div style="width:40%; height:100%; border-radius:3px; background:rgba(79,216,196,0.7); animation:barGrow 1s .4s both;"></div></div><span style="font-size:10px; color:#7a756e; font-variant-numeric:tabular-nums;">14</span></div>
+                <div style="display:flex; align-items:center; gap:8px;"><span style="font-size:10.5px; color:#a09e9a; width:64px;">Darfur</span><div style="flex:1; height:5px; border-radius:3px; background:rgba(255,255,255,0.06);"><div style="width:34%; height:100%; border-radius:3px; background:rgba(79,216,196,0.55); animation:barGrow 1s .5s both;"></div></div><span style="font-size:10px; color:#7a756e; font-variant-numeric:tabular-nums;">12</span></div>
+                <div style="display:flex; align-items:center; gap:8px;"><span style="font-size:10.5px; color:#a09e9a; width:64px;">Northern</span><div style="flex:1; height:5px; border-radius:3px; background:rgba(255,255,255,0.06);"><div style="width:30%; height:100%; border-radius:3px; background:rgba(79,216,196,0.45); animation:barGrow 1s .6s both;"></div></div><span style="font-size:10px; color:#7a756e; font-variant-numeric:tabular-nums;">11</span></div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+        <div style="font-size:10.5px; color:#7a756e; text-align:center; line-height:1.6;">Illustrative data — region tags grow from community contributions in Contribute mode.</div>
+      </div>
+    </sc-if>
+
+    <!-- ═══ MODE: DEEP CARDS ═══ -->
+    <sc-if value="{{ isDeep }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Deep cards" style="animation:screenIn .5s cubic-bezier(.2,.8,.2,1) both;">
+        <button onClick="{{ backMore }}" style="background:transparent; border:none; color:#7a756e; font-family:'DM Sans',sans-serif; font-size:12.5px; cursor:pointer; padding:0; margin-bottom:16px;">← all modes</button>
+        <div style="font-family:'Instrument Serif','Noto Naskh Arabic',serif; font-style:italic; font-size:23px; color:#c9a96e; margin-bottom:16px;">Deep cards + synonyms</div>
+        <div style="padding:26px 24px; border-radius:22px; background:rgba(255,250,242,0.035); border:1px solid rgba(255,255,255,0.09); backdrop-filter:blur(18px); box-shadow:0 24px 50px -28px rgba(0,0,0,0.85);">
+          <div style="display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;">
+            <div style="font-family:'Noto Naskh Arabic','Instrument Serif',serif; font-size:34px; direction:rtl; color:#f6f1e8;">رهيب / رهيبة</div>
+            <div style="font-size:13px; font-style:italic; color:#a78bfa;">rahib / rahiba</div>
+            <span style="font-size:10px; padding:3px 10px; border-radius:100px; background:rgba(255,255,255,0.05); color:#a09e9a; border:1px solid rgba(255,255,255,0.09);">Praise · Word</span>
+          </div>
+          <div style="font-size:15px; color:#e8c99a; font-weight:600; margin-top:10px;">Amazing / incredible / awesome</div>
+          <div style="font-size:12.5px; color:#a09e9a; line-height:1.7; margin-top:6px;">Strong praise. One of the go-to compliment words in Sudanese Arabic.</div>
+          <div style="padding:12px 14px; border-radius:12px; background:rgba(255,255,255,0.035); border:1px solid rgba(255,255,255,0.07); margin-top:14px;">
+            <div style="font-family:'Noto Naskh Arabic','Instrument Serif',serif; font-size:16px; direction:rtl; text-align:right; color:#f0ede8; line-height:1.9;">البرفورمنس بتاعه كان رهيب شديد.</div>
+            <div style="font-size:11px; font-style:italic; color:#a78bfa; margin-top:3px;">al-performance bata3u kan rahib shadeed.</div>
+            <div style="font-size:11.5px; color:#7a756e; margin-top:4px;">His performance was incredibly amazing.</div>
+          </div>
+          <div style="font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:#4fd8c4; margin:18px 0 10px;">Swap in — synonyms</div>
+          <div style="display:flex; flex-wrap:wrap; gap:8px;">
+            <span style="display:flex; flex-direction:column; gap:1px; padding:8px 14px; border-radius:14px; background:rgba(79,216,196,0.06); border:1px solid rgba(79,216,196,0.22);"><span dir="rtl" style="font-family:'Noto Naskh Arabic',serif; font-size:15px; color:#f0ede8;">فظيع</span><span style="font-size:10px; color:#7a756e;">fazee3 · insanely good</span></span>
+            <span style="display:flex; flex-direction:column; gap:1px; padding:8px 14px; border-radius:14px; background:rgba(79,216,196,0.06); border:1px solid rgba(79,216,196,0.22);"><span dir="rtl" style="font-family:'Noto Naskh Arabic',serif; font-size:15px; color:#f0ede8;">درعة</span><span style="font-size:10px; color:#7a756e;">dara3ah · exceptional</span></span>
+            <span style="display:flex; flex-direction:column; gap:1px; padding:8px 14px; border-radius:14px; background:rgba(79,216,196,0.06); border:1px solid rgba(79,216,196,0.22);"><span dir="rtl" style="font-family:'Noto Naskh Arabic',serif; font-size:15px; color:#f0ede8;">جامد</span><span style="font-size:10px; color:#7a756e;">jaamid · solid / great</span></span>
+            <span style="display:flex; flex-direction:column; gap:1px; padding:8px 14px; border-radius:14px; background:rgba(79,216,196,0.06); border:1px solid rgba(79,216,196,0.22);"><span dir="rtl" style="font-family:'Noto Naskh Arabic',serif; font-size:15px; color:#f0ede8;">زيت</span><span style="font-size:10px; color:#7a756e;">zait · excellent</span></span>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ═══ MODE: STARRED ═══ -->
+    <sc-if value="{{ isStarred }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Starred items" style="animation:screenIn .5s cubic-bezier(.2,.8,.2,1) both;">
+        <button onClick="{{ backMore }}" style="background:transparent; border:none; color:#7a756e; font-family:'DM Sans',sans-serif; font-size:12.5px; cursor:pointer; padding:0; margin-bottom:16px;">← all modes</button>
+        <div style="font-family:'Instrument Serif','Noto Naskh Arabic',serif; font-style:italic; font-size:23px; color:#c9a96e; margin-bottom:16px;">Starred items <span style="font-size:12px; font-style:normal; font-family:'DM Sans',sans-serif; color:#7a756e;">· 3 saved</span></div>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="display:flex; align-items:flex-start; gap:12px; padding:16px 18px; border-radius:18px; background:rgba(255,250,242,0.03); border:1px solid rgba(255,255,255,0.08); backdrop-filter:blur(14px);">
+            <span style="color:#e8c99a; font-size:16px; text-shadow:0 0 12px rgba(232,201,154,0.6);">★</span>
+            <div style="flex:1;">
+              <div dir="rtl" style="font-family:'Noto Naskh Arabic','Instrument Serif',serif; font-size:19px; color:#f6f1e8; text-align:left;">كوني كونيك</div>
+              <div style="font-size:11px; font-style:italic; color:#a78bfa; margin-top:2px;">kowni kownik</div>
+              <div style="font-size:12.5px; color:#a09e9a; margin-top:3px;">You do you / be yourself</div>
+            </div>
+          </div>
+          <div style="display:flex; align-items:flex-start; gap:12px; padding:16px 18px; border-radius:18px; background:rgba(255,250,242,0.03); border:1px solid rgba(255,255,255,0.08); backdrop-filter:blur(14px);">
+            <span style="color:#e8c99a; font-size:16px; text-shadow:0 0 12px rgba(232,201,154,0.6);">★</span>
+            <div style="flex:1;">
+              <div dir="rtl" style="font-family:'Noto Naskh Arabic','Instrument Serif',serif; font-size:19px; color:#f6f1e8; text-align:left;">بتنحت في الصخر</div>
+              <div style="font-size:11px; font-style:italic; color:#a78bfa; margin-top:2px;">betnhat fi as-sakhr</div>
+              <div style="font-size:12.5px; color:#a09e9a; margin-top:3px;">Chiseling into rock — grinding persistently</div>
+            </div>
+          </div>
+          <div style="display:flex; align-items:flex-start; gap:12px; padding:16px 18px; border-radius:18px; background:rgba(255,250,242,0.03); border:1px solid rgba(255,255,255,0.08); backdrop-filter:blur(14px);">
+            <span style="color:#e8c99a; font-size:16px; text-shadow:0 0 12px rgba(232,201,154,0.6);">★</span>
+            <div style="flex:1;">
+              <div dir="rtl" style="font-family:'Noto Naskh Arabic','Instrument Serif',serif; font-size:19px; color:#f6f1e8; text-align:left;">الكبريش</div>
+              <div style="font-size:11px; font-style:italic; color:#a78bfa; margin-top:2px;">al-kabreesh</div>
+              <div style="font-size:12.5px; color:#a09e9a; margin-top:3px;">The electric buzz between two people together</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ═══ MODE: SHADOWING ═══ -->
+    <sc-if value="{{ isShadow }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Shadowing" style="animation:screenIn .5s cubic-bezier(.2,.8,.2,1) both;">
+        <button onClick="{{ backMore }}" style="background:transparent; border:none; color:#7a756e; font-family:'DM Sans',sans-serif; font-size:12.5px; cursor:pointer; padding:0; margin-bottom:16px;">← all modes</button>
+        <div style="font-family:'Instrument Serif','Noto Naskh Arabic',serif; font-style:italic; font-size:23px; color:#c9a96e; margin-bottom:16px;">Shadowing</div>
+        <div style="padding:26px 24px; border-radius:22px; background:rgba(255,250,242,0.035); border:1px solid rgba(255,255,255,0.09); backdrop-filter:blur(18px); box-shadow:0 24px 50px -28px rgba(0,0,0,0.85);">
+          <div style="font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:#4fd8c4; margin-bottom:12px;">Say it out loud first</div>
+          <div style="font-size:16px; color:#f0ede8; line-height:1.7;">Your circle of friends is small — <em style="color:#e8c99a;">and you're happy about that.</em></div>
+          <div style="font-size:12px; color:#7a756e; margin-top:6px;">Try the whole sentence before revealing — struggle first, that's the exercise.</div>
+          <sc-if value="{{ shadowHidden }}" hint-placeholder-val="{{ true }}">
+            <button onClick="{{ revealShadow }}" style="width:100%; margin-top:18px; padding:22px; border-radius:16px; background:rgba(255,255,255,0.03); border:1px dashed rgba(201,169,110,0.35); color:#c9a96e; font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer; transition:all .25s;" style-hover="background:rgba(201,169,110,0.06);">
+              <span style="filter:blur(6px); display:block; font-family:'Noto Naskh Arabic',serif; font-size:19px; direction:rtl; color:#f0ede8; margin-bottom:8px;">السيركل بتاعتي دايماً ضيقة وأنا مبسوط بكدا</span>
+              tap to reveal الجواب
+            </button>
+          </sc-if>
+          <sc-if value="{{ shadowShown }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:18px; padding:16px; border-radius:16px; background:rgba(201,169,110,0.06); border:1px solid rgba(201,169,110,0.2); animation:materialize .4s cubic-bezier(.2,.8,.2,1) both;">
+              <div dir="rtl" style="font-family:'Noto Naskh Arabic','Instrument Serif',serif; font-size:21px; color:#f6f1e8; line-height:1.9; text-align:right;">السيركل بتاعتي دايماً ضيقة وأنا مبسوط بكدا.</div>
+              <div style="font-size:12px; font-style:italic; color:#a78bfa; margin-top:4px;">as-circle bata3ti dayiman dayyiqa w-ana mabsoot bikida.</div>
+            </div>
+            <div style="display:flex; gap:10px; justify-content:center; margin-top:16px;">
+              <button onClick="{{ revealShadow }}" style="padding:11px 20px; border-radius:100px; background:transparent; border:1px solid rgba(217,107,90,0.45); color:#e08a7a; font-family:'DM Sans',sans-serif; font-size:12.5px; font-weight:600; cursor:pointer;">Try again</button>
+              <button onClick="{{ revealShadow }}" style="padding:11px 20px; border-radius:100px; background:rgba(86,201,143,0.1); border:1px solid rgba(86,201,143,0.5); color:#56c98f; font-family:'DM Sans',sans-serif; font-size:12.5px; font-weight:600; cursor:pointer; box-shadow:0 0 24px -10px rgba(86,201,143,0.55);">Nailed it ✓</button>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ═══ MODE: SENTENCE BUILDER ═══ -->
+    <sc-if value="{{ isBuild }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Sentence builder" style="animation:screenIn .5s cubic-bezier(.2,.8,.2,1) both;">
+        <button onClick="{{ backMore }}" style="background:transparent; border:none; color:#7a756e; font-family:'DM Sans',sans-serif; font-size:12.5px; cursor:pointer; padding:0; margin-bottom:16px;">← all modes</button>
+        <div style="font-family:'Instrument Serif','Noto Naskh Arabic',serif; font-style:italic; font-size:23px; color:#c9a96e; margin-bottom:16px;">Sentence builder</div>
+        <div style="padding:26px 24px; border-radius:22px; background:rgba(255,250,242,0.035); border:1px solid rgba(255,255,255,0.09); backdrop-filter:blur(18px); box-shadow:0 24px 50px -28px rgba(0,0,0,0.85);">
+          <div style="font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:#4fd8c4; margin-bottom:12px;">Build your own sentence</div>
+          <div style="font-size:15px; color:#f0ede8; line-height:1.7;">Someone asks how long you've been doing your work. Answer using:</div>
+          <div style="display:inline-block; margin-top:12px; padding:8px 18px; border-radius:14px; background:rgba(201,169,110,0.1); border:1px solid rgba(201,169,110,0.3);">
+            <span dir="rtl" style="font-family:'Noto Naskh Arabic',serif; font-size:19px; color:#e8c99a;">من حوالي</span>
+            <span style="font-size:11px; font-style:italic; color:#a78bfa; margin-left:8px;">min hawali · for about</span>
+          </div>
+          <sc-if value="{{ buildHidden }}" hint-placeholder-val="{{ true }}">
+            <button onClick="{{ revealBuild }}" style="display:block; margin-top:18px; padding:10px 18px; border-radius:100px; background:transparent; border:1px solid rgba(255,255,255,0.14); color:#a09e9a; font-family:'DM Sans',sans-serif; font-size:12px; cursor:pointer;">show one natural way →</button>
+          </sc-if>
+          <sc-if value="{{ buildShown }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:18px; padding:16px; border-radius:16px; background:rgba(201,169,110,0.06); border:1px solid rgba(201,169,110,0.2); animation:materialize .4s cubic-bezier(.2,.8,.2,1) both;">
+              <div dir="rtl" style="font-family:'Noto Naskh Arabic','Instrument Serif',serif; font-size:20px; color:#f6f1e8; line-height:1.9; text-align:right;">صراحة أنا بعمل شغلي من حوالي سنة ونص هسه.</div>
+              <div style="font-size:12px; font-style:italic; color:#a78bfa; margin-top:4px;">saraha ana ba3mil shughli min hawali sana w-nus hissa.</div>
+              <div style="font-size:12px; color:#7a756e; margin-top:3px;">Honestly I've been doing my work for about a year and a half now.</div>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ═══ MODE: TUNE YOUR EAR ═══ -->
+    <sc-if value="{{ isListen }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Tune your ear" style="animation:screenIn .5s cubic-bezier(.2,.8,.2,1) both;">
+        <button onClick="{{ backMore }}" style="background:transparent; border:none; color:#7a756e; font-family:'DM Sans',sans-serif; font-size:12.5px; cursor:pointer; padding:0; margin-bottom:16px;">← all modes</button>
+        <div style="font-family:'Instrument Serif','Noto Naskh Arabic',serif; font-style:italic; font-size:23px; color:#a78bfa; margin-bottom:16px;">Tune your ear</div>
+        <div style="padding:26px 24px; border-radius:22px; background:rgba(255,250,242,0.035); border:1px solid rgba(255,255,255,0.09); backdrop-filter:blur(18px); box-shadow:0 24px 50px -28px rgba(0,0,0,0.85); margin-bottom:16px;">
+          <div style="font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:#a78bfa; margin-bottom:12px;">Solja said · Wansa episode</div>
+          <div dir="rtl" style="font-family:'Noto Naskh Arabic','Instrument Serif',serif; font-size:20px; color:#f6f1e8; line-height:2; text-align:right;">سبحان الله — يعني أي حاجة ربنا دايماً بيجي لوقتها المناسب.</div>
+          <div style="font-size:12px; font-style:italic; color:#a78bfa; margin-top:6px;">subhan allah — ya3ni ayy haga rabbina dayiman biyiji li-waqtiha al-munaasib.</div>
+        </div>
+        <div style="font-size:12.5px; color:#a09e9a; margin-bottom:12px; text-align:center;">What is he saying? Guess before you're sure — the guess is the exercise.</div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <sc-for list="{{ listenOpts }}" as="o" hint-placeholder-count="3">
+            <button onClick="{{ o.onPick }}" style="width:100%; text-align:left; padding:14px 18px; border-radius:16px; background:{{ o.bg }}; border:1px solid {{ o.border }}; color:{{ o.color }}; font-family:'DM Sans',sans-serif; font-size:13.5px; line-height:1.5; cursor:pointer; transition:all .25s; backdrop-filter:blur(12px);">{{ o.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ═══ MODE: CONVERSATION ═══ -->
+    <sc-if value="{{ isConvo }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Conversation mode" style="animation:screenIn .5s cubic-bezier(.2,.8,.2,1) both;">
+        <button onClick="{{ backMore }}" style="background:transparent; border:none; color:#7a756e; font-family:'DM Sans',sans-serif; font-size:12.5px; cursor:pointer; padding:0; margin-bottom:16px;">← all modes</button>
+        <div style="font-family:'Instrument Serif','Noto Naskh Arabic',serif; font-style:italic; font-size:23px; color:#c9a96e;">Conversation mode</div>
+        <div style="font-size:11.5px; color:#7a756e; margin:4px 0 16px;">Scene 1 of 9 · Opening — Wansa welcomes Solja</div>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="align-self:flex-start; max-width:88%;">
+            <div style="font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:#7a756e; margin:0 0 4px 6px;">Wansa · host</div>
+            <div style="padding:14px 16px; border-radius:4px 18px 18px 18px; background:rgba(255,250,242,0.04); border:1px solid rgba(255,255,255,0.08); backdrop-filter:blur(12px);">
+              <div dir="rtl" style="font-family:'Noto Naskh Arabic',serif; font-size:16px; color:#f0ede8; line-height:1.9; text-align:right;">أهلاً بكم في حلقة جديدة من بودكاست ونسا — الحلقة دي يا جماعة، أنا عارفة إنكم كلكم مستنيننا.</div>
+              <div style="font-size:11px; font-style:italic; color:#a78bfa; margin-top:4px;">ahlan bikum fi halqa jadeeda min podcast Wansa — al-halqa di ya jama3a, ana 3arfa innkum kullkum mistnineena.</div>
+              <div style="font-size:11px; color:#7a756e; margin-top:5px;">Welcome to a new episode of Wansa podcast — I know you've all been waiting.</div>
+            </div>
+          </div>
+          <div style="align-self:flex-start; max-width:88%;">
+            <div style="padding:14px 16px; border-radius:4px 18px 18px 18px; background:rgba(255,250,242,0.04); border:1px solid rgba(255,255,255,0.08); backdrop-filter:blur(12px);">
+              <div dir="rtl" style="font-family:'Noto Naskh Arabic',serif; font-size:16px; color:#f0ede8; line-height:1.9; text-align:right;">لكن أنا أحب أرحّب بصديقي الصدوق وأحسن رابر في السودان — سولجا سمكرة.</div>
+              <div style="font-size:11px; font-style:italic; color:#a78bfa; margin-top:4px;">lakin ana ahibb arahhib bi-sadeeqi as-saduq w-ahsan raber fi as-Sudan — Solja Samkara.</div>
+              <div style="font-size:11px; color:#7a756e; margin-top:5px;">I want to welcome my truly sincere friend, the best rapper in Sudan — Solja Samkara.</div>
+            </div>
+          </div>
+          <div style="align-self:flex-end; max-width:88%;">
+            <div style="font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:#c9a96e; margin:0 6px 4px 0; text-align:right;">Solja · guest</div>
+            <div style="padding:14px 16px; border-radius:18px 4px 18px 18px; background:rgba(201,169,110,0.08); border:1px solid rgba(201,169,110,0.24); backdrop-filter:blur(12px);">
+              <sc-if value="{{ convoHidden }}" hint-placeholder-val="{{ true }}">
+                <div dir="rtl" style="font-family:'Noto Naskh Arabic',serif; font-size:16px; color:#f0ede8; line-height:1.9; text-align:right; filter:blur(6px); user-select:none;">هو ما هتحمّلني مسؤولية العوارض في القصة دي — لأنه تقريباً هو أنا.</div>
+                <button onClick="{{ revealConvo }}" style="margin-top:8px; padding:5px 14px; border-radius:100px; background:transparent; border:1px solid rgba(201,169,110,0.4); color:#e8c99a; font-size:11px; font-family:'DM Sans',sans-serif; cursor:pointer;">shadow it first, then reveal</button>
+              </sc-if>
+              <sc-if value="{{ convoShown }}" hint-placeholder-val="{{ false }}">
+                <div dir="rtl" style="font-family:'Noto Naskh Arabic',serif; font-size:16px; color:#f0ede8; line-height:1.9; text-align:right; animation:materialize .35s both;">هو ما هتحمّلني مسؤولية العوارض في القصة دي — لأنه تقريباً هو أنا.</div>
+                <div style="font-size:11px; font-style:italic; color:#a78bfa; margin-top:4px;">huw ma hattahammalni mas-uuliyyat al-3awarid fi al-qissa di — la-innuh taqreeban huw ana.</div>
+                <div style="font-size:11px; color:#7a756e; margin-top:5px;">He won't hold me responsible for the obstacles — because it's basically me.</div>
+              </sc-if>
+            </div>
+          </div>
+          <div style="padding:16px 18px; border-radius:18px; border:2px dashed rgba(201,169,110,0.35); text-align:right; margin-top:6px;">
+            <div style="font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:#e8c99a; margin-bottom:6px; text-align:left;">Your turn — you're Solja</div>
+            <div style="font-size:12.5px; color:#a09e9a; line-height:1.6;">Respond to the warm welcome. Try weaving in:</div>
+            <div style="display:flex; gap:6px; justify-content:flex-end; margin-top:8px;">
+              <span dir="rtl" style="font-family:'Noto Naskh Arabic',serif; font-size:13px; padding:4px 12px; border-radius:100px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); color:#c9c4bc;">سبحان الله · subhan allah</span>
+              <span dir="rtl" style="font-family:'Noto Naskh Arabic',serif; font-size:13px; padding:4px 12px; border-radius:100px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); color:#c9c4bc;">الحمد لله · al-hamdu lillah</span>
+              <span dir="rtl" style="font-family:'Noto Naskh Arabic',serif; font-size:13px; padding:4px 12px; border-radius:100px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); color:#c9c4bc;">مبسوط شديد · mabsoot shadeed</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ═══ MODE: CONTRIBUTE ═══ -->
+    <sc-if value="{{ isContribute }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Contribute" style="animation:screenIn .5s cubic-bezier(.2,.8,.2,1) both;">
+        <button onClick="{{ backMore }}" style="background:transparent; border:none; color:#7a756e; font-family:'DM Sans',sans-serif; font-size:12.5px; cursor:pointer; padding:0; margin-bottom:16px;">← all modes</button>
+        <div style="font-family:'Instrument Serif','Noto Naskh Arabic',serif; font-style:italic; font-size:23px; color:#c9a96e;">Contribute</div>
+        <div style="font-size:12.5px; color:#a09e9a; margin:4px 0 18px; line-height:1.6;">Help preserve the dialect — answer the way <em style="color:#e8c99a;">your</em> family actually says it.</div>
+        <div style="padding:24px; border-radius:22px; background:rgba(255,250,242,0.035); border:1px solid rgba(255,255,255,0.09); backdrop-filter:blur(18px); box-shadow:0 24px 50px -28px rgba(0,0,0,0.85);">
+          <div style="font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:#4fd8c4; margin-bottom:12px;">This week's prompt</div>
+          <div style="font-size:17px; color:#f0ede8; line-height:1.6;">How does your family say <em style="color:#e8c99a;">"take it easy / relax"</em>?</div>
+          <textarea dir="auto" rows="2" placeholder="اكتب هنا… your family's way" style="width:100%; margin-top:14px; border:1px solid rgba(255,255,255,0.1); border-radius:14px; background:rgba(255,255,255,0.03); color:#f0ede8; font-family:'DM Sans','Noto Naskh Arabic',sans-serif; font-size:15px; line-height:1.7; padding:12px 14px; resize:none;"></textarea>
+          <div style="font-size:11px; color:#7a756e; margin:14px 0 8px;">Region</div>
+          <div style="display:flex; flex-wrap:wrap; gap:6px;">
+            <span style="font-size:12px; padding:6px 14px; border-radius:100px; background:rgba(201,169,110,0.12); border:1px solid rgba(201,169,110,0.35); color:#e8c99a;">Khartoum</span>
+            <span style="font-size:12px; padding:6px 14px; border-radius:100px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.09); color:#8a857e;">Omdurman</span>
+            <span style="font-size:12px; padding:6px 14px; border-radius:100px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.09); color:#8a857e;">Port Sudan</span>
+            <span style="font-size:12px; padding:6px 14px; border-radius:100px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.09); color:#8a857e;">Diaspora</span>
+          </div>
+          <div style="font-size:11px; color:#7a756e; margin:14px 0 8px;">Whose way of saying it?</div>
+          <div style="display:flex; flex-wrap:wrap; gap:6px;">
+            <span style="font-size:12px; padding:6px 14px; border-radius:100px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.09); color:#8a857e;">Grandparents'</span>
+            <span style="font-size:12px; padding:6px 14px; border-radius:100px; background:rgba(201,169,110,0.12); border:1px solid rgba(201,169,110,0.35); color:#e8c99a;">Parents'</span>
+            <span style="font-size:12px; padding:6px 14px; border-radius:100px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.09); color:#8a857e;">My generation</span>
+          </div>
+          <button style="width:100%; margin-top:18px; padding:14px; border-radius:100px; background:linear-gradient(120deg, #c9a96e, #b8935a); border:none; color:#1a1206; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:700; cursor:pointer; box-shadow:0 8px 28px -8px rgba(201,169,110,0.6);">Add to the library →</button>
+          <div style="font-size:11px; color:#7a756e; text-align:center; margin-top:10px;">Reviewed by 2–3 native speakers before going live.</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ═══ MODE: QUIZ ═══ -->
+    <sc-if value="{{ isMc }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Quiz" style="animation:screenIn .5s cubic-bezier(.2,.8,.2,1) both;">
+        <button onClick="{{ backMore }}" style="background:transparent; border:none; color:#7a756e; font-family:'DM Sans',sans-serif; font-size:12.5px; cursor:pointer; padding:0; margin-bottom:16px;">← all modes</button>
+        <div style="font-family:'Instrument Serif','Noto Naskh Arabic',serif; font-style:italic; font-size:23px; color:#c9a96e; margin-bottom:16px;">Quiz <span style="font-size:12px; font-style:normal; font-family:'DM Sans',sans-serif; color:#7a756e;">· go fast, trust your first instinct</span></div>
+        <div style="padding:30px 24px; border-radius:22px; background:rgba(255,250,242,0.035); border:1px solid rgba(255,255,255,0.09); backdrop-filter:blur(18px); text-align:center; margin-bottom:14px;">
+          <div dir="rtl" style="font-family:'Noto Naskh Arabic','Instrument Serif',serif; font-size:38px; color:#f6f1e8;">شديد</div>
+          <div style="font-size:13px; font-style:italic; color:#a78bfa; margin-top:4px;">shadeed</div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <sc-for list="{{ mcOpts }}" as="o" hint-placeholder-count="4">
+            <button onClick="{{ o.onPick }}" style="width:100%; text-align:left; padding:14px 18px; border-radius:16px; background:{{ o.bg }}; border:1px solid {{ o.border }}; color:{{ o.color }}; font-family:'DM Sans',sans-serif; font-size:13.5px; line-height:1.5; cursor:pointer; transition:all .25s; backdrop-filter:blur(12px);">{{ o.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ═══ MODE: DEEP QUIZ ═══ -->
+    <sc-if value="{{ isDeepquiz }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Deep quiz" style="animation:screenIn .5s cubic-bezier(.2,.8,.2,1) both;">
+        <button onClick="{{ backMore }}" style="background:transparent; border:none; color:#7a756e; font-family:'DM Sans',sans-serif; font-size:12.5px; cursor:pointer; padding:0; margin-bottom:16px;">← all modes</button>
+        <div style="font-family:'Instrument Serif','Noto Naskh Arabic',serif; font-style:italic; font-size:23px; color:#c9a96e; margin-bottom:14px;">Deep quiz</div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:16px;">
+          <span style="font-size:11.5px; padding:6px 13px; border-radius:100px; background:rgba(201,169,110,0.12); border:1px solid rgba(201,169,110,0.35); color:#e8c99a;">Context cloze</span>
+          <span style="font-size:11.5px; padding:6px 13px; border-radius:100px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.09); color:#8a857e;">Mixed drill</span>
+          <span style="font-size:11.5px; padding:6px 13px; border-radius:100px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.09); color:#8a857e;">EN → AR production</span>
+          <span style="font-size:11.5px; padding:6px 13px; border-radius:100px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.09); color:#8a857e;">Word order</span>
+        </div>
+        <div style="padding:24px; border-radius:22px; background:rgba(255,250,242,0.035); border:1px solid rgba(255,255,255,0.09); backdrop-filter:blur(18px); margin-bottom:14px;">
+          <div style="font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:#4fd8c4; margin-bottom:12px;">Fill the gap</div>
+          <div dir="rtl" style="font-family:'Noto Naskh Arabic','Instrument Serif',serif; font-size:24px; color:#f6f1e8; line-height:1.9; text-align:right;">المجال دا صعب <span style="color:#c9a96e; border-bottom:2px dashed rgba(201,169,110,0.5); padding:0 18px;">…</span></div>
+          <div style="font-size:11.5px; font-style:italic; color:#a78bfa; margin-top:6px; text-align:right;">al-majaal da sa3b ___</div>
+          <div style="font-size:12px; color:#7a756e; margin-top:8px;">"This field is ___ difficult." — pick the natural intensifier.</div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <sc-for list="{{ dqOpts }}" as="o" hint-placeholder-count="4">
+            <button onClick="{{ o.onPick }}" dir="rtl" style="width:100%; text-align:right; padding:13px 18px; border-radius:16px; background:{{ o.bg }}; border:1px solid {{ o.border }}; color:{{ o.color }}; font-family:'Noto Naskh Arabic',sans-serif; font-size:16px; cursor:pointer; transition:all .25s; backdrop-filter:blur(12px);">{{ o.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ═══ MODE: FLOW TRANSLATION ═══ -->
+    <sc-if value="{{ isFlow }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Flow translation" style="animation:screenIn .5s cubic-bezier(.2,.8,.2,1) both;">
+        <button onClick="{{ backMore }}" style="background:transparent; border:none; color:#7a756e; font-family:'DM Sans',sans-serif; font-size:12.5px; cursor:pointer; padding:0; margin-bottom:16px;">← all modes</button>
+        <div style="font-family:'Instrument Serif','Noto Naskh Arabic',serif; font-style:italic; font-size:23px; color:#c9a96e;">Flow translation</div>
+        <div style="font-size:11.5px; color:#7a756e; margin:4px 0 16px;">Who you are as a creator · say the whole paragraph, then check line by line</div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <sc-for list="{{ flowRows }}" as="r" hint-placeholder-count="5">
+            <div style="border-radius:16px; background:rgba(255,250,242,0.03); border:1px solid rgba(255,255,255,0.08); overflow:hidden; backdrop-filter:blur(12px);">
+              <button onClick="{{ r.onToggle }}" style="display:flex; align-items:center; gap:12px; width:100%; text-align:left; padding:14px 18px; background:transparent; border:none; cursor:pointer; font-family:'DM Sans',sans-serif;">
+                <span style="font-size:10px; color:#7a756e; font-variant-numeric:tabular-nums;">{{ r.num }}</span>
+                <span style="flex:1; font-size:13.5px; color:#e6e1d8; line-height:1.55;">{{ r.en }}</span>
+                <span style="color:{{ r.chevColor }}; font-size:13px;">{{ r.chev }}</span>
+              </button>
+              <sc-if value="{{ r.open }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:0 18px 16px; border-top:1px solid rgba(255,255,255,0.06); animation:materialize .3s both;">
+                  <div dir="rtl" style="font-family:'Noto Naskh Arabic','Instrument Serif',serif; font-size:18px; color:#e8c99a; line-height:1.9; text-align:right; margin-top:12px;">{{ r.ar }}</div>
+                  <div style="font-size:11.5px; font-style:italic; color:#a78bfa; margin-top:3px;">{{ r.ph }}</div>
+                  <div style="font-size:11.5px; color:#7a756e; margin-top:5px; line-height:1.6;">{{ r.note }}</div>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ═══ MODE: TRANSITIONS GUIDE ═══ -->
+    <sc-if value="{{ isTrans }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Transitions guide" style="animation:screenIn .5s cubic-bezier(.2,.8,.2,1) both;">
+        <button onClick="{{ backMore }}" style="background:transparent; border:none; color:#7a756e; font-family:'DM Sans',sans-serif; font-size:12.5px; cursor:pointer; padding:0; margin-bottom:16px;">← all modes</button>
+        <div style="font-family:'Instrument Serif','Noto Naskh Arabic',serif; font-style:italic; font-size:23px; color:#c9a96e;">Transitions guide</div>
+        <div style="font-size:11.5px; color:#7a756e; margin:4px 0 16px;">The connectors that make you sound fluent — master these first</div>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="border-radius:18px; background:rgba(255,250,242,0.035); border:1px solid rgba(255,255,255,0.09); overflow:hidden; backdrop-filter:blur(14px);">
+            <button onClick="{{ toggleTrans0 }}" style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; width:100%; text-align:left; padding:16px 18px; background:transparent; border:none; cursor:pointer; font-family:'DM Sans',sans-serif;">
+              <span>
+                <span dir="rtl" style="display:block; font-family:'Noto Naskh Arabic','Instrument Serif',serif; font-size:19px; color:#f6f1e8; text-align:left;">طالما إحنا من ناحية</span>
+                <span style="display:block; font-size:11px; font-style:italic; color:#a78bfa; margin-top:2px;">tala ma ihna min nahyat · as long as we're on this angle…</span>
+              </span>
+              <span style="font-size:10px; padding:3px 10px; border-radius:100px; background:rgba(201,169,110,0.14); color:#e8c99a; border:1px solid rgba(201,169,110,0.3); white-space:nowrap;">pivot</span>
+            </button>
+            <sc-if value="{{ trans0Open }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:0 18px 16px; border-top:1px solid rgba(255,255,255,0.06); animation:materialize .3s both;">
+                <div style="font-size:11px; color:#4fd8c4; margin-top:12px; font-weight:600;">When</div>
+                <div style="font-size:12.5px; color:#a09e9a; line-height:1.65; margin-top:3px;">To shift perspective or introduce a new angle on the same topic — mid-conversation, without breaking flow.</div>
+                <div style="padding:11px 14px; border-radius:12px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); margin-top:10px;">
+                  <div dir="rtl" style="font-family:'Noto Naskh Arabic',serif; font-size:15px; color:#f0ede8; line-height:1.8; text-align:right;">طالما إحنا من ناحية الشهرة، خلينا نتكلم عن الأصحاب.</div>
+                  <div style="font-size:10.5px; font-style:italic; color:#a78bfa; margin-top:3px;">tala ma ihna min nahyat ash-shuhra, khalina nitkallam 3an al-ashab.</div>
+                  <div style="font-size:11px; color:#7a756e; margin-top:3px;">Since we're on fame, let's talk about friends.</div>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+          <div style="border-radius:18px; background:rgba(255,250,242,0.035); border:1px solid rgba(255,255,255,0.09); overflow:hidden; backdrop-filter:blur(14px);">
+            <button onClick="{{ toggleTrans1 }}" style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; width:100%; text-align:left; padding:16px 18px; background:transparent; border:none; cursor:pointer; font-family:'DM Sans',sans-serif;">
+              <span>
+                <span dir="rtl" style="display:block; font-family:'Noto Naskh Arabic','Instrument Serif',serif; font-size:19px; color:#f6f1e8; text-align:left;">ألو هو / ألو إنو</span>
+                <span style="display:block; font-size:11px; font-style:italic; color:#a78bfa; margin-top:2px;">alu hwa / alu ino · so that's it / which means…</span>
+              </span>
+              <span style="font-size:10px; padding:3px 10px; border-radius:100px; background:rgba(201,169,110,0.14); color:#e8c99a; border:1px solid rgba(201,169,110,0.3); white-space:nowrap;">pivot</span>
+            </button>
+            <sc-if value="{{ trans1Open }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:0 18px 16px; border-top:1px solid rgba(255,255,255,0.06); animation:materialize .3s both;">
+                <div style="font-size:11px; color:#4fd8c4; margin-top:12px; font-weight:600;">When</div>
+                <div style="font-size:12.5px; color:#a09e9a; line-height:1.65; margin-top:3px;">When landing on a conclusion. "Alu hwa" closes a reasoning chain; "alu ino" introduces what it means.</div>
+                <div style="padding:11px 14px; border-radius:12px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); margin-top:10px;">
+                  <div dir="rtl" style="font-family:'Noto Naskh Arabic',serif; font-size:15px; color:#f0ede8; line-height:1.8; text-align:right;">ألو هو الزول دا ما كان مستعد للشهرة.</div>
+                  <div style="font-size:10.5px; font-style:italic; color:#a78bfa; margin-top:3px;">alu hwa az-zool da ma kan musta3id lil-shuhra.</div>
+                  <div style="font-size:11px; color:#7a756e; margin-top:3px;">So that's it — that person wasn't ready for fame.</div>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ═══ MODE: VOCAB LISTS ═══ -->
+    <sc-if value="{{ isVocab }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Vocab lists" style="animation:screenIn .5s cubic-bezier(.2,.8,.2,1) both;">
+        <button onClick="{{ backMore }}" style="background:transparent; border:none; color:#7a756e; font-family:'DM Sans',sans-serif; font-size:12.5px; cursor:pointer; padding:0; margin-bottom:16px;">← all modes</button>
+        <div style="font-family:'Instrument Serif','Noto Naskh Arabic',serif; font-style:italic; font-size:23px; color:#c9a96e;">Vocab lists</div>
+        <div style="font-size:11.5px; color:#7a756e; margin:4px 0 16px;">Essential 30 — learn these first</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div style="padding:14px 16px; border-radius:16px; background:rgba(255,250,242,0.03); border:1px solid rgba(255,255,255,0.08); backdrop-filter:blur(12px);"><div dir="rtl" style="font-family:'Noto Naskh Arabic',serif; font-size:17px; color:#f6f1e8; text-align:left;">يعني</div><div style="font-size:10.5px; font-style:italic; color:#a78bfa;">ya3ni</div><div style="font-size:11.5px; color:#a09e9a; margin-top:2px;">I mean / you know</div></div>
+          <div style="padding:14px 16px; border-radius:16px; background:rgba(255,250,242,0.03); border:1px solid rgba(255,255,255,0.08); backdrop-filter:blur(12px);"><div dir="rtl" style="font-family:'Noto Naskh Arabic',serif; font-size:17px; color:#f6f1e8; text-align:left;">صراحة</div><div style="font-size:10.5px; font-style:italic; color:#a78bfa;">saraha</div><div style="font-size:11.5px; color:#a09e9a; margin-top:2px;">Honestly / straight up</div></div>
+          <div style="padding:14px 16px; border-radius:16px; background:rgba(255,250,242,0.03); border:1px solid rgba(255,255,255,0.08); backdrop-filter:blur(12px);"><div dir="rtl" style="font-family:'Noto Naskh Arabic',serif; font-size:17px; color:#f6f1e8; text-align:left;">شديد</div><div style="font-size:10.5px; font-style:italic; color:#a78bfa;">shadeed</div><div style="font-size:11.5px; color:#a09e9a; margin-top:2px;">Very / extremely</div></div>
+          <div style="padding:14px 16px; border-radius:16px; background:rgba(255,250,242,0.03); border:1px solid rgba(255,255,255,0.08); backdrop-filter:blur(12px);"><div dir="rtl" style="font-family:'Noto Naskh Arabic',serif; font-size:17px; color:#f6f1e8; text-align:left;">فاهماني</div><div style="font-size:10.5px; font-style:italic; color:#a78bfa;">fahimani</div><div style="font-size:11.5px; color:#a09e9a; margin-top:2px;">You see what I mean?</div></div>
+          <div style="padding:14px 16px; border-radius:16px; background:rgba(255,250,242,0.03); border:1px solid rgba(255,255,255,0.08); backdrop-filter:blur(12px);"><div dir="rtl" style="font-family:'Noto Naskh Arabic',serif; font-size:17px; color:#f6f1e8; text-align:left;">بالجد</div><div style="font-size:10.5px; font-style:italic; color:#a78bfa;">bil-jad</div><div style="font-size:11.5px; color:#a09e9a; margin-top:2px;">Seriously / for real</div></div>
+          <div style="padding:14px 16px; border-radius:16px; background:rgba(255,250,242,0.03); border:1px solid rgba(255,255,255,0.08); backdrop-filter:blur(12px);"><div dir="rtl" style="font-family:'Noto Naskh Arabic',serif; font-size:17px; color:#f6f1e8; text-align:left;">وبتاع</div><div style="font-size:10.5px; font-style:italic; color:#a78bfa;">w-bita3</div><div style="font-size:11.5px; color:#a09e9a; margin-top:2px;">And stuff / and all that</div></div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ═══ MODE: FULL REFERENCE ═══ -->
+    <sc-if value="{{ isRef }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Full reference" style="animation:screenIn .5s cubic-bezier(.2,.8,.2,1) both;">
+        <button onClick="{{ backMore }}" style="background:transparent; border:none; color:#7a756e; font-family:'DM Sans',sans-serif; font-size:12.5px; cursor:pointer; padding:0; margin-bottom:16px;">← all modes</button>
+        <div style="font-family:'Instrument Serif','Noto Naskh Arabic',serif; font-style:italic; font-size:23px; color:#c9a96e; margin-bottom:14px;">Full reference</div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:16px;">
+          <span style="font-size:11.5px; padding:6px 13px; border-radius:100px; background:rgba(201,169,110,0.12); border:1px solid rgba(201,169,110,0.35); color:#e8c99a;">All</span>
+          <span style="font-size:11.5px; padding:6px 13px; border-radius:100px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.09); color:#8a857e;">Transitions</span>
+          <span style="font-size:11.5px; padding:6px 13px; border-radius:100px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.09); color:#8a857e;">Emphasis</span>
+          <span style="font-size:11.5px; padding:6px 13px; border-radius:100px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.09); color:#8a857e;">Faith</span>
+          <span style="font-size:11.5px; padding:6px 13px; border-radius:100px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.09); color:#8a857e;">Wisdom</span>
+        </div>
+        <div style="padding:6px 20px; border-radius:20px; background:rgba(255,250,242,0.03); border:1px solid rgba(255,255,255,0.08); backdrop-filter:blur(14px);">
+          <div style="display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; padding:14px 0; border-bottom:1px solid rgba(255,255,255,0.06);"><span dir="rtl" style="font-family:'Noto Naskh Arabic',serif; font-size:18px; color:#f6f1e8;">ألو هو</span><span style="font-size:11px; font-style:italic; color:#a78bfa;">alu hwa</span><span style="flex:1; font-size:12.5px; color:#a09e9a;">So that's it / which means</span></div>
+          <div style="display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; padding:14px 0; border-bottom:1px solid rgba(255,255,255,0.06);"><span dir="rtl" style="font-family:'Noto Naskh Arabic',serif; font-size:18px; color:#f6f1e8;">بالذات</span><span style="font-size:11px; font-style:italic; color:#a78bfa;">bil-zat</span><span style="flex:1; font-size:12.5px; color:#a09e9a;">Especially / specifically</span></div>
+          <div style="display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; padding:14px 0; border-bottom:1px solid rgba(255,255,255,0.06);"><span dir="rtl" style="font-family:'Noto Naskh Arabic',serif; font-size:18px; color:#f6f1e8;">توفيق</span><span style="font-size:11px; font-style:italic; color:#a78bfa;">tawfeeq</span><span style="flex:1; font-size:12.5px; color:#a09e9a;">God-given success</span></div>
+          <div style="display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; padding:14px 0; border-bottom:1px solid rgba(255,255,255,0.06);"><span dir="rtl" style="font-family:'Noto Naskh Arabic',serif; font-size:18px; color:#f6f1e8;">التوقعات عدو الإنسان</span><span style="font-size:11px; font-style:italic; color:#a78bfa;">tawaqqu3at 3aduw al-insan</span><span style="flex:1; font-size:12.5px; color:#a09e9a;">Expectations are the enemy</span></div>
+          <div style="display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; padding:14px 0;"><span dir="rtl" style="font-family:'Noto Naskh Arabic',serif; font-size:18px; color:#f6f1e8;">كمّل المشوار</span><span style="font-size:11px; font-style:italic; color:#a78bfa;">kammil al-mishwar</span><span style="flex:1; font-size:12.5px; color:#a09e9a;">Complete the journey</span></div>
+        </div>
+        <div style="font-size:11px; color:#7a756e; text-align:center; margin-top:12px;">89 phrases in the full app — grouped by category with context notes.</div>
+      </div>
+    </sc-if>
+  </div>
+
+  <!-- ═══ ALL MODES SHEET ═══ -->
+  <sc-if value="{{ moreOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeMore }}" style="position:fixed; inset:0; z-index:20; background:rgba(8,7,6,0.55); backdrop-filter:blur(6px); animation:screenIn .25s ease both;"></div>
+    <div style="position:fixed; left:0; right:0; bottom:0; z-index:21; display:flex; justify-content:center; padding:0 12px;">
+      <div style="width:100%; max-width:480px; max-height:76vh; overflow-y:auto; border-radius:26px 26px 0 0; background:rgba(26,23,20,0.94); border:1px solid rgba(255,255,255,0.1); border-bottom:none; backdrop-filter:blur(26px); box-shadow:0 -20px 60px -18px rgba(0,0,0,0.95); padding:20px 22px calc(24px + env(safe-area-inset-bottom)); animation:materialize .4s cubic-bezier(.2,.8,.2,1) both;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+          <div style="font-family:'Instrument Serif','Noto Naskh Arabic',serif; font-style:italic; font-size:21px; color:#e8c99a;">All modes</div>
+          <button onClick="{{ closeMore }}" style="width:32px; height:32px; border-radius:50%; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:#a09e9a; font-size:15px; cursor:pointer; font-family:'DM Sans',sans-serif;">×</button>
+        </div>
+        <div style="font-size:12px; color:#7a756e; line-height:1.6; margin-bottom:14px;">Everything from the current app, nothing deleted — the core path stays up front.</div>
+
+        <div style="font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:#c9a96e; margin:14px 0 8px;">① Build vocab</div>
+        <div style="display:flex; flex-direction:column; gap:6px;">
+          <button onClick="{{ moreGoCards }}" style="display:flex; align-items:center; gap:10px; width:100%; text-align:left; padding:11px 14px; border-radius:12px; background:rgba(201,169,110,0.08); border:1px solid rgba(201,169,110,0.22); color:#f0ede8; font-family:'DM Sans',sans-serif; font-size:13.5px; cursor:pointer; transition:all .25s;" style-hover="background:rgba(201,169,110,0.14);">Flashcards <span style="margin-left:auto; font-size:10px; letter-spacing:.06em; color:#4fd8c4;">in prototype ›</span></button>
+          <button onClick="{{ navDeep }}" style="display:flex; align-items:center; gap:10px; width:100%; text-align:left; padding:11px 14px; border-radius:12px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); color:#e6e1d8; font-family:'DM Sans',sans-serif; font-size:13.5px; cursor:pointer; transition:all .25s;">Deep cards + synonyms <span style="margin-left:auto; font-size:10px; letter-spacing:.06em; color:#7a756e;">open ›</span></button>
+          <button onClick="{{ navStarred }}" style="display:flex; align-items:center; gap:10px; width:100%; text-align:left; padding:11px 14px; border-radius:12px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); color:#e6e1d8; font-family:'DM Sans',sans-serif; font-size:13.5px; cursor:pointer; transition:all .25s;">Starred items <span style="margin-left:auto; font-size:10px; letter-spacing:.06em; color:#7a756e;">open ›</span></button>
+        </div>
+
+        <div style="font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:#c9a96e; margin:16px 0 8px;">② Speak it</div>
+        <div style="display:flex; flex-direction:column; gap:6px;">
+          <button onClick="{{ navShadow }}" style="display:flex; align-items:center; gap:10px; width:100%; text-align:left; padding:11px 14px; border-radius:12px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); color:#e6e1d8; font-family:'DM Sans',sans-serif; font-size:13.5px; cursor:pointer; transition:all .25s;">Shadowing <span style="margin-left:auto; font-size:10px; letter-spacing:.06em; color:#7a756e;">open ›</span></button>
+          <button onClick="{{ navBuild }}" style="display:flex; align-items:center; gap:10px; width:100%; text-align:left; padding:11px 14px; border-radius:12px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); color:#e6e1d8; font-family:'DM Sans',sans-serif; font-size:13.5px; cursor:pointer; transition:all .25s;">Sentence builder <span style="margin-left:auto; font-size:10px; letter-spacing:.06em; color:#7a756e;">open ›</span></button>
+          <button onClick="{{ moreGoCoach }}" style="display:flex; align-items:center; gap:10px; width:100%; text-align:left; padding:11px 14px; border-radius:12px; background:rgba(79,216,196,0.07); border:1px solid rgba(79,216,196,0.24); color:#f0ede8; font-family:'DM Sans',sans-serif; font-size:13.5px; cursor:pointer; transition:all .25s;" style-hover="background:rgba(79,216,196,0.13);">Speak &amp; respond — your coach <span style="margin-left:auto; font-size:10px; letter-spacing:.06em; color:#4fd8c4;">in prototype ›</span></button>
+        </div>
+
+        <div style="font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:#c9a96e; margin:16px 0 8px;">③ Immerse</div>
+        <div style="display:flex; flex-direction:column; gap:6px;">
+          <button onClick="{{ navListen }}" style="display:flex; align-items:center; gap:10px; width:100%; text-align:left; padding:11px 14px; border-radius:12px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); color:#e6e1d8; font-family:'DM Sans',sans-serif; font-size:13.5px; cursor:pointer; transition:all .25s;">Tune your ear <span style="margin-left:auto; font-size:10px; letter-spacing:.06em; color:#7a756e;">open ›</span></button>
+          <button onClick="{{ navConvo }}" style="display:flex; align-items:center; gap:10px; width:100%; text-align:left; padding:11px 14px; border-radius:12px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); color:#e6e1d8; font-family:'DM Sans',sans-serif; font-size:13.5px; cursor:pointer; transition:all .25s;">Conversation mode <span style="margin-left:auto; font-size:10px; letter-spacing:.06em; color:#7a756e;">open ›</span></button>
+          <button onClick="{{ navMap }}" style="display:flex; align-items:center; gap:10px; width:100%; text-align:left; padding:11px 14px; border-radius:12px; background:rgba(79,216,196,0.07); border:1px solid rgba(79,216,196,0.24); color:#f0ede8; font-family:'DM Sans',sans-serif; font-size:13.5px; cursor:pointer; transition:all .25s;">Word origins map <span style="margin-left:auto; font-size:10px; letter-spacing:.06em; color:#4fd8c4;">in prototype ›</span></button>
+        </div>
+
+        <div style="font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:#c9a96e; margin:16px 0 8px;">④ Preserve it</div>
+        <button onClick="{{ navContribute }}" style="display:flex; align-items:center; gap:10px; width:100%; text-align:left; padding:11px 14px; border-radius:12px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); color:#e6e1d8; font-family:'DM Sans',sans-serif; font-size:13.5px; cursor:pointer; transition:all .25s;">Contribute <span style="margin-left:auto; font-size:10px; letter-spacing:.06em; color:#7a756e;">open ›</span></button>
+
+        <div style="font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:#7a756e; margin:18px 0 4px;">Archived modes</div>
+        <div style="font-size:11.5px; color:#7a756e; line-height:1.6; margin-bottom:8px;">Still fully working in the current app — just tucked away while the core path stays focused.</div>
+        <div style="display:flex; flex-wrap:wrap; gap:6px;">
+          <button onClick="{{ navMc }}" style="font-size:12px; padding:7px 13px; border-radius:100px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); color:#c9c4bc; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all .25s;">Quiz ›</button>
+          <button onClick="{{ navDeepquiz }}" style="font-size:12px; padding:7px 13px; border-radius:100px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); color:#c9c4bc; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all .25s;">Deep quiz ›</button>
+          <button onClick="{{ navFlow }}" style="font-size:12px; padding:7px 13px; border-radius:100px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); color:#c9c4bc; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all .25s;">Flow translation ›</button>
+          <button onClick="{{ navTrans }}" style="font-size:12px; padding:7px 13px; border-radius:100px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); color:#c9c4bc; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all .25s;">Transitions guide ›</button>
+          <button onClick="{{ navVocab }}" style="font-size:12px; padding:7px 13px; border-radius:100px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); color:#c9c4bc; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all .25s;">Vocab lists ›</button>
+          <button onClick="{{ navRef }}" style="font-size:12px; padding:7px 13px; border-radius:100px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); color:#c9c4bc; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all .25s;">Full reference ›</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ═══ TAB BAR ═══ -->
+  <div style="position:fixed; bottom:0; left:0; right:0; z-index:10; display:flex; justify-content:center; padding:0 20px calc(14px + env(safe-area-inset-bottom));">
+    <div style="display:flex; gap:4px; width:100%; max-width:420px; padding:8px; border-radius:100px; background:rgba(24,21,18,0.72); border:1px solid rgba(255,255,255,0.09); backdrop-filter:blur(24px); box-shadow:0 20px 50px -16px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,255,255,0.06);">
+      <button onClick="{{ goHome }}" style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; padding:9px 4px; border-radius:100px; border:none; background:{{ tabHomeBg }}; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all .3s;">
+        <svg width="19" height="19" viewBox="0 0 20 20" fill="{{ tabHomeColor }}"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+        <span style="font-size:9.5px; letter-spacing:.06em; font-weight:600; color:{{ tabHomeColor }};">Home</span>
+      </button>
+      <button onClick="{{ goCards }}" style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; padding:9px 4px; border-radius:100px; border:none; background:{{ tabCardsBg }}; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all .3s;">
+        <svg width="19" height="19" viewBox="0 0 20 20" fill="{{ tabCardsColor }}"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"></path></svg>
+        <span style="font-size:9.5px; letter-spacing:.06em; font-weight:600; color:{{ tabCardsColor }};">Cards</span>
+      </button>
+      <button onClick="{{ goCoach }}" style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; padding:9px 4px; border-radius:100px; border:none; background:{{ tabCoachBg }}; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all .3s;">
+        <svg width="19" height="19" viewBox="0 0 20 20" fill="{{ tabCoachColor }}"><path fill-rule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clip-rule="evenodd"></path></svg>
+        <span style="font-size:9.5px; letter-spacing:.06em; font-weight:600; color:{{ tabCoachColor }};">Coach</span>
+      </button>
+      <button onClick="{{ goJourney }}" style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; padding:9px 4px; border-radius:100px; border:none; background:{{ tabJourneyBg }}; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all .3s;">
+        <svg width="19" height="19" viewBox="0 0 20 20" fill="{{ tabJourneyColor }}"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+        <span style="font-size:9.5px; letter-spacing:.06em; font-weight:600; color:{{ tabJourneyColor }};">Journey</span>
+      </button>
+      <button onClick="{{ openMore }}" style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; padding:9px 4px; border-radius:100px; border:none; background:transparent; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all .3s;">
+        <svg width="19" height="19" viewBox="0 0 20 20" fill="#8a857e"><circle cx="4" cy="10" r="1.7"></circle><circle cx="10" cy="10" r="1.7"></circle><circle cx="16" cy="10" r="1.7"></circle></svg>
+        <span style="font-size:9.5px; letter-spacing:.06em; font-weight:600; color:#8a857e;">More</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: &quot;430px&quot;, &quot;height&quot;: &quot;900px&quot; },
+  &quot;startScreen&quot;: { &quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;home&quot;, &quot;cards&quot;, &quot;coach&quot;, &quot;voice&quot;, &quot;journey&quot;], &quot;default&quot;: &quot;home&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Prototype&quot; },
+  &quot;coachThinkMs&quot;: { &quot;editor&quot;: null, &quot;default&quot;: 2600, &quot;tsType&quot;: &quot;number&quot; }
+}">
+const CARDS = [
+  { a: "فاهمني / فاهماني", p: "fahimni / fahimani", e: "You understand me? / you see what I mean?", ctx: "THE most important check-in in Sudanese Arabic. Used after almost every point.", ex: "الموضوع صعب — فاهماني؟", exPh: "al-mawdoo3 sa3b — fahimani?", exen: "The matter is difficult — you understand?", cat: "Connectors" },
+  { a: "صراحة", p: "saraha", e: "Honestly / to be frank / straight up", ctx: "Signals the real unfiltered truth is coming. Opens honest statements.", ex: "صراحة ما كنت واثق إنو ينجح.", exPh: "saraha ma kunt waathiq inno yinjah.", exen: "Honestly I wasn't sure he'd succeed.", cat: "Emphasis" },
+  { a: "كوني كونيك", p: "kowni kownik", e: "You do you / be yourself", ctx: "Asserting mutual authenticity. Classic Sudanese phrase for everyone just being themselves.", ex: "كوني كونيك — ما لازم كلنا نكون نفس الشيء.", exPh: "kowni kownik — ma lazim kullina nakoon nafs ash-shay.", exen: "Be yourself — we don't all have to be the same.", cat: "Transitions" },
+  { a: "شديد", p: "shadeed", e: "Very / extremely / intensely", ctx: "Sudanese intensifier. Goes after the thing it intensifies. 'صعب شديد' = extremely difficult.", ex: "المجال دا صعب شديد.", exPh: "al-majaal da sa3b shadeed.", exen: "This field is extremely difficult.", cat: "Emphasis" },
+  { a: "كمّل المشوار", p: "kammil al-mishwar", e: "Complete the journey / see it through", ctx: "Powerful encouragement phrase. 'Keep going — finish what you started.'", ex: "كمّلوا المشوار — لسه قدامكم كتير.", exPh: "kammilu al-mishwar — lissa quddamkum kateer.", exen: "Complete the journey — there's still a lot ahead.", cat: "Encouragement" },
+];
+
+// Practice sentences per card (EN → AR production mode) — parallel to CARDS
+const CARD_EXS = [
+  [
+    { en: "The matter is difficult — you understand?", ar: "الموضوع صعب — فاهماني؟", ph: "al-mawdoo3 sa3b — fahimani?" },
+    { en: "I show you one side of me — you understand?", ar: "بوريكم سايد مني — فاهماني؟", ph: "bawwarreekum side minni — fahimani?" },
+  ],
+  [
+    { en: "Honestly I wasn't sure he'd succeed.", ar: "صراحة ما كنت واثق إنو ينجح.", ph: "saraha ma kunt waathiq inno yinjah." },
+    { en: "Honestly it affects me, I'm not going to tell you it doesn't.", ar: "صراحة بتأثر فيني، مش حقول لك ما بتأثر.", ph: "saraha bita'athar finni, mish haqool lak ma bita'athar." },
+  ],
+  [
+    { en: "Be yourself — we don't all have to be the same.", ar: "كوني كونيك — ما لازم كلنا نكون نفس الشيء.", ph: "kowni kownik — ma lazim kullina nakoon nafs ash-shay." },
+  ],
+  [
+    { en: "This field is extremely difficult.", ar: "المجال دا صعب شديد.", ph: "al-majaal da sa3b shadeed." },
+    { en: "I'm genuinely so happy to be here with you tonight.", ar: "أنا مبسوط شديد إني معك هنا الليلة.", ph: "ana mabsoot shadeed inni ma3ak hina al-layla." },
+  ],
+  [
+    { en: "Complete the journey — there's still a lot ahead of you.", ar: "كمّلوا المشوار — لسه قدامكم كتير.", ph: "kammilu al-mishwar — lissa quddamkum kateer." },
+  ],
+];
+
+const DEMO_ANSWER = "saraha it affects me، بس برجع وبقول لنفسي من حقه يقول رأيه";
+const VOICE_WORDS = ["صراحة", "بتأثر", "فيني،", "بس", "بحاول", "ما", "أخليها", "توقفني"];
+const VOICE_WORDS_PH = ["saraha", "bita'athar", "finni,", "bas", "bahawil", "ma", "akhaliha", "tawagifni"];
+
+const FLOW = [
+  { en: "Honestly, I've been doing social media for about a year and a half now.", ar: "صراحة، أنا بعمل سوشيال ميديا من حوالي سنة ونص.", ph: "saraha, ana ba3mil social media min hawali sana w-nus.", note: "Lead with صراحة to sound natural and honest." },
+  { en: "People know me mainly for cooking videos, but I also do fashion content.", ar: "الناس عارفاني بالذات من فيديوهات الطبيخ، لكن بعمل فاشن كمان.", ph: "an-nas 3arfani bil-zat min videohaat at-tabikh, lakin ba3mil fashion kaman.", note: "Use بالذات to mean 'especially' or 'mainly known for'." },
+  { en: "I hate the word influencer — it carries massive responsibility.", ar: "بكره كلمة إنفلونسر — فيها مسؤولية شديدة.", ph: "bakra kalimat influencer — fiha mas'uliyya shadida.", note: "بكره is strong — 'I really hate.'" },
+  { en: "I just say I do social media — no self-glorification in that.", ar: "بقول بعمل سوشيال ميديا — ما فيها تعظيم لنفسي.", ph: "baqool ba3mil social media — ma fiha ta3zeem li-nafsi.", note: "ما فيها تعظيم = a humility phrase." },
+  { en: "I provide entertainment — no more, no less. That's my lane.", ar: "بقدم انترتينمنت — لا أكثر لا أقل. دا لين بتاعي.", ph: "baqaddim entertainment — la akthar la aqal. da lane bata3i.", note: "لا أكثر لا أقل defines your role clearly." },
+];
+
+const LISTEN_OPTS = [
+  { label: "Everything from God always comes at its right time.", correct: true },
+  { label: "You should always plan everything ahead carefully.", correct: false },
+  { label: "Coincidences don't really mean anything.", correct: false },
+];
+const MC_OPTS = [
+  { label: "Very / extremely / intensely", correct: true },
+  { label: "Difficult / hard", correct: false },
+  { label: "Fast / quickly", correct: false },
+  { label: "Strict / harsh", correct: false },
+];
+const DQ_OPTS = [
+  { label: "شديد · shadeed", correct: true },
+  { label: "كويس · kuayis", correct: false },
+  { label: "بسرعة · bisur3a", correct: false },
+  { label: "قليل · qaleel", correct: false },
+];
+
+const MODE_NAMES = ["deep", "starred", "shadow", "build", "listen", "convo", "contribute", "mc", "deepquiz", "flow", "trans", "vocab", "ref"];
+
+const REQUIRED = ["صراحة", "من حقه", "نفسيتك"];
+const BONUS = ["بالجد", "يعني", "فاهماني"];
+
+const PH_MAP = { "صراحة": "saraha", "من حقه": "min haqquh", "نفسيتك": "nafseeytak", "بالجد": "bil-jad", "يعني": "ya3ni", "فاهماني": "fahimani" };
+
+const SCENARIO = {
+  qen: "How do you deal with hate comments and people who don't like your content?",
+  models: [
+    { ar: "صراحة بتأثر فيني، مش حقول لك ما بتأثر.", ph: "saraha bita'athar finni, mish haqool lak ma bita'athar.", en: "Honestly it affects me, I'm not going to tell you it doesn't." },
+    { ar: "لكن برجع وبقول لنفسي — من حقه يقول أي رأي عنده.", ph: "lakin barji3 w-baqool li-nafsi — min haqquh yaqool ayy ra'y 3anduh.", en: "But I go back and tell myself — he has the right to say whatever opinion he has." },
+    { ar: "خُذ للزول العذر عشان نفسيتك ترتاح — مش عشان الزول.", ph: "khuz lil-zool al-3uzur 3ashan nafseeytak tirtah — mish 3ashan az-zool.", en: "Give the person an excuse so your mind can rest — not for the person's sake." },
+  ],
+};
+
+const DEFAULT_FB = {
+  overall: "That already sounds like you're talking to a friend — let's make it land even more Sudanese.",
+  kept: ["صراحة", "من حقه"],
+  swaps: [{ from: "it affects me", to_ar: "بتأثر فيني", to_ph: "bita'athar finni" }],
+  closest_model_index: 0,
+  suggestion: {
+    ar: "صراحة بتأثر فيني، لكن برجع وبقول لنفسي — من حقه يقول أي رأي عنده.",
+    ph: "saraha bita'athar finni, lakin barji3 w-baqool li-nafsi — min haqquh yaqool ayy ra'y 3anduh.",
+    en: "Honestly it affects me, but I go back and tell myself — he has the right to his opinion.",
+  },
+};
+
+const COACH_SYSTEM = `You are a warm Sudanese Arabic dialect coach for diaspora heritage speakers — people who understand their family's dialect but freeze when speaking it. Compare the learner's answer to the native reference answers. NEVER say correct/incorrect; be specific, warm, comparison-based. Arabizi (saraha, 3ashan) counts fully as Arabic. Respond with ONLY a JSON object, no markdown fences:
+{
+ "overall": string, // one warm specific sentence about their answer, max 18 words
+ "kept": string[], // Sudanese words/phrases they actually used (Arabic script), [] if none
+ "swaps": [{"from": string, "to_ar": string, "to_ph": string}], // max 2: English or MSA-shaped fragments quoted from their answer, with the natural Sudanese swap
+ "closest_model_index": number, // 0-2, which native answer theirs is closest to in spirit
+ "suggestion": {"ar": string, "ph": string, "en": string} // THEIR answer upgraded into natural Sudanese, preserving their meaning and personality
+}`;
+
+class Component extends DCLogic {
+  state = {
+    screen: this.props.startScreen ?? "home",
+    flipped: false,
+    cardIdx: 0,
+    sweepTick: 0,
+    coachPhase: "prompt", // prompt | thinking | feedback
+    typed: "",
+    voiceText: "",
+    moreOpen: false,
+    hintOpen: false,
+    textMode: false,
+    fb: null,
+    shadowShow: false,
+    buildShow: false,
+    convoReveal: false,
+    listenPick: null,
+    mcPick: null,
+    dqPick: null,
+    flowOpen: -1,
+    trans0: false,
+    trans1: false,
+    flashDir: "ar",
+    exIdx: 0,
+    pInput: "",
+    pCompare: false,
+    pMicOn: false,
+    pLevel: "word",
+  };
+
+  _pMicSim(ex) {
+    clearInterval(this._pMicTimer);
+    const words = ex.ar.split(/\s+/);
+    let i = 0;
+    this.setState({ pInput: "", pCompare: false, pMicOn: true });
+    this._pMicTimer = setInterval(() => {
+      i++;
+      if (i > words.length) {
+        clearInterval(this._pMicTimer);
+        this.setState({ pMicOn: false, pCompare: true });
+        return;
+      }
+      this.setState({ pInput: words.slice(0, i).join(" ") });
+    }, 420);
+  }
+
+  _say(text) {
+    try {
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = /[\u0600-\u06FF]/.test(text) ? "ar-SA" : "en-US";
+      u.rate = 0.88;
+      speechSynthesis.cancel();
+      speechSynthesis.speak(u);
+    } catch (e) { /* no TTS available */ }
+  }
+
+  _resetPractice(extra) {
+    clearInterval(this._pMicTimer);
+    this.setState(Object.assign({ pInput: "", pCompare: false, pMicOn: false, exIdx: 0 }, extra || {}));
+  }
+
+  async _runCoach(text) {
+    this.setState({ coachPhase: "thinking" });
+    const t0 = Date.now();
+    let fb = DEFAULT_FB;
+    try {
+      if (window.claude && window.claude.complete) {
+        const raw = await window.claude.complete({
+          model: "claude-sonnet-4-5",
+          max_tokens: 900,
+          system: COACH_SYSTEM,
+          messages: [{
+            role: "user",
+            content: JSON.stringify({
+              scenario: SCENARIO.qen,
+              native_answers: SCENARIO.models,
+              key_vocab_to_encourage: REQUIRED.concat(BONUS),
+              learner_answer: text,
+            }),
+          }],
+        });
+        const m = String(raw).match(/\{[\s\S]*\}/);
+        if (m) {
+          const p = JSON.parse(m[0]);
+          if (p && p.suggestion && p.suggestion.ar) {
+            fb = {
+              overall: p.overall || DEFAULT_FB.overall,
+              kept: Array.isArray(p.kept) ? p.kept.slice(0, 5) : [],
+              swaps: Array.isArray(p.swaps) ? p.swaps.slice(0, 2) : [],
+              closest_model_index: typeof p.closest_model_index === "number" ? p.closest_model_index : 0,
+              suggestion: p.suggestion,
+            };
+          }
+        }
+      }
+    } catch (e) { /* fall back to scripted feedback */ }
+    const wait = Math.max(0, 1800 - (Date.now() - t0));
+    clearTimeout(this._thinkTimer);
+    this._thinkTimer = setTimeout(() => this.setState({ fb, coachPhase: "feedback" }), wait);
+  }
+
+  _goMode(m) {
+    this.setState({ moreOpen: false });
+    this.go(m);
+  }
+
+  _optList(opts, picked, key) {
+    return opts.map((o, i) => {
+      const isPicked = picked === i;
+      const answered = picked !== null && picked !== undefined;
+      let bg = "rgba(255,250,242,0.03)", border = "rgba(255,255,255,0.1)", color = "#e6e1d8";
+      if (answered && o.correct) { bg = "rgba(86,201,143,0.1)"; border = "rgba(86,201,143,0.5)"; color = "#7fdcaa"; }
+      else if (answered && isPicked && !o.correct) { bg = "rgba(217,107,90,0.1)"; border = "rgba(217,107,90,0.5)"; color = "#e08a7a"; }
+      else if (answered) { color = "#7a756e"; }
+      return { label: o.label, bg, border, color, onPick: () => this.setState({ [key]: i }) };
+    });
+  }
+
+  _endSwipe(x) {
+    const dx = x - (this._sx ?? x);
+    this._sx = null;
+    if (Math.abs(dx) > 45) {
+      this._justSwiped = true;
+      setTimeout(() => { this._justSwiped = false; }, 300);
+      this.setState(st => ({ cardIdx: (st.cardIdx + (dx < 0 ? 1 : -1) + CARDS.length) % CARDS.length, flipped: false }));
+    }
+  }
+
+  componentWillUnmount() {
+    clearInterval(this._voiceTimer);
+    clearTimeout(this._thinkTimer);
+  }
+
+  go(screen) {
+    clearInterval(this._voiceTimer);
+    this.setState({ screen });
+    if (screen === "voice") this.startVoiceSim();
+  }
+
+  startVoiceSim() {
+    this.setState({ voiceText: "" });
+    let i = 0;
+    clearInterval(this._voiceTimer);
+    this._voiceTimer = setInterval(() => {
+      i++;
+      if (i > VOICE_WORDS.length) { clearInterval(this._voiceTimer); return; }
+      this.setState({ voiceText: VOICE_WORDS.slice(0, i).join(" ") });
+    }, 520);
+  }
+
+  renderVals() {
+    const s = this.state;
+    const card = CARDS[s.cardIdx % CARDS.length];
+    const typedOrDemo = s.typed.trim() || DEMO_ANSWER;
+
+    const teal = "#4fd8c4", gold = "#e8c99a", dim = "#8a857e";
+    const tab = (name, color) => {
+      const on = s.screen === name || (name === "coach" && s.screen === "voice");
+      return {
+        color: on ? color : dim,
+        bg: on ? (color === teal ? "rgba(79,216,196,0.12)" : "rgba(201,169,110,0.12)") : "transparent",
+      };
+    };
+    const tHome = tab("home", gold), tCards = tab("cards", gold), tCoach = tab("coach", teal), tJourney = tab("journey", gold);
+
+    // weave chips light up when typed contains them
+    const text = s.typed || "";
+    const chip = (word, bonus) => {
+      const hit = word.split("/")[0].trim() && text.includes(word.split("/")[0].trim());
+      return {
+        word,
+        ph: PH_MAP[word] || "",
+        color: hit ? "#7fdcaa" : (bonus ? "#8a857e" : "#e8c99a"),
+        bg: hit ? "rgba(86,201,143,0.12)" : (bonus ? "rgba(255,255,255,0.03)" : "rgba(201,169,110,0.08)"),
+        border: hit ? "rgba(86,201,143,0.45)" : (bonus ? "rgba(255,255,255,0.08)" : "rgba(201,169,110,0.25)"),
+        glow: hit ? "0 0 20px -6px rgba(86,201,143,0.6)" : "none",
+      };
+    };
+
+    // 3D card carousel
+    const cur = ((s.cardIdx % CARDS.length) + CARDS.length) % CARDS.length;
+    const sweepAnimStr = (s.sweepTick % 2 === 0 ? "sweepA" : "sweepB") + " 1.1s .1s cubic-bezier(.3,.7,.4,1) both";
+    const deck = CARDS.map((c, i) => {
+      let d = ((i - cur) % CARDS.length + CARDS.length) % CARDS.length;
+      if (d > 2) d -= CARDS.length;
+      const active = d === 0;
+      const hidden = Math.abs(d) >= 2;
+      return {
+        ar: c.a, ph: c.p, en: c.e, ctx: c.ctx, ex: c.ex, exph: c.exPh, exen: c.exen, cat: c.cat,
+        wrapTf: "translateX(" + (-50 + d * 64) + "%) translateZ(" + (active ? 0 : -90) + "px) rotateY(" + (d * -26) + "deg) scale(" + (active ? 1 : 0.84) + ")",
+        op: active ? 1 : hidden ? 0 : 0.55,
+        z: 5 - Math.abs(d),
+        pe: hidden ? "none" : "auto",
+        floatAnim: active ? "floaty 6.5s ease-in-out infinite" : "none",
+        flipTf: active && s.flipped ? "rotateY(180deg)" : "rotateY(0deg)",
+        sweep: active ? sweepAnimStr : "none",
+        onTap: () => {
+          if (this._justSwiped) return;
+          if (i === cur) this.setState(st => ({ flipped: !st.flipped, sweepTick: st.sweepTick + 1 }));
+          else this.setState({ cardIdx: i, flipped: false });
+        },
+        onSay: (e) => { e.stopPropagation(); this._say(c.a); },
+        onSayEx: (e) => { e.stopPropagation(); this._say(c.a + "… " + c.ex); },
+      };
+    });
+    const dots = CARDS.map((_, i) => ({
+      w: i === cur ? "22px" : "6px",
+      bg: i === cur ? "#e8c99a" : "rgba(255,255,255,0.16)",
+      glow: i === cur ? "0 0 12px rgba(232,201,154,0.7)" : "none",
+    }));
+
+    const attemptScores = [38, 51, 64, 76];
+    const attempts = attemptScores.map((v, i) => ({
+      n: i + 1,
+      h: Math.round(v * 0.6) + "px",
+      bg: i === attemptScores.length - 1 ? "linear-gradient(180deg, #4fd8c4, rgba(79,216,196,0.4))" : "rgba(255,255,255,0.14)",
+      glow: i === attemptScores.length - 1 ? "0 0 18px rgba(79,216,196,0.55)" : "none",
+    }));
+
+    return {
+      // routing
+      isHome: s.screen === "home",
+      isCards: s.screen === "cards",
+      isCoach: s.screen === "coach",
+      isVoice: s.screen === "voice",
+      isJourney: s.screen === "journey",
+      goHome: () => this.go("home"),
+      goCards: () => this.go("cards"),
+      goCoach: () => { this.setState({ coachPhase: "prompt" }); this.go("coach"); },
+      goJourney: () => this.go("journey"),
+      goVoice: () => this.go("voice"),
+
+      // tab bar
+      tabHomeBg: tHome.bg, tabHomeColor: tHome.color,
+      tabCardsBg: tCards.bg, tabCardsColor: tCards.color,
+      tabCoachBg: tCoach.bg, tabCoachColor: tCoach.color,
+      tabJourneyBg: tJourney.bg, tabJourneyColor: tJourney.color,
+
+      // flashcards
+      cardAr: card.a, cardPh: card.p, cardEn: card.e, cardCtx: card.ctx,
+      cardEx: card.ex, cardExEn: card.exen, cardCat: card.cat,
+      cardCounter: (s.cardIdx % CARDS.length) + 1 + " / " + CARDS.length,
+      flipped: s.flipped,
+      notFlipped: !s.flipped,
+      flipTf: s.flipped ? "rotateY(180deg)" : "rotateY(0deg)",
+      sweepAnim: (s.sweepTick % 2 === 0 ? "sweepA" : "sweepB") + " 1.1s .1s cubic-bezier(.3,.7,.4,1) both",
+      flip: () => this.setState(st => ({ flipped: !st.flipped, sweepTick: st.sweepTick + 1 })),
+      nextCard: () => { clearInterval(this._pMicTimer); this.setState(st => ({ cardIdx: (st.cardIdx + 1) % CARDS.length, flipped: false, exIdx: 0, pInput: "", pCompare: false, pMicOn: false })); },
+      prevCard: () => { clearInterval(this._pMicTimer); this.setState(st => ({ cardIdx: (st.cardIdx + CARDS.length - 1) % CARDS.length, flipped: false, exIdx: 0, pInput: "", pCompare: false, pMicOn: false })); },
+      markGot: () => this.setState(st => ({ cardIdx: (st.cardIdx + 1) % CARDS.length, flipped: false, sweepTick: st.sweepTick + 1 })),
+      markLearn: () => this.setState(st => ({ cardIdx: (st.cardIdx + 1) % CARDS.length, flipped: false, sweepTick: st.sweepTick + 1 })),
+
+      // coach
+      coachPromptPhase: s.coachPhase === "prompt",
+      coachThinkingPhase: s.coachPhase === "thinking",
+      coachFeedbackPhase: s.coachPhase === "feedback",
+      typed: s.typed,
+      answerShown: typedOrDemo,
+      onType: (e) => this.setState({ typed: e.target.value }),
+      weaveChips: REQUIRED.map(w => chip(w, false)),
+      hintOpen: s.hintOpen,
+      hintLabel: s.hintOpen ? "hide hint" : "need a hint? عربي",
+      toggleHint: () => this.setState(st => ({ hintOpen: !st.hintOpen })),
+      voiceFirst: !s.textMode,
+      textFirst: s.textMode,
+      useText: () => this.setState({ textMode: true }),
+      submitCoach: () => this._runCoach(s.typed.trim() || DEMO_ANSWER),
+      tryAgain: () => this.setState({ coachPhase: "prompt" }),
+
+      // voice
+      voiceText: s.voiceText || "…",
+      voicePh: s.voiceText ? VOICE_WORDS_PH.slice(0, s.voiceText.split(" ").length).join(" ") : "",
+      stopVoice: () => clearInterval(this._voiceTimer),
+      cancelVoice: () => this.go("coach"),
+      doneVoice: () => {
+        clearInterval(this._voiceTimer);
+        const said = this.state.voiceText.trim() || DEMO_ANSWER;
+        this.setState({ typed: said, screen: "coach" });
+        this._runCoach(said);
+      },
+
+      // direction toggle + EN→AR practice
+      dirAr: s.flashDir !== "en",
+      dirEn: s.flashDir === "en",
+      setDirAr: () => this._resetPractice({ flashDir: "ar", flipped: false }),
+      setDirEn: () => this._resetPractice({ flashDir: "en", flipped: false }),
+      dirArBg: s.flashDir !== "en" ? "rgba(201,169,110,0.15)" : "transparent",
+      dirArColor: s.flashDir !== "en" ? "#e8c99a" : "#7a756e",
+      dirArBorder: s.flashDir !== "en" ? "rgba(201,169,110,0.3)" : "transparent",
+      dirEnBg: s.flashDir === "en" ? "rgba(79,216,196,0.14)" : "transparent",
+      dirEnColor: s.flashDir === "en" ? "#4fd8c4" : "#7a756e",
+      dirEnBorder: s.flashDir === "en" ? "rgba(79,216,196,0.35)" : "transparent",
+      ...(() => {
+        const dirEn = s.flashDir === "en";
+        const isSent = s.pLevel === "sentence";
+        const exs = CARD_EXS[cur] || [];
+        const exI = exs.length ? s.exIdx % exs.length : 0;
+        const ex = exs[exI] || { en: "", ar: "", ph: "" };
+
+        // direction + level → prompt (what you read) and target (what you produce)
+        let promptText = "", promptPh = "", target = "", targetPh = "";
+        if (isSent) {
+          if (dirEn) { promptText = ex.en; target = ex.ar; targetPh = ex.ph; }
+          else { promptText = ex.ar; promptPh = ex.ph; target = ex.en; }
+        } else {
+          if (dirEn) { promptText = card.e; target = card.a; targetPh = card.p; }
+          else { promptText = card.a; promptPh = card.p; target = card.e; }
+        }
+
+        const clean = t => t.replace(/[—؟?.،,!"'…\/]/g, "");
+        const tToks = target.split(/\s+/).map(clean);
+        const phToks = targetPh.split(/\s+/).map(t => clean(t).toLowerCase());
+        const pairs = tToks.map((a, i) => ({ w: a, ph: phToks[i] || "" })).filter(p => p.w.length > 1);
+        const inputLc = s.pInput.toLowerCase();
+        const hitPair = p => inputLc.includes(p.w.toLowerCase()) || (p.ph.length > 1 && inputLc.includes(p.ph));
+        const used = pairs.filter(hitPair).length;
+        const resetEx = { pInput: "", pCompare: false, pMicOn: false };
+
+        return {
+          pTitle: dirEn ? "Try it in Arabic" : "Try it in English",
+          pIsSentence: isSent,
+          pSetWord: () => { clearInterval(this._pMicTimer); this.setState(Object.assign({ pLevel: "word" }, resetEx)); },
+          pSetSentence: () => { clearInterval(this._pMicTimer); this.setState(Object.assign({ pLevel: "sentence" }, resetEx)); },
+          pWordBg: !isSent ? "rgba(201,169,110,0.15)" : "transparent",
+          pWordColor: !isSent ? "#e8c99a" : "#7a756e",
+          pSentBg: isSent ? "rgba(201,169,110,0.15)" : "transparent",
+          pSentColor: isSent ? "#e8c99a" : "#7a756e",
+          pPromptText: promptText,
+          pPromptPh: promptPh,
+          pShowPromptPh: !!promptPh,
+          pExCounter: (exI + 1) + " / " + Math.max(1, exs.length),
+          pHasMultiple: exs.length > 1,
+          pSentMultiple: isSent && exs.length > 1,
+          pNextEx: () => { clearInterval(this._pMicTimer); this.setState(st => (Object.assign({ exIdx: (st.exIdx + 1) % exs.length }, resetEx))); },
+          pPrevEx: () => { clearInterval(this._pMicTimer); this.setState(st => (Object.assign({ exIdx: (st.exIdx + exs.length - 1) % exs.length }, resetEx))); },
+          pInput: s.pInput,
+          pOnType: (e) => this.setState({ pInput: e.target.value }),
+          pNotCompared: !s.pCompare,
+          pCompared: s.pCompare,
+          pGo: () => { if (s.pInput.trim()) this.setState({ pCompare: true }); },
+          pMic: () => this._pMicSim({ ar: target }),
+          pMicBorder: s.pMicOn ? "rgba(240,166,216,0.85)" : "rgba(167,139,250,0.45)",
+          pPlaceholder: dirEn ? "اكتب أو قول… Arabizi counts" : "type or say the English…",
+          pHint: dirEn ? "tap the mic and say it out loud — or type it, Arabizi counts" : "tap the mic and say the English — or type it",
+          pTarget: target,
+          pTargetPh: targetPh,
+          pShowTargetPh: !!targetPh,
+          pScore: "you matched " + used + " of " + pairs.length + " —",
+          pChips: pairs.map(p => ({
+            label: p.w,
+            bg: hitPair(p) ? "rgba(86,201,143,0.12)" : "rgba(255,255,255,0.04)",
+            border: hitPair(p) ? "rgba(86,201,143,0.45)" : "rgba(255,255,255,0.1)",
+            color: hitPair(p) ? "#7fdcaa" : "#7a756e",
+          })),
+          pTryAgain: () => { clearInterval(this._pMicTimer); this.setState(resetEx); },
+          pSayTarget: () => this._say(target),
+        };
+      })(),
+
+      // carousel
+      deck,
+      dots,
+      swipeStart: (e) => { this._sx = e.touches[0].clientX; },
+      swipeEnd: (e) => this._endSwipe(e.changedTouches[0].clientX),
+      swipeStartM: (e) => { this._sx = e.clientX; },
+      swipeEndM: (e) => this._endSwipe(e.clientX),
+
+      // all-modes sheet
+      moreOpen: s.moreOpen,
+      openMore: () => this.setState({ moreOpen: true }),
+      closeMore: () => this.setState({ moreOpen: false }),
+      moreGoCards: () => { this.setState({ moreOpen: false }); this.go("cards"); },
+      moreGoCoach: () => { this.setState({ moreOpen: false, coachPhase: "prompt" }); this.go("coach"); },
+
+      // live feedback
+      fbOverall: (s.fb || DEFAULT_FB).overall,
+      fbKept: ((s.fb || DEFAULT_FB).kept || []).map(k => (typeof k === "string" ? { ar: k, ph: PH_MAP[k] || "" } : k)),
+      hasKept: ((s.fb || DEFAULT_FB).kept || []).length > 0,
+      fbSwaps: ((s.fb || DEFAULT_FB).swaps || []).map(x => ({ from: x.from, toAr: x.to_ar, toPh: x.to_ph || "" })),
+      hasSwaps: ((s.fb || DEFAULT_FB).swaps || []).length > 0,
+      fbNativeAr: SCENARIO.models[Math.max(0, Math.min(2, (s.fb || DEFAULT_FB).closest_model_index || 0))].ar,
+      fbNativePh: SCENARIO.models[Math.max(0, Math.min(2, (s.fb || DEFAULT_FB).closest_model_index || 0))].ph,
+      fbSugAr: (s.fb || DEFAULT_FB).suggestion.ar,
+      fbSugPh: (s.fb || DEFAULT_FB).suggestion.ph,
+      fbSugEn: (s.fb || DEFAULT_FB).suggestion.en,
+
+      // extra modes
+      isDeep: s.screen === "deep", isStarred: s.screen === "starred", isShadow: s.screen === "shadow",
+      isBuild: s.screen === "build", isListen: s.screen === "listen", isConvo: s.screen === "convo",
+      isContribute: s.screen === "contribute", isMc: s.screen === "mc", isDeepquiz: s.screen === "deepquiz",
+      isFlow: s.screen === "flow", isTrans: s.screen === "trans", isVocab: s.screen === "vocab", isRef: s.screen === "ref",
+      navDeep: () => this._goMode("deep"), navStarred: () => this._goMode("starred"), navShadow: () => this._goMode("shadow"),
+      navBuild: () => this._goMode("build"), navListen: () => this._goMode("listen"), navConvo: () => this._goMode("convo"),
+      navContribute: () => this._goMode("contribute"), navMc: () => this._goMode("mc"), navDeepquiz: () => this._goMode("deepquiz"),
+      navFlow: () => this._goMode("flow"), navTrans: () => this._goMode("trans"), navVocab: () => this._goMode("vocab"), navRef: () => this._goMode("ref"),
+      backMore: () => this.setState({ screen: "home", moreOpen: true }),
+
+      // word-origins map
+      isMap: s.screen === "map",
+      navMap: () => this._goMode("map"),
+      mapC1Open: s.mapC1 !== false, mapC2Open: s.mapC2 !== false,
+      mapC1Icon: s.mapC1 !== false ? "−" : "+",
+      mapC2Icon: s.mapC2 !== false ? "−" : "+",
+      toggleMapC1: () => this.setState(st => ({ mapC1: st.mapC1 === false })),
+      toggleMapC2: () => this.setState(st => ({ mapC2: st.mapC2 === false })),
+
+      shadowHidden: !s.shadowShow, shadowShown: s.shadowShow,
+      revealShadow: () => this.setState(st => ({ shadowShow: !st.shadowShow })),
+      buildHidden: !s.buildShow, buildShown: s.buildShow,
+      revealBuild: () => this.setState({ buildShow: true }),
+      convoHidden: !s.convoReveal, convoShown: s.convoReveal,
+      revealConvo: () => this.setState({ convoReveal: true }),
+      listenOpts: this._optList(LISTEN_OPTS, s.listenPick, "listenPick"),
+      mcOpts: this._optList(MC_OPTS, s.mcPick, "mcPick"),
+      dqOpts: this._optList(DQ_OPTS, s.dqPick, "dqPick"),
+      flowRows: FLOW.map((r, i) => ({
+        ...r,
+        num: "0" + (i + 1),
+        open: s.flowOpen === i,
+        chev: s.flowOpen === i ? "▴" : "▾",
+        chevColor: s.flowOpen === i ? "#e8c99a" : "#7a756e",
+        onToggle: () => this.setState(st => ({ flowOpen: st.flowOpen === i ? -1 : i })),
+      })),
+      trans0Open: s.trans0, trans1Open: s.trans1,
+      toggleTrans0: () => this.setState(st => ({ trans0: !st.trans0 })),
+      toggleTrans1: () => this.setState(st => ({ trans1: !st.trans1 })),
+
+      // text-to-speech
+      saySuggestion: () => this._say((s.fb || DEFAULT_FB).suggestion.ar),
+      sayNow: () => this._say("صراحة بتأثر فيني، بس برجع وبقول لنفسي من حقه يقول رأيه — عشان نفسيتي ترتاح"),
+
+      // journey
+      attempts,
+    };
+  }
+}
+
+</script>
+</body>
+</html>
