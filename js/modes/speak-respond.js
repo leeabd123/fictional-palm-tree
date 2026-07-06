@@ -1,25 +1,45 @@
-// Speak & Respond — the AI-coached core loop.
-// scenario → learner types a real response (Arabic script or Arabizi) →
+// Speak & Respond — the AI-coached core loop, in the Claude-designed skin.
+// scenario → learner answers out loud (or types; Arabic script or Arabizi) →
 // Claude compares it against native-speaker reference answers →
 // comparison-based feedback (never "correct/incorrect") → attempt stored →
 // on later attempts, a before/after journey view shows real growth.
 
 let coachIdx = 0;
-let coachPhase = 'prompt';       // 'prompt' | 'thinking' | 'feedback' | 'journey'
+let coachPhase = 'prompt';       // 'prompt' | 'voice' | 'thinking' | 'feedback' | 'journey'
 let coachText = '';
 let coachFeedback = null;
 let coachError = null;
-let coachLayers = { ar: true, ph: true, en: false }; // question difficulty layers
+let coachHintOpen = false;       // "show hint" reveal on the question card
+let coachInputMode = null;       // 'voice' | 'text' — resolved lazily so mic support is known
 let coachSettingsOpen = false;
 let coachModelsRevealed = false;
+
+// Rough phonetics for the most common weave chips (chips fall back to
+// Arabic-only when a phrase isn't in this map).
+const COACH_CHIP_PH = {
+  'صراحة': 'saraha', 'يعني': 'ya3ni', 'وبتاع': 'w-bita3', 'الحمد لله': 'al-hamdu lillah',
+  'بالجد': 'bil-jadd', 'شديد': 'shadid', 'هسه': 'hissa', 'من حقه': 'min haqquh',
+  'نفسيتك': 'nafseeytak', 'فاهماني': 'fahmani', 'بالذات': 'bil-zat', 'شكراً': 'shukran',
+  'حبوب': 'haboob', 'رهيب': 'raheeb', 'بريدك': 'bareedak', 'فخور': 'fakhoor',
+  'فنان': 'fanan', 'مجهول': 'majhool', 'نفسية': 'nafsiya', 'أصلي': 'asli',
+  'الجمهور': 'al-jumhoor', 'هويتنا': 'huwiyyatna', 'بيناتنا': 'binatna',
+  'المصلحة': 'al-maslaha', 'التقبل': 'at-taqabbul', 'كوني كونيك': 'kooni koonik',
+  'على طبيعتك': '3ala tabee3tak', 'تكلة': 'takkala', 'دفنتلي': 'dafantali',
+};
 
 function esc(s) { return escAttr(String(s == null ? '' : s)); }
 
 function coachScenario() { return SPEAK_QA[coachIdx]; }
 
+function coachMode() {
+  if (coachInputMode === null) coachInputMode = coachMicSupported() ? 'voice' : 'text';
+  return coachInputMode;
+}
+
 // ── Entry point ──
 function renderSpeak() {
   const ca = document.getElementById('content-area');
+  if (coachPhase === 'voice') { ca.innerHTML = coachVoiceHTML(); return; }
   if (coachPhase === 'thinking') { ca.innerHTML = coachThinkingHTML(); return; }
   if (coachPhase === 'feedback' && coachFeedback) { ca.innerHTML = coachFeedbackHTML(); return; }
   if (coachPhase === 'journey') { ca.innerHTML = coachJourneyHTML(); return; }
@@ -29,54 +49,22 @@ function renderSpeak() {
     ta.value = coachText;
     ta.addEventListener('input', () => { coachText = ta.value; coachAutosize(ta); coachUpdateWeave(); });
     coachAutosize(ta);
-    coachUpdateWeave();
   }
+  coachUpdateWeave();
 }
 
 // Light up the vocab chips the learner has already woven in (Arabic-script
 // match only — the AI does the authoritative accounting, Arabizi included).
 function coachUpdateWeave() {
-  document.querySelectorAll('.coach-weave-chip').forEach(chip => {
+  document.querySelectorAll('.c2-chip').forEach(chip => {
     const ar = chip.dataset.ar || '';
     const core = ar.split('/')[0].trim();
     chip.classList.toggle('hit', !!core && coachText.includes(core));
   });
 }
 
-// ── Rough voice input (§ tiered response modes — demo-grade browser STT).
-// Whisper-quiet speech works; accuracy on Sudanese is limited by design of
-// the underlying models, which is exactly why text mode ships first.
-let coachRecognizer = null;
 function coachMicSupported() {
   return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
-}
-function coachToggleMic() {
-  const btn = document.getElementById('coach-mic');
-  if (coachRecognizer) { coachRecognizer.stop(); return; }
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  coachRecognizer = new SR();
-  coachRecognizer.lang = 'ar-SA';
-  coachRecognizer.interimResults = false;
-  coachRecognizer.continuous = true;
-  coachRecognizer.onresult = (ev) => {
-    for (let i = ev.resultIndex; i < ev.results.length; i++) {
-      if (ev.results[i].isFinal) {
-        coachText = (coachText ? coachText.trimEnd() + ' ' : '') + ev.results[i][0].transcript.trim();
-      }
-    }
-    const ta = document.getElementById('coach-input');
-    if (ta) { ta.value = coachText; coachAutosize(ta); coachUpdateWeave(); }
-  };
-  coachRecognizer.onend = () => {
-    coachRecognizer = null;
-    document.getElementById('coach-mic')?.classList.remove('listening');
-  };
-  coachRecognizer.onerror = () => {
-    coachRecognizer = null;
-    document.getElementById('coach-mic')?.classList.remove('listening');
-  };
-  coachRecognizer.start();
-  if (btn) btn.classList.add('listening');
 }
 
 function coachAutosize(ta) {
@@ -89,52 +77,66 @@ function coachPromptHTML() {
   const it = coachScenario();
   const attempts = getAttempts(it);
   const configured = apiConfigured();
+  const mode = coachMode();
 
   return `
     <div class="coach-wrap">
-      <div class="speak-q-nav">
-        <button class="arrow-btn" onclick="coachNav(-1)" ${coachIdx === 0 ? 'disabled' : ''}>←</button>
-        <span class="speak-q-counter">Scenario ${coachIdx + 1} of ${SPEAK_QA.length}</span>
-        <button class="arrow-btn" onclick="coachNav(1)" ${coachIdx >= SPEAK_QA.length - 1 ? 'disabled' : ''}>→</button>
+      <div class="c2-head">
+        <div>
+          <div class="c2-title">Your coach</div>
+          <div class="c2-sub">Scenario ${coachIdx + 1} of ${SPEAK_QA.length} · answer it the way you would with family</div>
+        </div>
+        <div class="speak-q-nav" style="margin:0">
+          <button class="arrow-btn" onclick="coachNav(-1)" ${coachIdx === 0 ? 'disabled' : ''}>←</button>
+          <button class="arrow-btn" onclick="coachNav(1)" ${coachIdx >= SPEAK_QA.length - 1 ? 'disabled' : ''}>→</button>
+        </div>
       </div>
 
       ${attempts.length ? `
-        <button class="coach-journey-pill" onclick="coachShowJourney()">
-          <span class="coach-journey-pill-icon">✦</span>
-          You've answered this ${attempts.length === 1 ? 'once' : attempts.length + ' times'} — see your journey
+        <button class="c2-journey-pill" onclick="coachShowJourney()">
+          ✦ You've answered this ${attempts.length === 1 ? 'once' : attempts.length + ' times'} — see your journey
         </button>` : ''}
 
-      <div class="speak-question-card coach-q-card">
-        <div class="speak-q-label">The scenario</div>
-        <div class="coach-context">${esc(it.context)}</div>
-        <div class="coach-layer-row">
-          <button class="coach-layer-chip ${coachLayers.ar ? 'on' : ''}" onclick="coachToggleLayer('ar')">عربي</button>
-          <button class="coach-layer-chip ${coachLayers.ph ? 'on' : ''}" onclick="coachToggleLayer('ph')">phonetic</button>
-          <button class="coach-layer-chip ${coachLayers.en ? 'on' : ''}" onclick="coachToggleLayer('en')">english</button>
+      <div class="c2-qcard">
+        <div class="c2-qlabel">Say it in Sudanese Arabic</div>
+        <div class="c2-qtext">${esc(it.qen)}</div>
+        <div class="c2-sub" style="margin-top:10px">${esc(it.context)}</div>
+        <button class="c2-hint-btn" onclick="coachToggleHint()">${coachHintOpen ? 'hide hint' : 'show hint — how it sounds'}</button>
+        <div class="c2-hint" id="coach-hint" style="${coachHintOpen ? '' : 'display:none'}">
+          <div class="c2-hint-ar">${esc(it.qar)}</div>
+          <div class="c2-hint-ph">${esc(it.qph)}</div>
         </div>
-        <div class="speak-question-ar coach-layer-ar" id="coach-q-ar" style="${coachLayers.ar ? '' : 'display:none'}">${esc(it.qar)}</div>
-        <div class="phonetic coach-layer-ph" id="coach-q-ph" style="${coachLayers.ph ? '' : 'display:none'}">${esc(it.qph)}</div>
-        <div class="speak-question-en coach-layer-en" id="coach-q-en" style="${coachLayers.en ? '' : 'display:none'}">${esc(it.qen)}</div>
       </div>
 
-      <div class="coach-input-block">
-        <div class="coach-input-label">How would <em>you</em> answer? <span class="coach-input-hint">Arabic script or Arabizi (saraha, 3ashan…) — both count.</span></div>
-        <div class="coach-weave">
-          <div class="coach-weave-label">Try to weave these in — they light up as you use them</div>
-          <div class="coach-weave-row">
-            ${it.required.map(v => `<span class="coach-weave-chip" data-ar="${esc(v)}" dir="auto">${esc(v)}</span>`).join('')}
-            ${it.bonus.map(v => `<span class="coach-weave-chip bonus" data-ar="${esc(v)}" dir="auto">${esc(v)}</span>`).join('')}
+      <div class="c2-weave">
+        <span class="c2-weave-label">try using —</span>
+        ${it.required.map(v => coachChipHTML(v, false)).join('')}
+        ${it.bonus.map(v => coachChipHTML(v, true)).join('')}
+      </div>
+
+      ${mode === 'voice' ? `
+        <div class="c2-voicefirst">
+          <button class="c2-mic-big" onclick="coachVoiceBegin()" ${configured ? '' : 'disabled title="Connect the coach below first"'}>🎙</button>
+          <div class="c2-mic-note">Tap and say it out loud</div>
+          <button class="c2-linklike" onclick="coachUseText()">or type it instead</button>
+        </div>
+      ` : `
+        <div class="c2-textbox">
+          <textarea id="coach-input" dir="auto" rows="3"
+            placeholder="اكتب ردك هنا… or type it in Arabizi (saraha, 3ashan…) — both count"></textarea>
+          <div class="c2-textbox-row">
+            ${coachMicSupported() ? `<button class="c2-mic-small" onclick="coachVoiceBegin()" title="Say it out loud instead">🎙</button>` : ''}
+            <span style="flex:1"></span>
+            <button class="c2-compare" onclick="coachSubmit()" ${configured ? '' : 'disabled title="Connect the coach below first"'}>Compare →</button>
           </div>
         </div>
-        <textarea id="coach-input" class="coach-textarea" dir="auto" rows="3"
-          placeholder="اكتب ردك هنا… or type it in Arabizi"></textarea>
-        <div class="coach-actions">
-          <button class="btn btn-accent coach-submit" onclick="coachSubmit()" ${configured ? '' : 'disabled title="Connect the coach below first"'}>Get coaching →</button>
-          ${coachMicSupported() ? `<button class="coach-mic" id="coach-mic" onclick="coachToggleMic()" title="Rough voice input (browser speech-to-text — Sudanese accuracy is limited, edit freely). Whisper-quiet works too.">🎙️</button>` : `<span class="coach-voice-note" title="Voice input is the next tier — text first, on purpose.">🎙️ voice coming soon</span>`}
-          <button class="coach-reveal-link" onclick="coachToggleModels()">${coachModelsRevealed ? 'Hide' : 'Peek at'} natural examples</button>
-        </div>
-        ${coachError ? `<div class="coach-error">${esc(coachError)}</div>` : ''}
+      `}
+
+      <div class="c2-footnote">No "correct answer" here — just how your family says it.<br>
+        <button class="c2-linklike" onclick="coachToggleModels()">${coachModelsRevealed ? 'hide' : 'peek at'} natural examples</button>
       </div>
+
+      ${coachError ? `<div class="coach-error">${esc(coachError)}</div>` : ''}
 
       <div id="coach-models" style="${coachModelsRevealed ? '' : 'display:none'}">
         ${coachModelsHTML(it)}
@@ -148,17 +150,147 @@ function coachPromptHTML() {
   `;
 }
 
+function coachChipHTML(v, bonus) {
+  const core = v.split('/')[0].trim();
+  const ph = COACH_CHIP_PH[core];
+  return `<span class="c2-chip ${bonus ? 'bonus' : ''}" data-ar="${esc(v)}" dir="auto">${esc(v)}${ph ? `<span class="ph">${esc(ph)}</span>` : ''}</span>`;
+}
+
+function coachToggleHint() {
+  coachHintOpen = !coachHintOpen;
+  const el = document.getElementById('coach-hint');
+  if (el) el.style.display = coachHintOpen ? '' : 'none';
+  document.querySelectorAll('.c2-hint-btn').forEach(b => {
+    b.textContent = coachHintOpen ? 'hide hint' : 'show hint — how it sounds';
+  });
+}
+
+function coachUseText() {
+  coachInputMode = 'text';
+  renderSpeak();
+}
+
 function coachModelsHTML(it) {
   return `
-    <div class="speak-vocab-panel coach-models-panel">
-      <div class="speak-vocab-title">Natural ways speakers have answered this <span class="coach-models-sub">— not "the correct way", just real ones</span></div>
+    <div class="c2-panel" style="margin-top:14px;text-align:left">
+      <div class="c2-col-label native" style="margin-bottom:12px">Natural ways speakers have answered this — not "the correct way", just real ones</div>
       ${it.model.map(m => `
         <div class="speak-model-line">
-          <div class="speak-line-ar">${esc(m.ar)}</div>
-          <div class="speak-line-ph">${esc(m.ph)}</div>
-          <div class="speak-line-en">${esc(m.en)}</div>
+          <div class="c2-native-ar">${esc(m.ar)}</div>
+          <div class="c2-native-ph">${esc(m.ph)}</div>
+          <div class="c2-sug-en">${esc(m.en)}</div>
         </div>`).join('')}
-      <div class="speak-tip-box" style="margin-top:12px"><strong>Tip:</strong> ${esc(it.tip)}</div>
+      <div class="c2-note-line" style="margin-top:10px"><b>Tip:</b> ${esc(it.tip)}</div>
+    </div>
+  `;
+}
+
+// ── Voice capture — full-screen listening state (tiered response modes).
+// Browser STT is demo-grade on Sudanese by design of the underlying models,
+// which is exactly why the transcript stays editable before you compare.
+let coachRecognizer = null;
+let coachVoiceInterim = '';
+let coachVoicePrevText = '';
+
+function coachVoiceBegin() {
+  if (!coachMicSupported()) { coachInputMode = 'text'; renderSpeak(); return; }
+  coachVoicePrevText = coachText;
+  coachVoiceInterim = '';
+  coachPhase = 'voice';
+  coachError = null;
+  renderSpeak();
+
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  coachRecognizer = new SR();
+  coachRecognizer.lang = 'ar-SA';
+  coachRecognizer.interimResults = true;
+  coachRecognizer.continuous = true;
+  coachRecognizer.onresult = (ev) => {
+    let interim = '';
+    for (let i = ev.resultIndex; i < ev.results.length; i++) {
+      if (ev.results[i].isFinal) {
+        coachText = (coachText ? coachText.trimEnd() + ' ' : '') + ev.results[i][0].transcript.trim();
+      } else {
+        interim += ev.results[i][0].transcript;
+      }
+    }
+    coachVoiceInterim = interim;
+    coachVoiceLiveUpdate();
+  };
+  coachRecognizer.onend = () => { coachRecognizer = null; };
+  coachRecognizer.onerror = (ev) => {
+    coachRecognizer = null;
+    if (coachPhase === 'voice') {
+      coachPhase = 'prompt';
+      coachInputMode = 'text';
+      coachError = ev.error === 'not-allowed'
+        ? 'The mic was blocked — allow microphone access, or type it instead.'
+        : 'Voice input hiccuped (' + (ev.error || 'unknown') + ') — type it instead, Arabizi counts.';
+      renderSpeak();
+    }
+  };
+  try { coachRecognizer.start(); } catch (e) { /* already started */ }
+}
+
+function coachVoiceLiveUpdate() {
+  const el = document.getElementById('c2-voice-live');
+  if (!el) return;
+  const full = (coachText + ' ' + coachVoiceInterim).trim();
+  el.textContent = full || '…';
+}
+
+function coachVoiceStopRecognizer() {
+  if (coachRecognizer) {
+    const r = coachRecognizer;
+    coachRecognizer = null;
+    r.onend = null; r.onerror = null;
+    try { r.stop(); } catch (e) { /* fine */ }
+  }
+}
+
+// ❚❚ Stop — keep what was heard, drop back to the text box to edit it.
+function coachVoiceStop() {
+  coachVoiceStopRecognizer();
+  coachPhase = 'prompt';
+  coachInputMode = 'text';
+  renderSpeak();
+}
+
+// ✓ Compare — send what was heard straight to the coach.
+function coachVoiceDone() {
+  coachVoiceStopRecognizer();
+  if (!coachText.trim()) { coachVoiceStop(); return; }
+  coachPhase = 'prompt';
+  coachSubmit();
+}
+
+// × — cancel, restore whatever was in the box before recording.
+function coachVoiceCancel() {
+  coachVoiceStopRecognizer();
+  coachText = coachVoicePrevText;
+  coachPhase = 'prompt';
+  renderSpeak();
+}
+
+function coachVoiceHTML() {
+  const live = (coachText + ' ' + coachVoiceInterim).trim();
+  return `
+    <div class="coach-wrap">
+      <div class="c2-voice">
+        <div class="c2-voice-halo"></div>
+        <span class="c2-voice-orb"><tariga-orb mode="listening"></tariga-orb></span>
+        <div class="c2-listening">
+          <span class="c2-dots"><span></span><span></span><span></span><span></span></span>
+          <span class="c2-listening-label">Listening</span>
+        </div>
+        <div class="c2-voice-text" id="c2-voice-live" dir="auto">${esc(live) || '…'}</div>
+        <div class="c2-voice-note">Speak the way you'd say it to family — Arabizi counts too.</div>
+        <div class="c2-voice-bar">
+          <button class="c2-voice-stop" onclick="coachVoiceStop()">❚❚ Stop</button>
+          <button class="c2-voice-done" onclick="coachVoiceDone()">Compare with a native ✓</button>
+          <button class="c2-voice-x" onclick="coachVoiceCancel()">×</button>
+        </div>
+      </div>
     </div>
   `;
 }
@@ -222,37 +354,25 @@ function coachDisconnect() { clearApiConfig(); coachSettingsOpen = false; render
 function coachToggleSettings() { coachSettingsOpen = !coachSettingsOpen; renderSpeak(); }
 
 // ── Interactions ──
-function coachToggleLayer(k) {
-  coachLayers[k] = !coachLayers[k];
-  // DOM-only toggle so the textarea keeps its content
-  const el = document.getElementById('coach-q-' + k);
-  if (el) el.style.display = coachLayers[k] ? '' : 'none';
-  document.querySelectorAll('.coach-layer-chip').forEach(c => {
-    if (c.textContent.trim() === (k === 'ar' ? 'عربي' : k === 'ph' ? 'phonetic' : 'english'))
-      c.classList.toggle('on', coachLayers[k]);
-  });
-}
-
 function coachToggleModels() {
   coachModelsRevealed = !coachModelsRevealed;
   const el = document.getElementById('coach-models');
   if (el) el.style.display = coachModelsRevealed ? '' : 'none';
-  document.querySelectorAll('.coach-reveal-link').forEach(b => {
-    b.textContent = (coachModelsRevealed ? 'Hide' : 'Peek at') + ' natural examples';
-  });
+  renderSpeak();
 }
 
 function coachNav(dir) {
   const n = coachIdx + dir;
   if (n < 0 || n >= SPEAK_QA.length) return;
   coachIdx = n;
-  coachPhase = 'prompt'; coachText = ''; coachFeedback = null; coachError = null; coachModelsRevealed = false;
+  coachPhase = 'prompt'; coachText = ''; coachFeedback = null; coachError = null;
+  coachModelsRevealed = false; coachHintOpen = false; coachInputMode = null;
   renderSpeak();
 }
 
 async function coachSubmit() {
   const text = coachText.trim();
-  if (!text) { coachError = 'Type your answer first — even a few words count.'; renderSpeak(); return; }
+  if (!text) { coachError = 'Say or type your answer first — even a few words count.'; renderSpeak(); return; }
   if (!apiConfigured()) { coachError = 'Connect the coach first (below).'; renderSpeak(); return; }
 
   const it = coachScenario();
@@ -273,6 +393,7 @@ async function coachSubmit() {
     coachPhase = 'feedback';
   } catch (e) {
     coachPhase = 'prompt';
+    coachInputMode = 'text'; // keep the transcript visible & editable after an error
     const msg = String(e.message || e);
     coachError =
       msg === 'bad_key' ? 'That API key was rejected — check it and try again.' :
@@ -286,7 +407,7 @@ async function coachSubmit() {
 
 function coachTryAgain() {
   coachPhase = 'prompt'; coachFeedback = null; coachModelsRevealed = false;
-  // keep coachText so they can edit their previous answer
+  coachInputMode = 'text'; // keep coachText so they can edit their previous answer
   renderSpeak();
 }
 
@@ -302,11 +423,12 @@ function coachCloseJourney() { coachPhase = 'prompt'; renderSpeak(); }
 function coachThinkingHTML() {
   return `
     <div class="coach-wrap">
-      <div class="coach-thinking">
-        <span class="coach-orb-el"><tariga-orb mode="thinking"></tariga-orb></span>
-        <div class="coach-thinking-title">Your coach is listening…</div>
-        <div class="coach-thinking-sub">comparing your answer with how Sudanese speakers naturally say it</div>
-        <div class="coach-thinking-answer" dir="auto">${esc(coachText)}</div>
+      <div class="c2-think">
+        <div class="c2-think-halo"></div>
+        <span class="c2-think-orb"><tariga-orb mode="thinking"></tariga-orb></span>
+        <div class="c2-think-title">Your coach is listening…</div>
+        <div class="c2-think-sub">comparing your answer with how Sudanese speakers naturally say it</div>
+        <div class="c2-think-answer" dir="auto">${esc(coachText)}</div>
       </div>
     </div>
   `;
@@ -321,97 +443,89 @@ function coachFeedbackHTML() {
   const delay = () => `style="animation-delay:${(d += 90)}ms"`;
 
   const closest = it.model[Math.max(0, Math.min(it.model.length - 1, fb.closest_model_index || 0))];
+  const kept = [...fb.vocab_used_required, ...fb.vocab_used_bonus];
+  const swaps = [...fb.sounds_msa, ...fb.sounds_english_shaped]
+    .filter(s => s.quote && s.sudanese)
+    .map(s => ({ from: s.quote, to: s.sudanese }));
+  const notes = [
+    fb.comparison_note ? { q: null, n: fb.comparison_note } : null,
+    ...fb.strengths.map(s => ({ q: s.quote, n: s.note })),
+    ...fb.sounds_msa.map(s => ({ q: s.quote, n: s.note })),
+    ...fb.sounds_english_shaped.map(s => ({ q: s.quote, n: s.note })),
+    fb.code_switched_words.length
+      ? { q: null, n: 'Still in English: ' + fb.code_switched_words.join(', ') + ' — totally normal, that’s how diaspora Arabic works. Swap one at a time.' }
+      : null,
+  ].filter(Boolean);
 
   return `
     <div class="coach-wrap">
-      <div class="coach-fb-head coach-stagger" ${delay()}>
-        <div class="speak-q-label">Coaching · scenario ${coachIdx + 1}</div>
-        <div class="coach-fb-overall">${esc(fb.overall)}</div>
-      </div>
-
-      <div class="coach-fb-yours coach-stagger" ${delay()}>
-        <div class="coach-fb-section-label">You said</div>
-        <div class="coach-fb-yours-text" dir="auto">${esc(coachText)}</div>
-        ${coachVocabChipsHTML(fb)}
-      </div>
-
-      ${fb.strengths.length ? `
-      <div class="coach-fb-card coach-fb-good coach-stagger" ${delay()}>
-        <div class="coach-fb-section-label">✦ Already sounds Sudanese</div>
-        ${fb.strengths.map(s => `
-          <div class="coach-fb-item">
-            <span class="coach-fb-quote" dir="auto">"${esc(s.quote)}"</span>
-            <span class="coach-fb-note">${esc(s.note)}</span>
-          </div>`).join('')}
-      </div>` : ''}
-
-      ${fb.sounds_msa.length ? `
-      <div class="coach-fb-card coach-fb-msa coach-stagger" ${delay()}>
-        <div class="coach-fb-section-label">📜 Reads as formal MSA</div>
-        ${fb.sounds_msa.map(s => `
-          <div class="coach-fb-item">
-            <span class="coach-fb-quote" dir="auto">"${esc(s.quote)}"</span>
-            <span class="coach-fb-note">${esc(s.note)}</span>
-            <span class="coach-fb-swap">a Sudanese speaker would say → <b dir="auto">${esc(s.sudanese)}</b></span>
-          </div>`).join('')}
-      </div>` : ''}
-
-      ${fb.sounds_english_shaped.length ? `
-      <div class="coach-fb-card coach-fb-eng coach-stagger" ${delay()}>
-        <div class="coach-fb-section-label">🔁 Shaped like English</div>
-        ${fb.sounds_english_shaped.map(s => `
-          <div class="coach-fb-item">
-            <span class="coach-fb-quote" dir="auto">"${esc(s.quote)}"</span>
-            <span class="coach-fb-note">${esc(s.note)}</span>
-            <span class="coach-fb-swap">more natural → <b dir="auto">${esc(s.sudanese)}</b></span>
-          </div>`).join('')}
-      </div>` : ''}
-
-      <div class="coach-fb-card coach-fb-compare coach-stagger" ${delay()}>
-        <div class="coach-fb-section-label">Side by side — one natural way vs. yours</div>
-        <div class="coach-compare-grid">
-          <div class="coach-compare-col">
-            <div class="coach-compare-tag">yours</div>
-            <div class="coach-compare-text" dir="auto">${esc(coachText)}</div>
-          </div>
-          <div class="coach-compare-col coach-compare-native">
-            <div class="coach-compare-tag">a native speaker</div>
-            <div class="coach-compare-text" dir="rtl">${esc(closest.ar)}</div>
-            <div class="speak-line-ph">${esc(closest.ph)}</div>
-            <div class="speak-line-en">${esc(closest.en)}</div>
-          </div>
+      <div class="c2-fb">
+        <div class="coach-stagger" ${delay()}>
+          <div class="c2-fb-label">Coaching · scenario ${coachIdx + 1}</div>
+          <div class="c2-fb-overall">${esc(fb.overall)}</div>
         </div>
-        <div class="coach-fb-note" style="margin-top:10px">${esc(fb.comparison_note)}</div>
-      </div>
 
-      <div class="coach-fb-card coach-fb-suggestion coach-stagger" ${delay()}>
-        <div class="coach-fb-section-label">💛 Your answer, upgraded — one natural way to say it</div>
-        <div class="coach-suggestion-ar" dir="rtl">${esc(fb.suggestion.ar)}</div>
-        <div class="speak-line-ph">${esc(fb.suggestion.ph)}</div>
-        <div class="speak-line-en">${esc(fb.suggestion.en)}</div>
-        <div class="coach-say-it">Now say it out loud. Twice. That's the whole trick.</div>
-      </div>
+        <div class="c2-panel coach-stagger" ${delay()}>
+          <div class="c2-grid">
+            <div>
+              <div class="c2-col-label">You said</div>
+              <div class="c2-you-text" dir="auto">${esc(coachText)}</div>
+            </div>
+            <div class="c2-native-col">
+              <div class="c2-col-label native">A native speaker</div>
+              <div class="c2-native-ar">${esc(closest.ar)}</div>
+              <div class="c2-native-ph">${esc(closest.ph)}</div>
+              <div class="c2-sug-en">${esc(closest.en)}</div>
+            </div>
+          </div>
+          ${kept.length || swaps.length ? `
+          <div class="c2-chips-row">
+            ${kept.length ? `<span class="c2-kept-label">✦ kept</span>${kept.map(v => `<span class="c2-kept-chip" dir="auto">${esc(v)}</span>`).join('')}` : ''}
+            ${swaps.length ? `<span class="c2-swap-label">swap</span>${swaps.map(s => `
+              <span class="c2-swap-pair">
+                <span class="c2-swap-from" dir="auto">${esc(s.from)}</span>
+                <span class="c2-swap-arrow">→</span>
+                <span class="c2-swap-to" dir="auto">${esc(s.to)}</span>
+              </span>`).join('')}` : ''}
+          </div>` : ''}
+          ${notes.length ? `
+          <div class="c2-notes">
+            ${notes.map(x => `<div class="c2-note-line">${x.q ? `<b dir="auto">"${esc(x.q)}"</b> — ` : ''}${esc(x.n)}</div>`).join('')}
+          </div>` : ''}
+        </div>
 
-      <div class="coach-fb-encourage coach-stagger" ${delay()}>${esc(fb.encouragement)}</div>
+        <div class="c2-sug coach-stagger" ${delay()}>
+          <div class="c2-sug-head">
+            <span class="c2-sug-label">💛 Your answer, upgraded — one natural way</span>
+            <button class="c2-speak-btn" onclick="coachSpeakSuggestion()" title="Hear it">🔊</button>
+          </div>
+          <div class="c2-sug-ar">${esc(fb.suggestion.ar)}</div>
+          <div class="c2-sug-ph">${esc(fb.suggestion.ph)}</div>
+          <div class="c2-sug-en">${esc(fb.suggestion.en)}</div>
+          <div class="c2-sug-say">Now say it out loud. Twice. That's the whole trick.</div>
+        </div>
 
-      <div class="coach-fb-actions coach-stagger" ${delay()}>
-        <button class="btn" onclick="coachTryAgain()">↻ Answer again</button>
-        ${attempts.length >= 2 ? `<button class="btn coach-journey-btn" onclick="coachShowJourney()">✦ See your journey</button>` : ''}
-        <button class="btn btn-accent" onclick="coachNextScenario()">Next scenario →</button>
+        <div class="c2-encourage coach-stagger" ${delay()}>${esc(fb.encouragement)}</div>
+
+        <div class="c2-fb-actions coach-stagger" ${delay()}>
+          <button class="c2-ghost-pill" onclick="coachTryAgain()">↻ Answer again</button>
+          ${attempts.length >= 2 ? `<button class="c2-gold-pill" onclick="coachShowJourney()">✦ See your journey</button>` : ''}
+          <button class="c2-gold-pill" onclick="coachNextScenario()">Next scenario →</button>
+        </div>
       </div>
     </div>
   `;
 }
 
-function coachVocabChipsHTML(fb) {
-  const used = [...fb.vocab_used_required, ...fb.vocab_used_bonus];
-  if (!used.length && !fb.code_switched_words.length) return '';
-  return `
-    <div class="coach-chip-row">
-      ${used.map(v => `<span class="coach-chip coach-chip-vocab" dir="auto">${esc(v)}</span>`).join('')}
-      ${fb.code_switched_words.map(w => `<span class="coach-chip coach-chip-english">${esc(w)} <i>english</i></span>`).join('')}
-    </div>
-  `;
+// Speak the suggested answer with the browser voice — rough, but it gives
+// the melody. Real native audio arrives with community contributions.
+function coachSpeakSuggestion() {
+  if (!('speechSynthesis' in window) || !coachFeedback) return;
+  const u = new SpeechSynthesisUtterance(coachFeedback.suggestion.ar);
+  u.lang = 'ar-SA';
+  u.rate = 0.85;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(u);
 }
 
 // ── The journey — before/after progress view ──
@@ -423,11 +537,15 @@ function coachJourneyHTML() {
     return `
       <div class="coach-wrap">
         <button class="coach-back-link" onclick="coachCloseJourney()">← back to the scenario</button>
-        <div class="coach-journey-head">
-          <div class="coach-journey-title">Your journey starts here</div>
-          <div class="coach-journey-sub">One answer recorded${only ? ' on ' + fmtAttemptDate(only.ts) : ''}. Answer this scenario again another day and this page becomes a before-and-after.</div>
+        <div class="j2-head">
+          <div class="j2-title">Your journey starts here</div>
+          <div class="j2-sub">One answer recorded${only ? ' on ' + fmtAttemptDate(only.ts) : ''}. Answer this scenario again another day and this page becomes a before-and-after.</div>
         </div>
-        ${only ? `<div class="coach-fb-yours"><div class="coach-fb-section-label">${fmtAttemptDate(only.ts)}</div><div class="coach-fb-yours-text" dir="auto">${esc(only.text)}</div></div>` : ''}
+        ${only ? `
+        <div class="j2-word-col" style="margin-top:8px">
+          <div class="j2-word-tag">${fmtAttemptDate(only.ts)}</div>
+          <div class="j2-word-text" dir="auto">${esc(only.text)}</div>
+        </div>` : ''}
       </div>`;
   }
 
@@ -435,6 +553,8 @@ function coachJourneyHTML() {
   const last = attempts[attempts.length - 1];
   const s1 = naturalScore(first.metrics);
   const s2 = naturalScore(last.metrics);
+  const v1 = first.metrics.vocabRequired + first.metrics.vocabBonus;
+  const v2 = last.metrics.vocabRequired + last.metrics.vocabBonus;
   const newVocab = last.vocabUsed.filter(v => !first.vocabUsed.includes(v));
   const droppedEnglish = first.englishWords.filter(w => !last.englishWords.includes(w));
 
@@ -442,54 +562,71 @@ function coachJourneyHTML() {
     <div class="coach-wrap">
       <button class="coach-back-link" onclick="coachCloseJourney()">← back to the scenario</button>
 
-      <div class="coach-journey-head coach-stagger" style="animation-delay:60ms">
-        <div class="coach-journey-title">Then <span class="coach-journey-vs">→</span> now</div>
-        <div class="coach-journey-sub" dir="auto">${esc(it.qen)}</div>
+      <div class="j2-head coach-stagger" style="animation-delay:60ms">
+        <div class="j2-title">You're getting there.</div>
+        <div class="j2-sub" dir="auto">${esc(it.qen)}</div>
       </div>
 
-      <div class="coach-journey-grid coach-stagger" style="animation-delay:160ms">
-        <div class="coach-journey-col coach-journey-then">
-          <div class="coach-compare-tag">first try · ${fmtAttemptDate(first.ts)}</div>
-          <div class="coach-journey-text" dir="auto">${esc(first.text)}</div>
-          <div class="coach-journey-stats">
-            <span>${first.metrics.vocabRequired + first.metrics.vocabBonus} Sudanese key phrases</span>
-            <span>${first.metrics.english} English word${first.metrics.english === 1 ? '' : 's'} mixed in</span>
+      <div class="j2-score coach-stagger" style="animation-delay:150ms">
+        <div class="j2-score-grid">
+          <div class="j2-score-cell">
+            <div class="j2-score-when">First try · ${fmtAttemptDate(first.ts)}</div>
+            <div class="j2-score-n">${s1}</div>
+            <div class="j2-score-bar"><i style="width:${s1}%"></i></div>
           </div>
-        </div>
-        <div class="coach-journey-arrow">→</div>
-        <div class="coach-journey-col coach-journey-now">
-          <div class="coach-compare-tag">latest · ${fmtAttemptDate(last.ts)}</div>
-          <div class="coach-journey-text" dir="auto">${esc(last.text)}</div>
-          <div class="coach-journey-stats">
-            <span>${last.metrics.vocabRequired + last.metrics.vocabBonus} Sudanese key phrases</span>
-            <span>${last.metrics.english} English word${last.metrics.english === 1 ? '' : 's'} mixed in</span>
+          <div class="j2-score-arrow"><span>→</span></div>
+          <div class="j2-score-cell now">
+            <div class="j2-score-when">Latest · ${fmtAttemptDate(last.ts)}</div>
+            <div class="j2-score-n">${s2}</div>
+            <div class="j2-score-bar"><i style="width:${s2}%"></i></div>
           </div>
         </div>
       </div>
 
-      <div class="coach-meter-block coach-stagger" style="animation-delay:280ms">
-        <div class="coach-fb-section-label">Sounding natural</div>
-        <div class="coach-meter">
-          <div class="coach-meter-fill coach-meter-then" style="width:${s1}%"></div>
-          <div class="coach-meter-fill coach-meter-now" style="--target:${s2}%"></div>
+      <div class="coach-stagger" style="animation-delay:240ms">
+        <div class="j2-sec-label">Your words, side by side</div>
+        <div class="j2-words">
+          <div class="j2-word-col">
+            <div class="j2-word-tag">Then</div>
+            <div class="j2-word-text" dir="auto">${esc(first.text)}</div>
+          </div>
+          <div class="j2-word-col now">
+            <div class="j2-word-tag">Now</div>
+            <div class="j2-word-text" dir="auto">${esc(last.text)}</div>
+          </div>
         </div>
-        <div class="coach-meter-labels"><span>then ${s1}</span><span>now ${s2}</span></div>
+      </div>
+
+      <div class="coach-stagger" style="animation-delay:330ms">
+        <div class="j2-sec-label">The numbers</div>
+        <div class="j2-nums">
+          <div class="j2-num-row"><span>Sudanese key phrases</span>
+            <span class="j2-num-vals"><span class="j2-num-then">${v1}</span><span class="j2-num-arrow">→</span><span class="j2-num-now">${v2}</span></span></div>
+          <div class="j2-num-row"><span>English words mixed in</span>
+            <span class="j2-num-vals"><span class="j2-num-then">${first.metrics.english}</span><span class="j2-num-arrow">→</span><span class="j2-num-now">${last.metrics.english}</span></span></div>
+          <div class="j2-num-row"><span>Natural score</span>
+            <span class="j2-num-vals"><span class="j2-num-then">${s1}</span><span class="j2-num-arrow">→</span><span class="j2-num-now">${s2}</span></span></div>
+        </div>
       </div>
 
       ${newVocab.length ? `
-      <div class="coach-fb-card coach-fb-good coach-stagger" style="animation-delay:380ms">
-        <div class="coach-fb-section-label">✦ New Sudanese vocabulary since your first try</div>
-        <div class="coach-chip-row">${newVocab.map(v => `<span class="coach-chip coach-chip-vocab coach-chip-new" dir="auto">${esc(v)}</span>`).join('')}</div>
+      <div class="coach-stagger" style="animation-delay:420ms">
+        <div class="j2-sec-label">✦ New Sudanese since your first try</div>
+        <div class="c2-chips-row" style="border-top:none;margin-top:0;padding-top:0">
+          ${newVocab.map(v => `<span class="c2-kept-chip" dir="auto">${esc(v)}</span>`).join('')}
+        </div>
       </div>` : ''}
 
       ${droppedEnglish.length ? `
-      <div class="coach-fb-card coach-stagger" style="animation-delay:460ms">
-        <div class="coach-fb-section-label">English you no longer lean on</div>
-        <div class="coach-chip-row">${droppedEnglish.map(w => `<span class="coach-chip coach-chip-dropped">${esc(w)}</span>`).join('')}</div>
+      <div class="coach-stagger" style="animation-delay:480ms">
+        <div class="j2-sec-label">English you no longer lean on</div>
+        <div class="c2-chips-row" style="border-top:none;margin-top:0;padding-top:0">
+          ${droppedEnglish.map(w => `<span class="c2-swap-from">${esc(w)}</span>`).join('')}
+        </div>
       </div>` : ''}
 
-      <div class="coach-timeline coach-stagger" style="animation-delay:540ms">
-        <div class="coach-fb-section-label">Every attempt</div>
+      <div class="coach-stagger" style="animation-delay:540ms">
+        <div class="j2-sec-label">Every attempt</div>
         <div class="coach-timeline-row">
           ${attempts.map((a, i) => {
             const s = naturalScore(a.metrics);
@@ -501,8 +638,8 @@ function coachJourneyHTML() {
         </div>
       </div>
 
-      <div class="coach-fb-actions coach-stagger" style="animation-delay:620ms">
-        <button class="btn btn-accent" onclick="coachCloseJourney()">Answer it again →</button>
+      <div class="c2-fb-actions coach-stagger" style="animation-delay:620ms">
+        <button class="c2-gold-pill" onclick="coachCloseJourney()">Answer it again →</button>
       </div>
     </div>
   `;
