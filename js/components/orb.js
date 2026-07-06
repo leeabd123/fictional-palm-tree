@@ -91,7 +91,7 @@ void main(){
 
   class TarigaOrb extends HTMLElement {
     connectedCallback() {
-      if (this._init) return;
+      if (this._init) { this._dead = false; if (this._raf) cancelAnimationFrame(this._raf); if (this._drawLoop) this._drawLoop(); return; }
       this._init = true;
       this.style.display = 'block';
       this.style.position = 'relative';
@@ -168,6 +168,7 @@ void main(){
           gl.drawArrays(gl.TRIANGLES, 0, 3);
           this._raf = requestAnimationFrame(draw);
         };
+        this._drawLoop = draw;
         draw();
         return true;
       } catch (e) { return false; }
