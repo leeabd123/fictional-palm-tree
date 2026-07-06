@@ -20,11 +20,16 @@ function toggleArchive(){
 // nav item is actually visible rather than hidden in a collapsed section.
 const ARCHIVED_MODES = ['mc', 'deepquiz', 'flow', 'trans', 'vocab', 'ref'];
 
+// Designed screens carry their own headers — hide the legacy top bar +
+// stats strip there. Card/quiz modes keep them (the counter is the UI).
+const SELF_HEADED_MODES = ['home', 'speak', 'journey', 'listen', 'contribute'];
+
 const _originalSetMode = setMode;
 setMode = function(m){
   // retrigger the page-enter transition so mode switches feel like navigation
   const ca = document.getElementById('content-area');
   if(ca){ ca.classList.remove('page-enter'); void ca.offsetWidth; ca.classList.add('page-enter'); }
+  document.body.classList.toggle('chromeless', SELF_HEADED_MODES.includes(m));
   _originalSetMode(m);
   if(ARCHIVED_MODES.includes(m) && !archiveOpen){
     toggleArchive();
