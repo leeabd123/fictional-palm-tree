@@ -16,15 +16,16 @@ function renderDeepQuiz(){
   const ca=document.getElementById('content-area');
   if(dqQuestions.length===0){
     ca.innerHTML=`
-      <div class="tip-bar"><span class="tip-label">Research note</span><span>These quiz types are based on spaced repetition (SR), retrieval practice, interleaving, and production-first principles — the fastest evidence-backed methods for language acquisition.</span></div>
-      <div class="dq-mode-row">
-        ${DQ_TYPES.map(t=>`<button class="dq-mode-card ${dqType===t.id?'active':''}" onclick="setDQType('${t.id}')">
-          <div class="dq-mode-title">${t.label}</div>
-          <div class="dq-mode-desc">${t.desc}</div>
-        </button>`).join('')}
-      </div>
-      <div style="display:flex;justify-content:center;margin-top:8px">
-        <button class="btn btn-accent" style="padding:12px 32px;font-size:14px" onclick="startDQ()">Start drill →</button>
+      <div class="coach-wrap">
+        <button class="d2-back" onclick="setMode('home')">← all modes</button>
+        <div class="d2-title" style="margin-bottom:14px">Deep quiz</div>
+        <div class="d2-tab-row">
+          ${DQ_TYPES.map(t=>`<button class="d2-tab ${dqType===t.id?'on':''}" onclick="setDQType('${t.id}')" title="${escAttr(t.desc)}">${escAttr(t.label)}</button>`).join('')}
+        </div>
+        <div class="d2-note">${escAttr((DQ_TYPES.find(t=>t.id===dqType)||{}).desc||'')} · Retrieval practice, interleaving, production-first — the fastest evidence-backed drills.</div>
+        <div class="d2-pill-row" style="justify-content:flex-start">
+          <button class="c2-compare" onclick="startDQ()">Start drill →</button>
+        </div>
       </div>`;
     return;
   }
@@ -38,11 +39,15 @@ function renderDeepQuiz(){
   else if(type==='context') html=renderDQContext(item);
   else if(type==='arrange') html=renderDQArrange(item);
   ca.innerHTML=`
-    <div class="dq-question-card">
-      <div class="dq-q-body">${html}</div>
-      <div class="dq-footer">
-        <span class="dq-score">${dqIdx+1} / ${dqQuestions.length} · Score: ${dqScore}</span>
-        <div class="dq-streak-dots">${dqQuestions.slice(0,dqIdx).map((_,i)=>`<div class="dot ${i<dqScore?'ok':'no'}"></div>`).join('')}</div>
+    <div class="coach-wrap">
+      <button class="d2-back" onclick="setMode('home')">← all modes</button>
+      <div class="d2-title" style="margin-bottom:14px">Deep quiz</div>
+      <div class="d2-card dq-question-card" style="padding:24px">
+        <div class="dq-q-body">${html}</div>
+        <div class="dq-footer">
+          <span class="dq-score">${dqIdx+1} / ${dqQuestions.length} · Score: ${dqScore}</span>
+          <div class="dq-streak-dots">${dqQuestions.slice(0,dqIdx).map((_,i)=>`<div class="dot ${i<dqScore?'ok':'no'}"></div>`).join('')}</div>
+        </div>
       </div>
     </div>`;
 }

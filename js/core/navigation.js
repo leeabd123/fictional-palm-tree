@@ -13,11 +13,11 @@ function setSrc(s){
 
 function setMode(m){
   mode=m;
-  ['flash','deep','shadow','mc','build','flow','speak','ref','trans','vocab','deepquiz','convo','starred','listen','contribute','home','journey'].forEach(x=>{
+  ['flash','deep','shadow','mc','build','flow','speak','ref','trans','vocab','deepquiz','convo','starred','listen','contribute','home','journey','map'].forEach(x=>{
     const el=document.getElementById('nav-'+x);
     if(el) el.className='nav-btn'+(x===m?' on':'');
   });
-  const titles={flash:'Flashcards',deep:'Deep cards + synonyms',shadow:'Shadowing',mc:'Quiz',build:'Sentence builder',flow:'Flow translation',speak:'Speak & respond — your coach',ref:'Full reference',trans:'Transitions guide',vocab:'Vocab lists',deepquiz:'Deep quiz',convo:'Conversation mode',listen:'Tune your ear',contribute:'Contribute — preserve the dialect',home:'\u0637\u0631\u064a\u0642\u0629',journey:'Your journey',starred:'Starred items'};
+  const titles={flash:'Flashcards',deep:'Deep cards + synonyms',shadow:'Shadowing',mc:'Quiz',build:'Sentence builder',flow:'Flow translation',speak:'Speak & respond — your coach',ref:'Full reference',trans:'Transitions guide',vocab:'Vocab lists',deepquiz:'Deep quiz',convo:'Conversation mode',listen:'Tune your ear',contribute:'Contribute — preserve the dialect',home:'\u0637\u0631\u064a\u0642\u0629',journey:'Your journey',starred:'Starred items',map:'Word origins'};
   document.getElementById('top-title').textContent=titles[m]||m;
   deck=getSrc();idx=0;flipped=false;mcAns=false;revShown=false;
   deepDeck=[];deepIdx=0;
@@ -45,6 +45,7 @@ function render(){
   if(mode==='journey'){renderJourney();return;}
   if(mode==='deep'){renderDeepCards();return;}
   if(mode==='starred'){renderStarred();return;}
+  if(mode==='map'){renderMap();return;}
   renderFlash();
 }
 

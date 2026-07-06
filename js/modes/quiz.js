@@ -1,4 +1,5 @@
-// 4-choice quiz mode
+// Quiz — designed screen: centered Arabic card, glass option rows,
+// go fast, trust your first instinct.
 function renderMC(){
   const ca=document.getElementById('content-area');
   if(idx>=deck.length){renderResult();return;}
@@ -8,25 +9,25 @@ function renderMC(){
     mcOpts=shuf([it,...shuf(pool).slice(0,3)]);
   }
   ca.innerHTML=`
-    ${tipHTML()}
-    ${streakHTML()}
-    <div class="mode-card">
-      <div class="mode-card-body">
-        ${tagH(it)}
-        <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:12px">${idx+1} / ${deck.length} · What does this mean?</div>
-        <div class="ar-text">${it.a}</div>
-        <div class="phonetic">${it.p}</div>
-        <div class="mc-grid">
-          ${mcOpts.map((o,i)=>`<button class="mc-opt" id="mc${i}" onclick="chkMC(${i},${o.e===it.e})">${o.e}</button>`).join('')}
-        </div>
-        ${mcAns?`<div class="ctx-block" style="margin-top:16px">${it.ctx}</div>`:''}
+    <div class="coach-wrap">
+      <button class="d2-back" onclick="setMode('home')">← all modes</button>
+      <div class="d2-title" style="margin-bottom:16px">Quiz <span class="sub">· go fast, trust your first instinct · ${idx+1} of ${deck.length}</span></div>
+      ${streakHTML()}
+      <div class="d2-card" style="text-align:center;padding:30px 24px;margin-bottom:14px">
+        <div class="f2-ar" style="font-size:38px">${escAttr(it.a)}</div>
+        <div class="d2-inset-ph" style="font-size:13px;margin-top:4px">${escAttr(it.p)}</div>
       </div>
-      ${mcAns?`<div class="mode-card-footer"><button class="btn btn-accent" onclick="nxtMC()">Next →</button></div>`:''}
+      <div class="d2-opts-col">
+        ${mcOpts.map((o,i)=>`<button class="d2-opt" id="mc${i}" onclick="chkMC(${i},${o.e===it.e})">${escAttr(o.e)}</button>`).join('')}
+      </div>
+      ${mcAns?`
+        <div class="d2-inset" style="margin-top:16px">${escAttr(it.ctx)}</div>
+        <div class="d2-pill-row"><button class="d2-pill-gold" onclick="nxtMC()">Next →</button></div>
+      `:''}
     </div>
   `;
 }
 
-// ── Sentence Builder ──
 function chkMC(i,correct){
   if(mcAns)return;
   mcAns=true;
@@ -42,4 +43,3 @@ function chkMC(i,correct){
 }
 
 function nxtMC(){idx++;mcAns=false;render();}
-

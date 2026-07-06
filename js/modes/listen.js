@@ -1,12 +1,12 @@
 // Tune your ear — comprehension activation, no production required.
-// Two exercises built from real podcast transcript lines (§13 of the research doc):
+// Designed screen: lavender title, glass line card ("Solja said · Wansa
+// episode"), predict-before-you-tap option rows.
 //   'meaning' — read a line, predict what it means before confirming
 //   'next'    — read one side of an exchange, predict the natural reply
-//               (conversational-flow comprehension, not word recognition)
 // Difficulty is self-adjustable by toggling the Arabic/phonetic layers.
 
 let listenKind = 'meaning';       // 'meaning' | 'next'
-let listenPool = [];              // meaning: lines · next: {cue, answer} pairs
+let listenPool = [];
 let listenIdx = 0;
 let listenPicked = null;
 let listenOptions = [];
@@ -61,36 +61,37 @@ function renderListen() {
   const answered = listenPicked !== null;
   const correctIdx = listenOptions.indexOf(answer);
   const line = listenKind === 'meaning' ? item : item.cue;
-  const speakerLabel = (l) => l.speaker === 'host' ? 'The host' : 'The guest';
+  const speakerLabel = (l) => l.speaker === 'host' ? 'Wansa said' : 'Solja said';
 
   ca.innerHTML = `
     <div class="coach-wrap">
-      <div class="listen-kind-row">
-        <button class="listen-kind ${listenKind === 'meaning' ? 'on' : ''}" onclick="listenSetKind('meaning')">Meaning</button>
-        <button class="listen-kind ${listenKind === 'next' ? 'on' : ''}" onclick="listenSetKind('next')">What comes next?</button>
-      </div>
-      <div class="listen-progress">${listenTotal ? `${listenRight} / ${listenTotal} this session · ` : ''}${listenIdx + 1} of ${listenPool.length}</div>
-
-      <div class="listen-line-card">
-        <div class="listen-speaker">${speakerLabel(line)} says${listenKind === 'next' ? ' —' : ''}</div>
-        <div class="coach-layer-row" style="margin-bottom:12px">
-          <button class="coach-layer-chip ${listenLayers.ar ? 'on' : ''}" onclick="listenToggle('ar')">عربي</button>
-          <button class="coach-layer-chip ${listenLayers.ph ? 'on' : ''}" onclick="listenToggle('ph')">phonetic</button>
-        </div>
-        <div class="listen-ar" style="${listenLayers.ar ? '' : 'display:none'}">${escAttr(line.ar)}</div>
-        <div class="listen-ph" style="${listenLayers.ph ? '' : 'display:none'}">${escAttr(line.ph)}</div>
-        ${listenKind === 'next' ? `<div class="listen-context-line" style="margin-top:12px;margin-bottom:0">…and ${speakerLabel(item.answer).toLowerCase()} replies. <b>What's the natural reply?</b></div>` : ''}
-        ${!listenLayers.ar && !listenLayers.ph ? '<div class="coach-fb-note" style="font-style:italic">Turn on at least one layer to read the line.</div>' : ''}
+      <button class="d2-back" onclick="setMode('home')">← all modes</button>
+      <div class="d2-title lav" style="margin-bottom:4px">Tune your ear</div>
+      <div class="d2-note">${listenTotal ? `${listenRight} / ${listenTotal} this session · ` : ''}${listenIdx + 1} of ${listenPool.length}</div>
+      <div class="d2-tab-row">
+        <button class="d2-tab ${listenKind === 'meaning' ? 'on' : ''}" onclick="listenSetKind('meaning')">Meaning</button>
+        <button class="d2-tab ${listenKind === 'next' ? 'on' : ''}" onclick="listenSetKind('next')">What comes next?</button>
+        <span style="flex:1"></span>
+        <button class="d2-tab ${listenLayers.ar ? 'on' : ''}" onclick="listenToggle('ar')">عربي</button>
+        <button class="d2-tab ${listenLayers.ph ? 'on' : ''}" onclick="listenToggle('ph')">phonetic</button>
       </div>
 
-      <div class="coach-fb-section-label" style="margin:2px 2px 0">${listenKind === 'meaning' ? 'What does it mean? Predict before you tap.' : 'Predict the reply before you tap.'}</div>
-      <div class="listen-choices">
+      <div class="d2-card" style="margin-bottom:16px">
+        <div class="d2-label lav">${speakerLabel(line)} · Wansa episode</div>
+        <div class="d2-acc-ar" style="font-size:20px;color:#f6f1e8;margin-top:0;${listenLayers.ar ? '' : 'display:none'}">${escAttr(line.ar)}</div>
+        <div class="d2-acc-ph" style="font-size:12px;${listenLayers.ph ? '' : 'display:none'}">${escAttr(line.ph)}</div>
+        ${listenKind === 'next' ? `<div class="d2-when-body" style="margin-top:12px">…and ${line.speaker === 'host' ? 'Solja' : 'Wansa'} replies. <b style="color:var(--text)">What's the natural reply?</b></div>` : ''}
+        ${!listenLayers.ar && !listenLayers.ph ? '<div class="d2-note" style="font-style:italic;margin:0">Turn on at least one layer to read the line.</div>' : ''}
+      </div>
+
+      <div class="d2-note" style="text-align:center">${listenKind === 'meaning' ? 'What is he saying? Guess before you\'re sure — the guess is the exercise.' : 'Predict the reply before you tap.'}</div>
+      <div class="d2-opts-col">
         ${listenOptions.map((o, i) => {
-          let cls = 'listen-choice';
+          let cls = 'd2-opt';
           if (answered) {
-            if (i === listenPicked && i === correctIdx) cls += ' picked-right';
-            else if (i === listenPicked) cls += ' picked-wrong';
-            else if (i === correctIdx) cls += ' reveal-right';
+            if (i === listenPicked && i === correctIdx) cls += ' correct';
+            else if (i === listenPicked) cls += ' wrong';
+            else if (i === correctIdx) cls += ' correct';
           }
           return `<button class="${cls}" onclick="listenPick(${i})" ${answered ? 'disabled' : ''}>${escAttr(o.en)}</button>`;
         }).join('')}
@@ -98,19 +99,17 @@ function renderListen() {
 
       ${answered ? `
         ${listenKind === 'next' ? `
-        <div class="listen-line-card" style="margin-top:14px;border-color:rgba(201,169,110,.3)">
-          <div class="listen-speaker">The actual reply</div>
-          <div class="listen-ar">${escAttr(item.answer.ar)}</div>
-          <div class="listen-ph">${escAttr(item.answer.ph)}</div>
+        <div class="d2-card" style="margin-top:14px;border-color:rgba(201,169,110,.3)">
+          <div class="d2-label gold">The actual reply</div>
+          <div class="d2-acc-ar" style="margin-top:0;color:#f6f1e8">${escAttr(item.answer.ar)}</div>
+          <div class="d2-acc-ph">${escAttr(item.answer.ph)}</div>
         </div>` : ''}
-        <div class="listen-result-note">
-          <b>${listenPicked === correctIdx ? 'Your ear knows.' : 'Close — hear it again:'}</b>
-          ${escAttr(answer.note || '')}
-          ${answer.vocab && answer.vocab.length ? `<div class="coach-chip-row">${answer.vocab.map(v => `<span class="coach-chip coach-chip-vocab" dir="auto">${escAttr(v)}</span>`).join('')}</div>` : ''}
+        <div class="d2-inset" style="margin-top:14px">
+          <b style="color:var(--text)">${listenPicked === correctIdx ? 'Your ear knows.' : 'Close — hear it again:'}</b>
+          <span class="d2-when-body">${escAttr(answer.note || '')}</span>
+          ${answer.vocab && answer.vocab.length ? `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${answer.vocab.map(v => `<span class="d2-weave-chip">${escAttr(v)}</span>`).join('')}</div>` : ''}
         </div>
-        <div class="coach-fb-actions" style="margin-top:16px">
-          <button class="btn btn-accent" onclick="listenNext()">Next →</button>
-        </div>` : ''}
+        <div class="d2-pill-row"><button class="d2-pill-gold" onclick="listenNext()">Next →</button></div>` : ''}
     </div>
   `;
 }
