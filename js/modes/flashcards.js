@@ -7,7 +7,6 @@
 let flashPractice = 'word';     // 'word' | 'sentence'
 let flashCompared = false;
 let flashInput = '';
-let flashSlideDir = 0;          // -1 back · 1 forward · 0 none (enter animation)
 
 const FLASH_SRC_LABEL = { v1: 'Solja episode', v2: 'Ala episode', all: 'Both episodes', p2: 'Glossary', extra: 'Deep vocab' };
 
@@ -33,10 +32,6 @@ function renderFlash() {
   if (idx >= deck.length) { renderResult(); return; }
   const it = deck[idx];
   const isAR = flashDir === 'ar';
-  const prev = idx > 0 ? deck[idx - 1] : null;
-  const next = idx < deck.length - 1 ? deck[idx + 1] : null;
-  const enterCls = flashSlideDir === 1 ? 'f2-enter-right' : flashSlideDir === -1 ? 'f2-enter-left' : '';
-  flashSlideDir = 0;
 
   // 5-dot window centered on the current card
   const dotStart = Math.max(0, Math.min(idx - 2, deck.length - 5));
@@ -57,49 +52,10 @@ function renderFlash() {
       </div>
 
       <div class="f2-scene" id="f2-scene">
-        ${prev ? flashGhostHTML(prev, isAR, 'f2-ghost-left') : ''}
-        ${next ? flashGhostHTML(next, isAR, 'f2-ghost-right') : ''}
-        <div class="f2-cardwrap f2-main ${enterCls}">
-          <div class="f2-float">
-            <div class="f2-flip ${flipped ? 'flipped' : ''}" onclick="flip()">
-              <div class="f2-face f2-front">
-                <div class="f2-sweep"></div>
-                <div style="display:flex;justify-content:space-between;align-items:flex-start">
-                  <div class="f2-tags">
-                    <span class="f2-tag src">${it.src === 'v1' ? 'Video 1' : it.src === 'v2' ? 'Video 2' : 'Glossary'}</span>
-                    <span class="f2-tag">${escAttr(it.cat)}</span>
-                  </div>
-                  <span style="display:inline-flex;gap:4px;align-items:center">
-                    ${speakerSVG('#a09e9a', encodeURIComponent(it.a))}
-                    ${starBtnHTML(it.a)}
-                  </span>
-                </div>
-                <div class="f2-mid">
-                  ${isAR
-                    ? `<div class="f2-ar">${escAttr(it.a)}</div><div class="f2-ph">${escAttr(it.p)}</div>`
-                    : `<div class="f2-en-prompt">${escAttr(it.e)}</div><div class="f2-en-hint">say it in Arabic below — or flip anytime</div>`}
-                </div>
-                <div class="f2-hint">tap to flip · swipe to browse</div>
-              </div>
-              <div class="f2-face f2-back">
-                <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px">
-                  <div class="f2-back-ar">${escAttr(it.a)}</div>
-                  <span style="display:inline-flex;gap:6px;align-items:center">
-                    <span class="f2-ph" style="font-size:12px;white-space:nowrap">${escAttr(it.p)}</span>
-                    ${speakerSVG('#a09e9a', encodeURIComponent(it.a))}
-                  </span>
-                </div>
-                <div class="f2-back-en">${escAttr(it.e)}</div>
-                <div class="f2-ctx">${escAttr(it.ctx)}</div>
-                <div class="d2-inset" style="margin-top:0">
-                  <div class="d2-inset-ar">${escAttr(it.ex)}</div>
-                  <div class="d2-inset-ph">${getExPh(it)}</div>
-                  <div class="d2-inset-en">${escAttr(it.exen)}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        ${[-2, -1, 0, 1, 2].map(d => {
+          const j = idx + d;
+          return (j >= 0 && j < deck.length) ? flashCardHTML(deck[j], d, isAR) : '';
+        }).join('')}
       </div>
       <div class="f2-shadow"></div>
       <div class="f2-dots">${dots}</div>
@@ -127,21 +83,78 @@ function renderFlash() {
   }
 }
 
-function flashGhostHTML(it, isAR, sideCls) {
+// ── the design's 3D card carousel ──
+// d = offset from the active card. Exact values from the design export:
+// translateX(-50 + d*64 %) translateZ(active?0:-90px) rotateY(d*-26deg)
+// scale(active?1:.84) · neighbors at opacity .55 · |d|>=2 hidden.
+function flashCardTf(d) {
+  const active = d === 0;
+  return {
+    tf: `translateX(${-50 + d * 64}%) translateZ(${active ? 0 : -90}px) rotateY(${d * -26}deg) scale(${active ? 1 : 0.84})`,
+    op: active ? 1 : Math.abs(d) >= 2 ? 0 : 0.55,
+    z: 5 - Math.abs(d),
+    pe: Math.abs(d) >= 2 ? 'none' : 'auto',
+  };
+}
+
+function flashCardHTML(it, d, isAR) {
+  const active = d === 0;
+  const t = flashCardTf(d);
   return `
-    <div class="f2-cardwrap f2-ghost ${sideCls}">
-      <div class="f2-face f2-front" style="position:relative;height:100%">
-        <div class="f2-mid">
-          ${isAR
-            ? `<div class="f2-ar" style="font-size:28px">${escAttr(it.a)}</div>`
-            : `<div class="f2-en-prompt" style="font-size:17px">${escAttr(it.e)}</div>`}
+    <div class="f2-cardwrap" data-off="${d}" style="transform:${t.tf}; opacity:${t.op}; z-index:${t.z}; pointer-events:${t.pe};">
+      <div class="f2-float" style="animation:${active ? 'f2Floaty 6.5s ease-in-out infinite' : 'none'}">
+        <div class="f2-flip ${active && flipped ? 'flipped' : ''}" onclick="flashTap(${d})">
+          <div class="f2-face f2-front">
+            ${active ? '<div class="f2-sweep"></div>' : ''}
+            <div style="display:flex;justify-content:space-between;align-items:flex-start">
+              <div class="f2-tags">
+                <span class="f2-tag src">${it.src === 'v1' ? 'Video 1' : it.src === 'v2' ? 'Video 2' : 'Glossary'}</span>
+                <span class="f2-tag">${escAttr(it.cat)}</span>
+              </div>
+              <span style="display:inline-flex;gap:4px;align-items:center">
+                ${speakerSVG('#a09e9a', encodeURIComponent(it.a))}
+                ${active ? starBtnHTML(it.a) : '<span style="color:#7a756e;font-size:17px">☆</span>'}
+              </span>
+            </div>
+            <div class="f2-mid">
+              ${isAR
+                ? `<div class="f2-ar">${escAttr(it.a)}</div><div class="f2-ph">${escAttr(it.p)}</div>`
+                : `<div class="f2-en-prompt">${escAttr(it.e)}</div><div class="f2-en-hint">say it in Arabic below — or flip anytime</div>`}
+            </div>
+            <div class="f2-hint">tap to flip · swipe to browse</div>
+          </div>
+          ${active ? `
+          <div class="f2-face f2-back">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px">
+              <div class="f2-back-ar">${escAttr(it.a)}</div>
+              <span style="display:inline-flex;gap:6px;align-items:center">
+                <span class="f2-ph" style="font-size:12px;white-space:nowrap">${escAttr(it.p)}</span>
+                ${speakerSVG('#a09e9a', encodeURIComponent(it.a))}
+              </span>
+            </div>
+            <div class="f2-back-en">${escAttr(it.e)}</div>
+            <div class="f2-ctx">${escAttr(it.ctx)}</div>
+            <div class="d2-inset" style="margin-top:0">
+              <div class="d2-inset-ar">${escAttr(it.ex)}</div>
+              <div class="d2-inset-ph">${getExPh(it)}</div>
+              <div class="d2-inset-en">${escAttr(it.exen)}</div>
+            </div>
+          </div>` : ''}
         </div>
       </div>
     </div>`;
 }
 
+// tap: active card flips, a side card slides into focus (like the design)
+function flashTap(d) {
+  if (flashJustSwiped) return;
+  if (d === 0) flip();
+  else navCard(d);
+}
+
 // ── swipe to browse ──
 let flashSwipeX = null;
+let flashJustSwiped = false;
 function flashBindSwipe() {
   const scene = document.getElementById('f2-scene');
   if (!scene) return;
@@ -150,7 +163,11 @@ function flashBindSwipe() {
     if (flashSwipeX === null) return;
     const dx = e.clientX - flashSwipeX;
     flashSwipeX = null;
-    if (Math.abs(dx) > 48) navCard(dx < 0 ? 1 : -1);
+    if (Math.abs(dx) > 48) {
+      flashJustSwiped = true;
+      setTimeout(() => { flashJustSwiped = false; }, 350);
+      navCard(dx < 0 ? 1 : -1);
+    }
   });
 }
 
@@ -272,22 +289,42 @@ function flashMic() {
   btn?.classList.add('listening');
 }
 
+let flashGliding = false;
 function navCard(dir) {
   const newIdx = idx + dir;
-  if (newIdx < 0 || newIdx >= deck.length) return;
+  if (newIdx < 0 || newIdx >= deck.length || flashGliding) return;
   idx = newIdx;
   flipped = false;
   flashCompared = false; flashInput = '';
-  flashSlideDir = dir;
-  updStats(); renderFlash();
+  updStats();
+  // glide the existing cards to their new carousel positions (the .65s
+  // wrapper transition does the motion), then re-render to re-center
+  const wraps = document.querySelectorAll('#f2-scene .f2-cardwrap');
+  if (wraps.length) {
+    flashGliding = true;
+    wraps.forEach(w => {
+      const nd = parseInt(w.dataset.off, 10) - dir;
+      const t = flashCardTf(nd);
+      w.dataset.off = nd;
+      w.style.transform = t.tf; w.style.opacity = t.op;
+      w.style.zIndex = t.z; w.style.pointerEvents = t.pe;
+      const fl = w.querySelector('.f2-float');
+      if (fl) fl.style.animation = nd === 0 ? 'f2Floaty 6.5s ease-in-out infinite' : 'none';
+    });
+    setTimeout(() => { flashGliding = false; renderFlash(); }, 660);
+  } else {
+    renderFlash();
+  }
 }
 
 function flip() {
   flipped = !flipped;
   // flip in place — only the mark/nav row below needs re-rendering
-  const flipEl = document.querySelector('.f2-flip');
+  const flipEl = document.querySelector('#f2-scene .f2-cardwrap[data-off="0"] .f2-flip');
   if (flipEl) {
     flipEl.classList.toggle('flipped', flipped);
+    const sw = flipEl.querySelector('.f2-sweep');
+    if (sw) { sw.style.animation = 'none'; void sw.offsetWidth; sw.style.animation = 'f2Sweep 1.1s .1s cubic-bezier(.3,.7,.4,1) both'; }
     const markRow = document.querySelector('.f2-mark-row, .f2-navround');
     if (markRow) {
       const html = flipped

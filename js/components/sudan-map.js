@@ -36,30 +36,30 @@
   const SEA = [[36.9,22.0],[39.6,22.6],[39.6,17.2],[38.6,18.02],[38.3,18.3],[37.9,18.7],[37.3,19.3],[37.15,19.9],[37.25,20.7],[37.1,21.4]];
 
   // ── region groups following real state lines ──
+  // each region gets its own tint so the states read as distinct shapes
   const REGIONS = [
-    { id:'northern', name:'Northern & River Nile', short:'Northern', ar:'الشمالية ونهر النيل', words:['حبوبة','دوب'], learners:412,
+    { id:'northern', name:'Northern & River Nile', short:'Northern', ar:'الشمالية ونهر النيل', words:['حبوبة','دوب'], learners:412, col:'214,196,150',
       poly:[[24.98,22.0],[31.4,22.0],[33.9,22.0],[34.0,21.0],[34.6,20.2],[35.5,19.2],[36.3,18.3],[35.9,17.4],[35.9,16.1],[34.3,16.0],[33.5,16.4],[31.9,16.6],[30.0,16.2],[27.6,16.4],[27.4,19.8],[24.98,20.0]] },
-    { id:'red_sea', name:'Red Sea · Port Sudan', short:'Red Sea', ar:'البحر الأحمر', words:['ضابط','بحري'], learners:389,
+    { id:'red_sea', name:'Red Sea · Port Sudan', short:'Red Sea', ar:'البحر الأحمر', words:['ضابط','بحري'], learners:389, col:'110,190,235',
       poly:[[33.9,22.0],[36.9,22.0],[37.1,21.4],[37.25,20.7],[37.15,19.9],[37.3,19.3],[37.9,18.7],[38.3,18.3],[38.6,18.02],[37.0,17.1],[36.3,18.3],[35.5,19.2],[34.6,20.2],[34.0,21.0]] },
-    { id:'kassala', name:'Kassala & Al Qadarif', short:'Kassala', ar:'كسلا والقضارف', words:['شديد'], learners:274,
+    { id:'kassala', name:'Kassala & Al Qadarif', short:'Kassala', ar:'كسلا والقضارف', words:['شديد'], learners:274, col:'235,150,120',
       poly:[[36.3,18.3],[37.0,17.1],[36.9,16.4],[36.55,15.1],[36.0,14.3],[35.6,12.6],[34.4,13.2],[34.0,14.2],[33.9,15.3],[34.3,16.0],[35.9,16.1],[35.9,17.4]] },
-    { id:'khartoum', name:'Khartoum & Omdurman', short:'', ar:'الخرطوم وأم درمان', words:['فاهماني','يعني','وبتاع'], learners:1204,
+    { id:'khartoum', name:'Khartoum & Omdurman', short:'', ar:'الخرطوم وأم درمان', words:['فاهماني','يعني','وبتاع'], learners:1204, col:'232,201,154',
       poly:[[31.9,16.6],[33.5,16.4],[34.3,16.0],[33.9,15.3],[33.0,14.9],[32.0,15.2],[31.7,15.9]] },
-    { id:'gezira', name:'Gezira · Sennar · Blue Nile', short:'Gezira', ar:'الجزيرة وسنار والنيل الأزرق', words:['تكلة'], learners:356,
+    { id:'gezira', name:'Gezira · Sennar · Blue Nile', short:'Gezira', ar:'الجزيرة وسنار والنيل الأزرق', words:['تكلة'], learners:356, col:'86,201,143',
       poly:[[32.0,15.2],[33.0,14.9],[33.9,15.3],[34.0,14.2],[34.4,13.2],[35.6,12.6],[34.7,11.8],[34.35,11.5],[34.1,11.3],[33.9,10.8],[33.1,9.8],[32.4,10.7],[31.7,10.2],[31.9,12.4],[31.8,15.2]] },
-    { id:'kordofan', name:'Kordofan', short:'Kordofan', ar:'كردفان', words:['كوني كونيك'], learners:298,
+    { id:'kordofan', name:'Kordofan', short:'Kordofan', ar:'كردفان', words:['كوني كونيك'], learners:298, col:'167,139,250',
       poly:[[27.6,16.4],[30.0,16.2],[31.9,16.6],[31.7,15.9],[31.8,15.2],[31.9,12.4],[31.7,10.2],[30.8,9.9],[29.9,10.3],[28.8,9.4],[28.0,9.3],[27.2,9.6],[27.6,12.0],[27.3,14.0]] },
-    { id:'darfur', name:'Darfur', short:'Darfur', ar:'دارفور', words:['زول'], learners:341,
+    { id:'darfur', name:'Darfur', short:'Darfur', ar:'دارفور', words:['زول'], learners:341, col:'79,216,196',
       poly:[[24.98,20.0],[27.4,19.8],[27.6,16.4],[27.3,14.0],[27.6,12.0],[27.2,9.6],[26.4,9.9],[25.8,10.4],[24.8,10.0],[24.3,10.7],[23.5,10.9],[22.9,11.4],[22.5,12.2],[22.0,12.7],[22.4,13.3],[22.1,13.8],[22.5,14.2],[22.0,14.7],[21.85,15.6],[23.98,19.5],[23.98,20.0]] },
   ];
   const CITIES = [
-    { name:'Khartoum', lon:32.53, lat:15.6, big:true },
-    { name:'Port Sudan', lon:37.22, lat:19.62 },
-    { name:'Dongola', lon:30.48, lat:19.17 },
-    { name:'Kassala', lon:36.4, lat:15.45 },
-    { name:'Nyala', lon:24.88, lat:12.05 },
+    { name:'Khartoum', lon:32.53, lat:15.6, big:true, side:'right' },
+    { name:'Port Sudan', lon:37.22, lat:19.62, side:'left' },
+    { name:'Dongola', lon:30.48, lat:19.17, side:'below' },
+    { name:'Nyala', lon:24.88, lat:12.05, side:'right' },
   ];
-  const LABELS = { northern:[29.3,19.6], red_sea:[35.9,20.5], kassala:[35.4,14.6], khartoum:null, gezira:[33.15,12.4], kordofan:[29.3,12.9], darfur:[24.4,14.0] };
+  const LABELS = { northern:[28.2,20.6], red_sea:[35.55,21.1], kassala:[35.6,13.6], khartoum:null, gezira:[33.3,12.1], kordofan:[29.2,12.6], darfur:[24.3,14.2] };
   const NEIGHBORS = [
     { t:'EGYPT', lon:28.5, lat:22.6 }, { t:'LIBYA', lon:22.6, lat:21.3 },
     { t:'CHAD', lon:21.9, lat:17.6 }, { t:'SOUTH SUDAN', lon:29.5, lat:8.85 },
@@ -415,10 +415,20 @@
       ctx.fillStyle = ig;
       ctx.fill();
 
-      // dot-matrix regions + interior borders, clipped to the real outline
+      // each state gets its own tinted surface + colored dot-matrix so the
+      // regions read as distinct shapes at a glance
       ctx.save();
       this._path(ctx, OUTLINE, w, h, true);
       ctx.clip();
+      for (const rg of REGIONS) {
+        const isHover = this._hover === rg.id || this._selected === rg.id;
+        const isHl = hl === rg.id;
+        const pulse = 0.5 + 0.5 * Math.sin(t * 2.0);
+        this._path(ctx, rg.poly, w, h, true);
+        const fillA = isHover ? 0.26 : isHl ? (0.14 + 0.05 * pulse) : 0.09;
+        ctx.fillStyle = `rgba(${rg.col},${fillA * fade})`;
+        ctx.fill();
+      }
       for (const rg of REGIONS) {
         const dots = DOTS[rg.id];
         const isHover = this._hover === rg.id || this._selected === rg.id;
@@ -428,23 +438,23 @@
           const d = dots[i];
           if (d[2] > prog * 1.15) continue;
           const [x, y] = this._mapXY(d[0], d[1], w, h);
-          let a, col = ICE, rad = 0.85;
-          if (isHl) { col = '232,201,154'; a = (0.4 + 0.3 * pulse) * fade; rad = 1.1; }
-          else if (isHover) { col = TEAL; a = 0.6 * fade; rad = 1.05; }
-          else { a = (0.10 + d[2] * 0.10) * fade; }
-          ctx.fillStyle = `rgba(${col},${a})`;
+          let a, rad = 0.85;
+          if (isHl) { a = (0.35 + 0.25 * pulse) * fade; rad = 1.1; }
+          else if (isHover) { a = 0.55 * fade; rad = 1.05; }
+          else { a = (0.14 + d[2] * 0.12) * fade; }
+          ctx.fillStyle = `rgba(${rg.col},${a})`;
           ctx.beginPath(); ctx.arc(x, y, rad * dpr, 0, Math.PI * 2); ctx.fill();
         }
       }
-      // internal state-group borders
+      // internal state borders — bright enough to actually separate states
       ctx.lineJoin = 'round';
       for (const rg of REGIONS) {
         const isHover = this._hover === rg.id || this._selected === rg.id;
         const isHl = hl === rg.id;
         this._path(ctx, rg.poly, w, h, true);
-        ctx.strokeStyle = isHl ? `rgba(${GOLD},${0.7 * fade})` : `rgba(${TEAL},${(isHover ? 0.75 : 0.22) * fade})`;
-        ctx.lineWidth = (isHover || isHl ? 1.5 : 0.8) * dpr;
-        if (isHover || isHl) { ctx.shadowBlur = 12 * dpr; ctx.shadowColor = isHl ? `rgba(${GOLD},0.7)` : `rgba(${TEAL},0.7)`; }
+        ctx.strokeStyle = (isHover || isHl) ? `rgba(${rg.col},${0.9 * fade})` : `rgba(235,230,220,${0.28 * fade})`;
+        ctx.lineWidth = (isHover || isHl ? 1.8 : 1.0) * dpr;
+        if (isHover || isHl) { ctx.shadowBlur = 12 * dpr; ctx.shadowColor = `rgba(${rg.col},0.8)`; }
         ctx.stroke();
         ctx.shadowBlur = 0;
       }
@@ -514,7 +524,7 @@
           if (!pos || !rg.short) continue;
           const [lx, ly] = this._mapXY(pos[0], pos[1], w, h);
           const isHl = hl === rg.id;
-          this._pill(ctx, rg.short.toUpperCase(), lx, ly, dpr, isHl ? '232,201,154' : '224,222,216', (isHl ? 0.95 : 0.8) * la, 8.5, 600);
+          this._pill(ctx, rg.short.toUpperCase(), lx, ly, dpr, rg.col, (isHl ? 0.95 : 0.85) * la, 8.5, 600);
         }
         for (const city of CITIES) {
           const [cx2, cy2] = this._mapXY(city.lon, city.lat, w, h);
@@ -528,14 +538,18 @@
             ctx.lineWidth = 1 * dpr;
             ctx.beginPath(); ctx.arc(cx2, cy2, (4 + pulse * 13) * dpr, 0, Math.PI * 2); ctx.stroke();
           }
-          // dark halo behind city name
+          // dark halo behind city name, placed to dodge the region pills
           ctx.font = `600 ${(city.big ? 9 : 8.5) * dpr}px 'DM Sans',sans-serif`;
-          ctx.textAlign = 'left';
           const cw2 = ctx.measureText(city.name).width;
-          ctx.fillStyle = `rgba(12,14,14,${0.65 * la})`;
-          ctx.fillRect(cx2 + 5 * dpr, cy2 - 6 * dpr, cw2 + 5 * dpr, 12 * dpr);
+          let tx, ty;
+          if (city.side === 'left') { tx = cx2 - cw2 - 8 * dpr; ty = cy2 + 3 * dpr; }
+          else if (city.side === 'below') { tx = cx2 - cw2 / 2; ty = cy2 + 13 * dpr; }
+          else { tx = cx2 + 7 * dpr; ty = cy2 + 3 * dpr; }
+          ctx.textAlign = 'left';
+          ctx.fillStyle = `rgba(12,14,14,${0.72 * la})`;
+          ctx.fillRect(tx - 3 * dpr, ty - 9 * dpr, cw2 + 6 * dpr, 12 * dpr);
           ctx.fillStyle = `rgba(236,214,170,${0.95 * la})`;
-          ctx.fillText(city.name, cx2 + 7 * dpr, cy2 + 3 * dpr);
+          ctx.fillText(city.name, tx, ty);
           ctx.textAlign = 'center';
         }
       }
@@ -545,12 +559,15 @@
     _setInfo(id) {
       const rg = REGIONS.find(r => r.id === id);
       if (!rg) {
-        this._info.innerHTML = `<div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#4fd8c4;margin-bottom:6px;">Word origins</div>
-          <div style="font-size:12.5px;color:#a09e9a;line-height:1.6;">Tap a region to see the phrases that live there. The gold region is where this week's featured word is most heard.</div>`;
+        const legend = REGIONS.map(r =>
+          `<span style="display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:#c9c4bc;white-space:nowrap;"><span style="width:8px;height:8px;border-radius:50%;background:rgba(${r.col},.9);box-shadow:0 0 6px rgba(${r.col},.7);"></span>${r.short || 'Khartoum'}</span>`).join('');
+        this._info.innerHTML = `<div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#4fd8c4;margin-bottom:6px;">Word origins — tap a region</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px 12px;">${legend}</div>`;
         return;
       }
+      const rc = rg.col || '79,216,196';
       const chips = rg.words.map(wd =>
-        `<span dir="rtl" style="font-family:'Noto Naskh Arabic',serif;font-size:13px;padding:3px 11px;border-radius:100px;background:rgba(${TEAL},0.08);border:1px solid rgba(${TEAL},0.3);color:#8ee6d6;">${wd}</span>`).join(' ');
+        `<span dir="rtl" style="font-family:'Noto Naskh Arabic',serif;font-size:13px;padding:3px 11px;border-radius:100px;background:rgba(${rc},0.1);border:1px solid rgba(${rc},0.4);color:rgba(${rc},1);">${wd}</span>`).join(' ');
       this._info.innerHTML = `
         <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;">
           <span style="font-size:13.5px;font-weight:600;color:#f0ede8;">${rg.name}</span>
