@@ -137,6 +137,7 @@ function contribSubmit() {
     ts: Date.now(),
   });
   _saveContribs(mine);
+  recordActivity();
   contribSubmitted = true;
   renderContribute();
 }

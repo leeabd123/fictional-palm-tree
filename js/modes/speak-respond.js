@@ -269,6 +269,7 @@ async function coachSubmit() {
     const fb = await coachEvaluate(req);
     coachFeedback = fb;
     addAttempt(it, text, fb);
+    recordActivity();
     coachPhase = 'feedback';
   } catch (e) {
     coachPhase = 'prompt';
@@ -302,7 +303,7 @@ function coachThinkingHTML() {
   return `
     <div class="coach-wrap">
       <div class="coach-thinking">
-        <div class="coach-thinking-orb"></div>
+        <span class="coach-orb-el"><tariga-orb mode="thinking"></tariga-orb></span>
         <div class="coach-thinking-title">Your coach is listening…</div>
         <div class="coach-thinking-sub">comparing your answer with how Sudanese speakers naturally say it</div>
         <div class="coach-thinking-answer" dir="auto">${esc(coachText)}</div>

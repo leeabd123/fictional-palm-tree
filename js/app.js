@@ -29,9 +29,18 @@ setMode = function(m){
   if(ARCHIVED_MODES.includes(m) && !archiveOpen){
     toggleArchive();
   }
+  syncTabBar(m);
 };
+
+// Bottom tab bar active state follows the mode
+const TAB_FOR_MODE = {home:'home', flash:'flash', deep:'flash', starred:'flash',
+  speak:'speak', shadow:'speak', build:'speak', journey:'journey'};
+function syncTabBar(m){
+  const tab = TAB_FOR_MODE[m] || 'more';
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('on', b.dataset.tab===tab));
+}
 
 // ── Init ──
 deck = getSrc();
 updStats();
-render();
+setMode('home');

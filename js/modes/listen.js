@@ -124,6 +124,7 @@ function listenPick(i) {
   if (listenPicked !== null) return;
   listenPicked = i;
   listenTotal++;
+  recordActivity();
   if (listenOptions[i] === listenAnswerOf(listenPool[listenIdx])) listenRight++;
   renderListen();
 }
