@@ -275,6 +275,7 @@
 }
 .c2-mic-big:hover { transform: scale(1.07); box-shadow: 0 0 58px -4px rgba(167, 139, 250, 0.75), 0 24px 50px -18px rgba(0, 0, 0, 0.95); }
 .c2-mic-big, .c2-mic-small { font-size: 30px; line-height: 1; color: #e9e2f7; text-shadow: 0 0 14px rgba(167, 139, 250, 0.8); }
+.f2-p-mic svg { display: block; }
 .c2-mic-small { font-size: 19px; }
 .c2-mic-big:disabled { opacity: .4; cursor: not-allowed; transform: none; }
 .c2-mic-note { font-size: 13px; color: var(--text2); }
@@ -688,6 +689,15 @@ body.chromeless .stats-strip { display: none; }
   position: absolute; left: 50%; top: 14px; width: min(86%, 380px); height: 400px;
   transform-style: preserve-3d; transition: transform .65s cubic-bezier(.25,.9,.3,1), opacity .5s ease;
 }
+.f2-main { transform: translateX(-50%); z-index: 3; }
+.f2-ghost { opacity: .2; pointer-events: none; filter: saturate(.6) brightness(.65); }
+.f2-ghost .f2-mid { filter: blur(1px); }
+.f2-ghost-left  { transform: translateX(-50%) translate(-30%, 12px) rotateY(18deg) scale(.88); z-index: 1; }
+.f2-ghost-right { transform: translateX(-50%) translate(30%, 12px) rotateY(-18deg) scale(.88); z-index: 1; }
+.f2-enter-right { animation: f2InRight .55s cubic-bezier(.25,.9,.3,1) both; }
+.f2-enter-left  { animation: f2InLeft  .55s cubic-bezier(.25,.9,.3,1) both; }
+@keyframes f2InRight { from { transform: translateX(-50%) translateX(26%) rotateY(-14deg) scale(.92); opacity: .4; } to { transform: translateX(-50%); opacity: 1; } }
+@keyframes f2InLeft  { from { transform: translateX(-50%) translateX(-26%) rotateY(14deg) scale(.92); opacity: .4; } to { transform: translateX(-50%); opacity: 1; } }
 .f2-float { height: 100%; transform-style: preserve-3d; animation: f2Float 7s ease-in-out infinite; }
 @keyframes f2Float { 0%,100% { transform: translateY(0) rotateZ(0deg); } 50% { transform: translateY(-9px) rotateZ(.4deg); } }
 .f2-flip { position: relative; height: 100%; transform-style: preserve-3d; transition: transform .75s cubic-bezier(.25,.9,.3,1); cursor: pointer; }

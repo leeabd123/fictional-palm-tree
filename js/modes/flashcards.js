@@ -1,13 +1,23 @@
 // Flashcards — the design's floating 3D card, ported to the live deck.
-// Tap to flip, swipe (or arrows) to browse, direction pills for
-// recognition (عربي → EN) vs production (EN → عربي), a speak-aloud button,
-// progress dots, and the Word/Sentence practice panel with self-check.
+// Tap to flip, swipe (or arrows) to browse with a slide animation,
+// direction pills for recognition (عربي → EN) vs production (EN → عربي),
+// speak-aloud buttons, progress dots, and the Word/Sentence practice panel
+// that works in both directions.
 
 let flashPractice = 'word';     // 'word' | 'sentence'
 let flashCompared = false;
 let flashInput = '';
+let flashSlideDir = 0;          // -1 back · 1 forward · 0 none (enter animation)
 
 const FLASH_SRC_LABEL = { v1: 'Solja episode', v2: 'Ala episode', all: 'Both episodes', p2: 'Glossary', extra: 'Deep vocab' };
+
+// the design's icons (emoji render as flat blobs — these match the export)
+function speakerSVG(color, enc) {
+  return `<button class="d2-icon-btn" onclick="sayAr('${enc}');event.stopPropagation()" title="hear it">
+    <svg width="16" height="16" viewBox="0 0 20 20" fill="${color}"><path d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.784L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.797-3.784a1 1 0 011.617.076z"></path><path d="M14.657 5.343a1 1 0 011.414 0A7.975 7.975 0 0118.4 11a7.975 7.975 0 01-2.329 5.657 1 1 0 01-1.414-1.414A5.975 5.975 0 0016.4 11c0-1.594-.62-3.09-1.743-4.243a1 1 0 010-1.414z"></path></svg>
+  </button>`;
+}
+const MIC_SVG = `<svg width="19" height="19" viewBox="0 0 20 20" fill="#dcd2ff"><path fill-rule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clip-rule="evenodd"></path></svg>`;
 
 // Speak Arabic out loud with the browser voice — rough but carries the melody.
 function sayAr(enc) {
@@ -25,6 +35,8 @@ function renderFlash() {
   const isAR = flashDir === 'ar';
   const prev = idx > 0 ? deck[idx - 1] : null;
   const next = idx < deck.length - 1 ? deck[idx + 1] : null;
+  const enterCls = flashSlideDir === 1 ? 'f2-enter-right' : flashSlideDir === -1 ? 'f2-enter-left' : '';
+  flashSlideDir = 0;
 
   // 5-dot window centered on the current card
   const dotStart = Math.max(0, Math.min(idx - 2, deck.length - 5));
@@ -45,9 +57,9 @@ function renderFlash() {
       </div>
 
       <div class="f2-scene" id="f2-scene">
-        ${prev ? flashGhostHTML(prev, 'translate(-118%, 8px) rotateY(14deg) scale(.92)') : ''}
-        ${next ? flashGhostHTML(next, 'translate(18%, 8px) rotateY(-14deg) scale(.92)') : ''}
-        <div class="f2-cardwrap" style="transform:translateX(-50%); z-index:3;">
+        ${prev ? flashGhostHTML(prev, isAR, 'f2-ghost-left') : ''}
+        ${next ? flashGhostHTML(next, isAR, 'f2-ghost-right') : ''}
+        <div class="f2-cardwrap f2-main ${enterCls}">
           <div class="f2-float">
             <div class="f2-flip ${flipped ? 'flipped' : ''}" onclick="flip()">
               <div class="f2-face f2-front">
@@ -58,7 +70,7 @@ function renderFlash() {
                     <span class="f2-tag">${escAttr(it.cat)}</span>
                   </div>
                   <span style="display:inline-flex;gap:4px;align-items:center">
-                    <button class="d2-icon-btn" onclick="sayAr('${encodeURIComponent(it.a)}');event.stopPropagation()" title="hear it">🔊</button>
+                    ${speakerSVG('#a09e9a', encodeURIComponent(it.a))}
                     ${starBtnHTML(it.a)}
                   </span>
                 </div>
@@ -74,7 +86,7 @@ function renderFlash() {
                   <div class="f2-back-ar">${escAttr(it.a)}</div>
                   <span style="display:inline-flex;gap:6px;align-items:center">
                     <span class="f2-ph" style="font-size:12px;white-space:nowrap">${escAttr(it.p)}</span>
-                    <button class="d2-icon-btn" onclick="sayAr('${encodeURIComponent(it.a)}');event.stopPropagation()" title="hear it">🔊</button>
+                    ${speakerSVG('#a09e9a', encodeURIComponent(it.a))}
                   </span>
                 </div>
                 <div class="f2-back-en">${escAttr(it.e)}</div>
@@ -115,11 +127,15 @@ function renderFlash() {
   }
 }
 
-function flashGhostHTML(it, tf) {
+function flashGhostHTML(it, isAR, sideCls) {
   return `
-    <div class="f2-cardwrap" style="transform:translateX(-50%) ${tf}; opacity:.35; z-index:1; pointer-events:none;">
+    <div class="f2-cardwrap f2-ghost ${sideCls}">
       <div class="f2-face f2-front" style="position:relative;height:100%">
-        <div class="f2-mid"><div class="f2-ar" style="font-size:30px">${escAttr(it.a)}</div></div>
+        <div class="f2-mid">
+          ${isAR
+            ? `<div class="f2-ar" style="font-size:28px">${escAttr(it.a)}</div>`
+            : `<div class="f2-en-prompt" style="font-size:17px">${escAttr(it.e)}</div>`}
+        </div>
       </div>
     </div>`;
 }
@@ -139,42 +155,58 @@ function flashBindSwipe() {
 }
 
 // ── practice panel: word & sentence, works in both directions ──
+// عربي → EN: read the Arabic, produce the meaning in English.
+// EN → عربي: read the English, produce the Arabic (script or Arabizi).
 function flashPracticeHTML(it) {
   const isWord = flashPractice === 'word';
-  const promptText = isWord ? it.e : it.exen;
-  const target = isWord ? it.a : it.ex;
-  const targetPh = isWord ? it.p : getExPh(it);
-  const micOk = coachMicSupported();
+  const isAR = flashDir === 'ar';
+  const prompt = isWord ? (isAR ? it.a : it.e) : (isAR ? it.ex : it.exen);
+  const promptPh = isAR ? (isWord ? it.p : getExPh(it)) : null;
+  const title = isAR
+    ? (isWord ? 'What does it mean?' : 'What does the sentence mean?')
+    : (isWord ? 'Say it in Arabic' : 'Say the sentence in Arabic');
+  const placeholder = isAR ? 'type the meaning in English…' : 'اكتب هنا… or Arabizi — both count';
+  const micOk = !isAR && coachMicSupported();
 
   return `
     <div class="f2-practice">
       <div class="f2-p-head">
-        <span class="f2-p-title">${isWord ? 'Say it in Arabic' : 'Say the sentence'}</span>
+        <span class="f2-p-title">${title}</span>
         <span class="f2-p-toggle">
           <button class="${isWord ? 'on' : ''}" onclick="flashSetPractice('word')">Word</button>
           <button class="${isWord ? '' : 'on'}" onclick="flashSetPractice('sentence')">Sentence</button>
         </span>
       </div>
       <div class="f2-p-prompt">
-        <div class="f2-p-prompt-text" dir="auto">"${escAttr(promptText)}"</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+          <div class="f2-p-prompt-text" dir="auto">"${escAttr(prompt)}"</div>
+          ${isAR ? speakerSVG('#a09e9a', encodeURIComponent(prompt)) : ''}
+        </div>
+        ${promptPh ? `<div class="d2-inset-ph" style="margin-top:4px">${escAttr(promptPh)}</div>` : ''}
       </div>
       ${!flashCompared ? `
         <div class="f2-p-row">
-          ${micOk ? `<button class="f2-p-mic" id="f2-mic" onclick="flashMic()" title="say it out loud">🎙</button>` : ''}
-          <input id="f2-input" class="f2-p-input" dir="auto" placeholder="اكتب هنا… or Arabizi — both count">
+          ${micOk ? `<button class="f2-p-mic" id="f2-mic" onclick="flashMic()" title="say it out loud">${MIC_SVG}</button>` : ''}
+          <input id="f2-input" class="f2-p-input" dir="auto" placeholder="${placeholder}">
           <button class="f2-p-check" onclick="flashCheck()">Check</button>
         </div>
         <div class="f2-p-hint">Compare against the card — no grades, just noticing the gap.</div>
-      ` : flashCompareHTML(target, targetPh)}
+      ` : flashCompareHTML(it)}
     </div>
   `;
 }
 
-function flashCompareHTML(target, targetPh) {
-  const words = target.split(/\s+/).filter(Boolean);
-  const hits = words.filter(w => flashInput.includes(w));
+function flashCompareHTML(it) {
+  const isWord = flashPractice === 'word';
+  const isAR = flashDir === 'ar';
+  const target = isWord ? (isAR ? it.e : it.a) : (isAR ? it.exen : it.ex);
+  const targetPh = isAR ? null : (isWord ? it.p : getExPh(it));
+  const words = target.split(/\s+/).filter(w => w.length > 1);
+  const norm = flashInput.toLowerCase();
+  const hit = (w) => norm.includes(w.toLowerCase().replace(/[.,!?،؟]/g, ''));
+  const hits = words.filter(hit);
   const chips = words.map(w =>
-    `<span class="f2-p-chip ${flashInput.includes(w) ? 'hit' : ''}" dir="auto">${escAttr(w)}</span>`).join('');
+    `<span class="f2-p-chip ${hit(w) ? 'hit' : ''}" dir="auto">${escAttr(w)}</span>`).join('');
   return `
     <div class="f2-p-compare">
       <div>
@@ -184,10 +216,10 @@ function flashCompareHTML(target, targetPh) {
       <div class="f2-p-target-col">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
           <span class="f2-p-col-label teal" style="margin-bottom:0">The card</span>
-          <button class="d2-icon-btn" onclick="sayAr('${encodeURIComponent(target)}')" title="hear it">🔊</button>
+          ${isAR ? '' : speakerSVG('#4fd8c4', encodeURIComponent(target))}
         </div>
-        <div class="f2-p-target">${escAttr(target)}</div>
-        <div class="f2-p-target-ph">${escAttr(targetPh)}</div>
+        <div class="f2-p-target" style="${isAR ? 'font-family:var(--sans);font-size:14px;direction:ltr;text-align:left' : ''}">${escAttr(target)}</div>
+        ${targetPh ? `<div class="f2-p-target-ph">${escAttr(targetPh)}</div>` : ''}
       </div>
     </div>
     <div class="f2-p-chips">
@@ -195,7 +227,7 @@ function flashCompareHTML(target, targetPh) {
       ${chips}
     </div>
     <div class="d2-pill-row" style="margin-top:14px">
-      <button class="d2-pill-red" onclick="flashTryAgain()">↻ Try again</button>
+      <button class="c2-ghost-pill" onclick="flashTryAgain()">↻ Try again</button>
       <button class="d2-pill-gold" onclick="flashNextWord()">Next word →</button>
     </div>
   `;
@@ -246,6 +278,7 @@ function navCard(dir) {
   idx = newIdx;
   flipped = false;
   flashCompared = false; flashInput = '';
+  flashSlideDir = dir;
   updStats(); renderFlash();
 }
 
@@ -276,5 +309,6 @@ function flip() {
 function setFlashDir(dir) {
   flashDir = dir;
   flipped = false;
+  flashCompared = false; flashInput = '';
   renderFlash();
 }
