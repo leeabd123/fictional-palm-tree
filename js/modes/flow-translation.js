@@ -1,72 +1,80 @@
-// Flow translation mode
-let flowSetIdx=0, flowAllRevealed=false;
-// ── Speak state ──
+// Flow translation — designed screen: numbered accordion rows; say the whole
+// paragraph out loud, then check line by line.
+let flowSetIdx=0, flowOpen={};
+// Speak state (legacy globals kept for setMode resets)
 let speakQIdx=0, speakRevealed=false, speakUsedChips=new Set();
 
-// ── Render: Flow Translation ──
 function renderFlow(){
   const ca=document.getElementById('content-area');
   const set=FLOW_SETS[flowSetIdx];
   const allSets=FLOW_SETS.length;
 
   ca.innerHTML=`
-    ${tipHTML()}
-    <div class="flow-set-nav">
-      <button class="arrow-btn" onclick="navFlow(-1)" ${flowSetIdx===0?'disabled':''}>←</button>
-      <span class="flow-set-counter">Set ${flowSetIdx+1} of ${allSets}</span>
-      <button class="arrow-btn" onclick="navFlow(1)" ${flowSetIdx>=allSets-1?'disabled':''}>→</button>
-    </div>
-    <div class="flow-set-meta">
-      <div class="flow-set-topic">${set.topic}</div>
-      <div class="flow-set-title">${set.title}</div>
-    </div>
-    <div style="display:flex;gap:10px;justify-content:flex-end;margin-bottom:16px">
-      <button class="flow-reveal-all-btn" onclick="revealAllFlow()">Reveal all</button>
-      <button class="flow-reveal-all-btn" onclick="hideAllFlow()">Hide all</button>
-    </div>
-    <div id="flow-sentences">
-      ${set.sentences.map((s,i)=>`
-        <div class="flow-sentence-block" id="fsb-${i}">
-          <div class="flow-sentence-header" onclick="toggleFlowSentence(${i})">
-            <span class="flow-sentence-num">${i+1}</span>
-            <span class="flow-en-text">${s.en}</span>
-            <span class="flow-reveal-icon" id="ficon-${i}">▾</span>
-          </div>
-          <div class="flow-arabic-reveal" id="far-${i}">
-            <div class="flow-ar-text">${s.ar}</div>
-            <div class="flow-ph-text">${s.ph}</div>
-            <div class="flow-note">${s.note}</div>
-            <div class="flow-vocab-required">
-              ${s.vocab.map(v=>`<span class="flow-vocab-tag">${v}</span>`).join('')}
+    <div class="coach-wrap">
+      <button class="d2-back" onclick="setMode('home')">← all modes</button>
+      <div class="d2-title">Flow translation</div>
+      <div class="d2-note">${escAttr(set.topic)} — ${escAttr(set.title)} · say the whole paragraph, then check line by line</div>
+      <div class="d2-tab-row" style="justify-content:space-between;align-items:center">
+        <span style="display:inline-flex;gap:6px">
+          <button class="d2-tab" onclick="navFlow(-1)" ${flowSetIdx===0?'disabled':''}>← prev set</button>
+          <button class="d2-tab" onclick="navFlow(1)" ${flowSetIdx>=allSets-1?'disabled':''}>next set →</button>
+        </span>
+        <span style="display:inline-flex;gap:6px">
+          <button class="d2-tab" onclick="revealAllFlow()">Reveal all</button>
+          <button class="d2-tab" onclick="hideAllFlow()">Hide all</button>
+        </span>
+      </div>
+      <div id="flow-sentences">
+        ${set.sentences.map((s,i)=>{
+          const open=!!flowOpen[flowSetIdx+'-'+i];
+          return `
+          <div class="d2-acc">
+            <button class="d2-acc-head" onclick="toggleFlowSentence(${i})">
+              <span class="d2-acc-num">${i+1}</span>
+              <span class="d2-acc-en">${escAttr(s.en)}</span>
+              <span class="d2-acc-chev ${open?'open':''}" id="ficon-${i}">▾</span>
+            </button>
+            <div class="d2-acc-body" id="far-${i}" style="${open?'':'display:none'}">
+              <div class="d2-acc-ar">${escAttr(s.ar)}</div>
+              <div class="d2-acc-ph">${escAttr(s.ph)}</div>
+              <div class="d2-acc-note">${escAttr(s.note)}</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+                ${s.vocab.map(v=>`<span class="d2-weave-chip">${escAttr(v)}</span>`).join('')}
+              </div>
             </div>
-          </div>
-        </div>
-      `).join('')}
-    </div>
-    <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
-      <button class="btn btn-accent" onclick="navFlow(1)" ${flowSetIdx>=allSets-1?'disabled':''}>Next set →</button>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="d2-pill-row" style="margin-top:20px">
+        <button class="d2-pill-gold" onclick="navFlow(1)" ${flowSetIdx>=allSets-1?'disabled':''}>Next set →</button>
+      </div>
     </div>
   `;
 }
 
 function toggleFlowSentence(i){
+  const key=flowSetIdx+'-'+i;
+  flowOpen[key]=!flowOpen[key];
   const el=document.getElementById('far-'+i);
   const icon=document.getElementById('ficon-'+i);
-  const isOpen=el.classList.contains('show');
-  el.classList.toggle('show',!isOpen);
-  icon.classList.toggle('open',!isOpen);
+  if(el) el.style.display=flowOpen[key]?'':'none';
+  if(icon) icon.classList.toggle('open',!!flowOpen[key]);
 }
 
 function revealAllFlow(){
   FLOW_SETS[flowSetIdx].sentences.forEach((_,i)=>{
-    document.getElementById('far-'+i)?.classList.add('show');
+    flowOpen[flowSetIdx+'-'+i]=true;
+    const el=document.getElementById('far-'+i);
+    if(el) el.style.display='';
     document.getElementById('ficon-'+i)?.classList.add('open');
   });
 }
 
 function hideAllFlow(){
   FLOW_SETS[flowSetIdx].sentences.forEach((_,i)=>{
-    document.getElementById('far-'+i)?.classList.remove('show');
+    flowOpen[flowSetIdx+'-'+i]=false;
+    const el=document.getElementById('far-'+i);
+    if(el) el.style.display='none';
     document.getElementById('ficon-'+i)?.classList.remove('open');
   });
 }
@@ -77,5 +85,3 @@ function navFlow(dir){
   flowSetIdx=newIdx;
   renderFlow();
 }
-
-// ── Render: Speak & Respond ──

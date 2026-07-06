@@ -1,8 +1,6 @@
-// Contribute — the community contribution pipeline (front-end flow, local-only).
-// Design per the research doc: micro-tasks not open-ended asks, variation tagged
-// by region/generation/formality, and the 2-3 native-reviewer trust threshold
-// stated up front. Submissions persist locally as "pending review" until the
-// real backend exists — the flow itself is the product evidence.
+// Contribute — the community contribution pipeline (front-end flow, local-only),
+// in the designed single-card layout: prompt, answer box, Region and
+// generation tag pills, gold "Add to the library →" button, 2–3-reviewer note.
 
 const CONTRIB_KEY = 'tariga_contributions_v1';
 const CONTRIB_PROMPTS = [
@@ -32,12 +30,13 @@ function renderContribute() {
   if (contribSubmitted) {
     ca.innerHTML = `
       <div class="coach-wrap">
-        <div class="contrib-thanks">
-          <div class="contrib-thanks-icon">🫶</div>
-          <div class="contrib-thanks-title">شكراً — that's one more phrase preserved</div>
-          <div class="contrib-thanks-body">Your phrasing joins the review queue. It goes live for learners once <b>2–3 independent native speakers</b> confirm it sounds natural — no single person's judgment, ever.<br><br><i>(In this prototype the queue is stored on your device; the live review pipeline is the next build.)</i></div>
-          <div class="coach-fb-actions" style="margin-top:20px">
-            <button class="btn btn-accent" onclick="contribAnother()">Answer another prompt →</button>
+        <button class="d2-back" onclick="setMode('home')">← all modes</button>
+        <div class="d2-card" style="text-align:center">
+          <div style="font-size:40px">🫶</div>
+          <div class="d2-title" style="margin:10px 0 6px">شكراً — one more phrase preserved</div>
+          <div class="d2-note" style="margin:0 auto;max-width:400px">Your phrasing joins the review queue. It goes live once <b style="color:var(--text)">2–3 independent native speakers</b> confirm it sounds natural — no single person's judgment, ever. <i>(In this prototype the queue lives on your device.)</i></div>
+          <div class="d2-pill-row" style="margin-top:18px">
+            <button class="d2-pill-gold" onclick="contribAnother()">Answer another prompt →</button>
           </div>
         </div>
         ${contribMineHTML(mine)}
@@ -47,47 +46,33 @@ function renderContribute() {
 
   ca.innerHTML = `
     <div class="coach-wrap">
-      <div class="contrib-hero">
-        <div class="contrib-hero-title">Help preserve Sudanese Arabic</div>
-        <div class="contrib-hero-sub">One prompt. One answer, the way <b>your family</b> actually says it.<br>Two minutes of your fluency becomes someone else's bridge home.</div>
-      </div>
+      <button class="d2-back" onclick="setMode('home')">← all modes</button>
+      <div class="d2-title">Contribute</div>
+      <div class="d2-note" style="margin-bottom:18px">Help preserve the dialect — answer the way <em style="color:var(--accent2)">your</em> family actually says it.</div>
 
-      <div class="contrib-card">
-        <div class="contrib-step">The prompt · ${(contribPromptIdx % CONTRIB_PROMPTS.length) + 1} of ${CONTRIB_PROMPTS.length}</div>
-        <div class="contrib-q">${escAttr(prompt.en)}</div>
-        <div class="contrib-q-ar">${escAttr(prompt.ar)}</div>
-        <div style="text-align:right;margin-top:8px">
-          <button class="coach-reveal-link" onclick="contribSkip()">different prompt ↻</button>
+      <div class="d2-card">
+        <div class="d2-label">This week's prompt <span style="letter-spacing:0;text-transform:none;color:var(--text3)">· ${(contribPromptIdx % CONTRIB_PROMPTS.length) + 1} of ${CONTRIB_PROMPTS.length}</span></div>
+        <div class="d2-prompt" style="font-size:17px">${escAttr(prompt.en)}</div>
+        <div class="d2-acc-ar" style="font-size:16px;color:var(--text2);margin-top:8px">${escAttr(prompt.ar)}</div>
+        <div style="text-align:right;margin-top:6px">
+          <button class="c2-linklike" onclick="contribSkip()">different prompt ↻</button>
         </div>
-      </div>
 
-      <div class="contrib-card">
-        <div class="contrib-step">Your natural answer</div>
-        <textarea id="contrib-text" class="contrib-textarea" dir="auto"
-          placeholder="اكتب الرد زي ما أهلك بقولوه… (Arabic script or Arabizi — write it how it's actually said, not how it's 'supposed' to be said)"></textarea>
-        <div class="contrib-note">🎙️ Voice recording lands with the community release — spoken answers carry the rhythm text can't.</div>
-      </div>
+        <textarea id="contrib-text" dir="auto" rows="2" placeholder="اكتب هنا… your family's way (Arabic script or Arabizi)"
+          style="width:100%;margin-top:14px;border:1px solid rgba(255,255,255,0.1);border-radius:14px;background:rgba(255,255,255,0.03);color:#f0ede8;font-family:var(--sans),'Noto Naskh Arabic';font-size:15px;line-height:1.7;padding:12px 14px;resize:none;outline:none"></textarea>
 
-      <div class="contrib-card">
-        <div class="contrib-step">Tag the variation <span style="text-transform:none;letter-spacing:0;color:var(--text3)">— because there is no single "correct way"</span></div>
-        <div class="contrib-note" style="margin:0 0 6px">Region</div>
-        <div class="contrib-tag-row">${['Khartoum','Omdurman','North','East','West','Diaspora mix'].map(t =>
-          `<button class="contrib-tag ${contribTags.region === t ? 'on' : ''}" onclick="contribTag('region','${t}')">${t}</button>`).join('')}
+        <div class="d2-note" style="margin:14px 0 8px">Region</div>
+        <div class="d2-tab-row" style="margin-bottom:0">${['Khartoum', 'Omdurman', 'Port Sudan', 'North', 'West', 'Diaspora'].map(t =>
+          `<button class="d2-tab ${contribTags.region === t ? 'on' : ''}" onclick="contribTag('region','${t}')">${t}</button>`).join('')}
         </div>
-        <div class="contrib-note" style="margin:12px 0 6px">Whose voice is this?</div>
-        <div class="contrib-tag-row">${['Grandparents say it','Parents say it','My generation'].map(t =>
-          `<button class="contrib-tag ${contribTags.generation === t ? 'on' : ''}" onclick="contribTag('generation','${t}')">${t}</button>`).join('')}
+        <div class="d2-note" style="margin:14px 0 8px">Whose way of saying it?</div>
+        <div class="d2-tab-row" style="margin-bottom:0">${["Grandparents'", "Parents'", 'My generation'].map(t =>
+          `<button class="d2-tab ${contribTags.generation === t ? 'on' : ''}" onclick="contribTag('generation',&quot;${t}&quot;)">${t}</button>`).join('')}
         </div>
-        <div class="contrib-note" style="margin:12px 0 6px">Register</div>
-        <div class="contrib-tag-row">${['Warm/family','Respectful/formal','Playful/teasing'].map(t =>
-          `<button class="contrib-tag ${contribTags.formality === t ? 'on' : ''}" onclick="contribTag('formality','${t}')">${t}</button>`).join('')}
-        </div>
-      </div>
 
-      <div class="coach-fb-actions">
-        <button class="btn btn-accent" style="padding:12px 30px" onclick="contribSubmit()">Add it to the review queue →</button>
+        <button class="c2-compare" style="width:100%;margin-top:18px;padding:14px;font-size:14px" onclick="contribSubmit()">Add to the library →</button>
+        <div class="d2-note" style="text-align:center;margin:10px 0 0">Reviewed by 2–3 native speakers before going live.</div>
       </div>
-      <div class="contrib-note" style="text-align:center;margin-top:10px">Goes live only after 2–3 independent native speakers confirm it sounds natural.</div>
 
       ${contribMineHTML(mine)}
     </div>
@@ -97,14 +82,15 @@ function renderContribute() {
 function contribMineHTML(mine) {
   if (!mine.length) return '';
   return `
-    <div style="margin-top:34px">
-      <div class="coach-fb-section-label">Your contributions</div>
+    <div style="margin-top:30px">
+      <div class="d2-label">Your contributions</div>
       ${mine.slice().reverse().map(c => `
-        <div class="contrib-pending">
-          <div class="contrib-pending-text" dir="auto">${escAttr(c.text)}
-            <div class="contrib-pending-meta">${escAttr(c.prompt)} · ${[c.tags.region, c.tags.generation, c.tags.formality].filter(Boolean).map(escAttr).join(' · ') || 'untagged'}</div>
+        <div class="d2-star-row" style="align-items:center">
+          <div style="flex:1">
+            <div class="d2-star-en" style="margin:0;color:var(--text)" dir="auto">${escAttr(c.text)}</div>
+            <div class="d2-item-note">${escAttr(c.prompt)} · ${[c.tags.region, c.tags.generation, c.tags.formality].filter(Boolean).map(escAttr).join(' · ') || 'untagged'}</div>
           </div>
-          <span class="contrib-status">pending review · 0/2</span>
+          <span class="d2-badge" style="white-space:nowrap">pending · 0/2</span>
         </div>`).join('')}
     </div>`;
 }

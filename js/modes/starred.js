@@ -46,39 +46,43 @@ function toggleStar(itemA){
 function renderStarred(){
   const ca=document.getElementById('content-area');
   if(starredItems.size===0){
-    ca.innerHTML=`<div class="starred-empty">
-      <div class="starred-empty-icon">☆</div>
-      <div class="starred-empty-title">No starred items yet</div>
-      <div class="starred-empty-body">While using any mode, tap the ☆ star icon on any card to save it here for review.</div>
-    </div>`;
+    ca.innerHTML=`
+      <div class="coach-wrap">
+        <button class="d2-back" onclick="setMode('home')">\u2190 all modes</button>
+        <div class="d2-title" style="margin-bottom:16px">Starred items</div>
+        <div class="d2-card" style="text-align:center">
+          <div style="font-size:34px;color:var(--accent2);text-shadow:0 0 18px rgba(232,201,154,.5)">\u2606</div>
+          <div class="d2-prompt" style="margin-top:10px">No starred items yet</div>
+          <div class="d2-note" style="margin-top:6px">While using any mode, tap the \u2606 star on a card to save it here for review.</div>
+        </div>
+      </div>`;
     return;
   }
   const all=[...V1,...V2,...P2,...EXTRA];
   const starred=all.filter(x=>starredItems.has(x.a));
-  const byCat={};
-  starred.forEach(it=>{if(!byCat[it.cat])byCat[it.cat]=[];byCat[it.cat].push(it);});
-  let html=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-    <div style="font-size:14px;color:var(--text2)">${starred.length} starred item${starred.length!==1?'s':''}</div>
-    <button class="starred-clear-btn" onclick="if(confirm('Clear all starred items?')){starredItems.clear();saveStarred();const l=document.getElementById('starred-nav-label');if(l)l.textContent='Starred items';renderStarred();}">Clear all</button>
-  </div>`;
-  Object.keys(byCat).sort().forEach(cat=>{
-    html+=`<div class="starred-section-head">${cat}</div>`;
-    byCat[cat].forEach(it=>{
-      const srcLbl=it.src==='v1'?'Video 1':it.src==='v2'?'Video 2':'Glossary';
-      html+=`<div class="starred-item">
-        <div class="starred-item-body">
-          <div class="starred-item-ar">${it.a}</div>
-          <div class="starred-item-ph">${it.p}</div>
-          <div class="starred-item-en">${it.e}</div>
-          <div class="ctx-block" style="margin-top:8px;font-size:12px">${it.ctx}</div>
-          <div class="deep-ex-block" style="margin-top:8px"><div class="deep-ex-ar">${it.ex}</div><div class="ex-ph-line">${getExPh(it)}</div><div class="deep-ex-en">${it.exen}</div></div>
-          <div class="starred-item-src">${srcLbl} · ${it.type}</div>
+  ca.innerHTML=`
+    <div class="coach-wrap">
+      <button class="d2-back" onclick="setMode('home')">\u2190 all modes</button>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">
+        <div class="d2-title" style="margin-bottom:16px">Starred items <span class="sub">\u00b7 ${starred.length} saved</span></div>
+        <button class="d2-tab" onclick="if(confirm('Clear all starred items?')){starredItems.clear();saveStarred();updateStarredNav();renderStarred();}">Clear all</button>
+      </div>
+      ${starred.map(it=>`
+      <div class="d2-star-row">
+        <button class="d2-star-ico" onclick="toggleStar(${JSON.stringify(it.a).replace(/"/g,'&quot;')});renderStarred()" title="Unstar">\u2605</button>
+        <div style="flex:1">
+          <div class="d2-star-ar">${escAttr(it.a)}</div>
+          <div class="d2-star-ph">${escAttr(it.p)}</div>
+          <div class="d2-star-en">${escAttr(it.e)}</div>
+          <div class="d2-inset" style="margin-top:8px">
+            <div class="d2-inset-ar" style="font-size:14px">${escAttr(it.ex)}</div>
+            <div class="d2-inset-en">${escAttr(it.exen)}</div>
+          </div>
+          <div class="d2-item-note" style="margin-top:6px">${it.src==='v1'?'Video 1':it.src==='v2'?'Video 2':'Glossary'} \u00b7 ${escAttr(it.type)}</div>
         </div>
-        <button class="star-btn starred" onclick="toggleStar(${JSON.stringify(it.a)});renderStarred()">★</button>
-      </div>`;
-    });
-  });
-  ca.innerHTML=html;
+        <button class="d2-icon-btn" onclick="sayAr('${encodeURIComponent(it.a)}')" title="hear it">\ud83d\udd0a</button>
+      </div>`).join('')}
+    </div>`;
 }
 
 // Restore sidebar count on load

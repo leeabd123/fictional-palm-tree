@@ -93,13 +93,13 @@ function renderHome() {
         ${homeCard('contribute', '🫶', 'Contribute', '④ Preserve it · one prompt')}
       </div>
 
-      <div class="home-map-card">
-        <sudan-map class="home-map"></sudan-map>
-        <div class="home-map-overlay">
-          <div class="home-map-title">Word origins — map of Sudan</div>
-          <div class="home-map-sub">Region tags arrive with community contributions</div>
-        </div>
-      </div>
+      <button class="home-map-card" onclick="setMode('map')">
+        <span class="home-map-wrap"><sudan-map highlight="khartoum"></sudan-map></span>
+        <span class="home-map-overlay">
+          <span class="home-map-title">Word origins — map of Sudan</span>
+          <span class="home-map-sub">Watch the globe find Sudan — tap to explore regions ›</span>
+        </span>
+      </button>
     </div>
   `;
 }

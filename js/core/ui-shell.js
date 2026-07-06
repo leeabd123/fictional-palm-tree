@@ -34,7 +34,10 @@ function showTarigaDef(){
 }
 
 // ── Sidebar toggle ──
+// Mobile: off-canvas open/close. Desktop: collapse/expand the whole rail
+// (persisted, so the choice survives reloads).
 function toggleSidebar(){
+  if (window.innerWidth > 900) { collapseSidebar(); return; }
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('sidebar-overlay');
   const btn = document.getElementById('menu-toggle');
@@ -43,6 +46,12 @@ function toggleSidebar(){
   overlay.classList.toggle('show', !isOpen);
   btn.textContent = isOpen ? '☰' : '✕';
 }
+function collapseSidebar(ev){
+  if (ev) ev.stopPropagation();
+  const collapsed = document.body.classList.toggle('nav-collapsed');
+  try { localStorage.setItem('tariga_nav_collapsed', collapsed ? '1' : ''); } catch (e) {}
+}
+try { if (localStorage.getItem('tariga_nav_collapsed') === '1') document.body.classList.add('nav-collapsed'); } catch (e) {}
 function closeSidebar(){
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('sidebar-overlay');
