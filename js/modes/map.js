@@ -6,10 +6,10 @@ let mapC1Open = true;
 let mapC2Open = true;
 
 const MAP_REGION_BARS = [
-  { name: 'Khartoum', pct: 88, n: 32, hot: true },
-  { name: 'Red Sea', pct: 40, n: 14 },
-  { name: 'Darfur', pct: 34, n: 12 },
-  { name: 'Northern', pct: 30, n: 11 },
+  { name: 'Khartoum', pct: 88, n: 32, col: '232,201,154', hot: true },
+  { name: 'Red Sea', pct: 40, n: 14, col: '110,190,235' },
+  { name: 'Darfur', pct: 34, n: 12, col: '79,216,196' },
+  { name: 'Northern', pct: 30, n: 11, col: '214,196,150' },
 ];
 
 function renderMap() {
@@ -50,8 +50,8 @@ function renderMap() {
             ${MAP_REGION_BARS.map((r, i) => `
             <div class="m2-bar-row">
               <span class="m2-bar-name">${r.name}</span>
-              <div class="m2-bar"><i style="width:${r.pct}%; ${r.hot ? '' : 'background:rgba(79,216,196,.55); box-shadow:none;'}"></i></div>
-              <span class="m2-bar-n" style="${r.hot ? '' : 'color:var(--text3)'}">${r.n}</span>
+              <div class="m2-bar"><i style="width:${r.pct}%; background:rgba(${r.col},.85); box-shadow:0 0 8px rgba(${r.col},.6);"></i></div>
+              <span class="m2-bar-n" style="color:rgba(${r.col},1)">${r.n}</span>
             </div>`).join('')}
           </div>` : ''}
         </div>
