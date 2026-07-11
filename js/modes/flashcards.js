@@ -244,16 +244,8 @@ function flashCompareHTML(it) {
   const isAR = flashDir === 'ar';
   const target = isWord ? (isAR ? it.e : it.a) : (isAR ? it.exen : it.ex);
   const targetPh = isAR ? null : (isWord ? it.p : getExPh(it));
-  const clean = (w) => w.toLowerCase().replace(/[.,!?،؟—"']/g, '');
-  const words = target.split(/\s+/).map(clean).filter(w => w.length > 1);
-  // spec: a word counts if the learner typed the Arabic script OR its
-  // transliteration (Arabizi), case-insensitive
-  const phWords = (targetPh || '').split(/\s+/).map(clean);
-  const norm = clean(flashInput);
-  const hit = (w, i) => norm.includes(w) || (!!phWords[i] && phWords[i].length > 1 && norm.includes(phWords[i]));
-  const hits = words.filter((w, i) => hit(w, i));
-  const chips = words.map((w, i) =>
-    `<span class="f2-p-chip ${hit(w, i) ? 'hit' : ''}" dir="auto">${escAttr(w)}</span>`).join('');
+  // shared engine (js/core/produce.js): Arabic script OR Arabizi counts
+  const m = prodMatch(flashInput, target, targetPh || '');
   return `
     <div class="f2-p-compare">
       <div>
@@ -269,10 +261,7 @@ function flashCompareHTML(it) {
         ${targetPh ? `<div class="f2-p-target-ph">${escAttr(targetPh)}</div>` : ''}
       </div>
     </div>
-    <div class="f2-p-chips">
-      <span class="f2-p-score">${hits.length} of ${words.length} words</span>
-      ${chips}
-    </div>
+    <div class="f2-p-chips">${prodChipsHTML(m)}</div>
     <div class="d2-pill-row" style="margin-top:14px">
       <button class="c2-ghost-pill" onclick="flashTryAgain()">↻ Try again</button>
       <button class="d2-pill-gold" onclick="flashNextWord()">Next word →</button>

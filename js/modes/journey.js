@@ -1,5 +1,37 @@
 // Journey — the design's "Then → now" tab: every coached scenario in one
 // place, each opening its full before/after comparison in the coach.
+// Plus per-domain comfort (learning-design doc §3): tracked separately per
+// domain, not one global level.
+
+const COMFORT_LABEL = { none: 'Beginning', little: 'Beginning', good: 'Comfortable' };
+
+function journeyDomainsHTML() {
+  const gDone = getGuidedProgress();
+  const profile = getProfile();
+  return `
+    <div class="j2-sec-label" style="margin-top:26px">Your domains — comfort is per-domain, not one level</div>
+    ${DOMAINS.map(dm => {
+      const items = dm.id === 'family'
+        ? [...GUIDED_SCENARIOS, ...CALL_SEQUENCES].filter(x => x.domain === dm.id)
+        : [];
+      const done = items.filter(x => gDone[x.id]).length;
+      const tier = dm.id === 'family'
+        ? (COMFORT_LABEL[profile.comfort] || 'Beginning')
+        : null;
+      const pct = items.length ? Math.round((done / items.length) * 100) : 0;
+      return `
+      <div class="d2-item" style="margin-bottom:8px;display:flex;align-items:center;gap:12px">
+        <span style="font-size:18px">${dm.icon}</span>
+        <span style="flex:1">
+          <span style="display:block;font-size:13.5px;color:var(--text)">${dm.label}
+            ${tier ? `<span class="d2-badge" style="margin-left:6px">${tier}</span>` : ''}</span>
+          <span style="display:block;font-size:11px;color:var(--text3);margin-top:2px">
+            ${dm.live ? `${done} of ${items.length} practiced` : 'coming soon — ' + escAttr(dm.desc)}</span>
+          ${dm.live ? `<span class="m2-bar" style="display:block;margin-top:6px"><i style="width:${pct}%"></i></span>` : ''}
+        </span>
+      </div>`;
+    }).join('')}`;
+}
 
 function renderJourney() {
   const ca = document.getElementById('content-area');
@@ -19,6 +51,7 @@ function renderJourney() {
             <button class="btn btn-accent" onclick="setMode('speak')">Practice out loud →</button>
           </div>
         </div>
+        ${journeyDomainsHTML()}
       </div>`;
     return;
   }
@@ -43,6 +76,7 @@ function renderJourney() {
           <span class="home-cta-chev">›</span>
         </button>`;
       }).join('')}
+      ${journeyDomainsHTML()}
     </div>
   `;
 }

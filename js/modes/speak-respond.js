@@ -448,20 +448,23 @@ function coachFeedbackHTML() {
     .filter(s => s.quote && s.sudanese)
     .map(s => ({ from: s.quote, to: s.sudanese }));
   const notes = [
-    fb.comparison_note ? { q: null, n: fb.comparison_note } : null,
     ...fb.strengths.map(s => ({ q: s.quote, n: s.note })),
     ...fb.sounds_msa.map(s => ({ q: s.quote, n: s.note })),
     ...fb.sounds_english_shaped.map(s => ({ q: s.quote, n: s.note })),
     fb.code_switched_words.length
-      ? { q: null, n: 'Still in English: ' + fb.code_switched_words.join(', ') + ' — totally normal, that’s how diaspora Arabic works. Swap one at a time.' }
+      ? { q: null, n: 'Still in English: ' + fb.code_switched_words.join(', ') + ' — totally normal, that\u2019s how diaspora Arabic works. Swap one at a time.' }
       : null,
   ].filter(Boolean);
 
+  // Hierarchy per the learning-design doc \u00a70: the PRIMARY comparison is the
+  // learner's answer vs. an upgraded version of THAT SAME answer (same
+  // content, cleaned-up Sudanese). Model answers and specific flags are
+  // secondary, collapsed context \u2014 not the main event.
   return `
     <div class="coach-wrap">
       <div class="c2-fb">
         <div class="coach-stagger" ${delay()}>
-          <div class="c2-fb-label">Coaching · scenario ${coachIdx + 1}</div>
+          <div class="c2-fb-label">Coaching \u00b7 scenario ${coachIdx + 1}</div>
           <div class="c2-fb-overall">${esc(fb.overall)}</div>
         </div>
 
@@ -472,49 +475,71 @@ function coachFeedbackHTML() {
               <div class="c2-you-text" dir="auto">${esc(coachText)}</div>
             </div>
             <div class="c2-native-col">
-              <div class="c2-col-label native">A native speaker</div>
-              <div class="c2-native-ar">${esc(closest.ar)}</div>
-              <div class="c2-native-ph">${esc(closest.ph)}</div>
-              <div class="c2-sug-en">${esc(closest.en)}</div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px">
+                <span class="c2-col-label native" style="margin-bottom:0">Your answer, upgraded</span>
+                <button class="c2-speak-btn" onclick="coachSpeakSuggestion()" title="Hear it">\ud83d\udd0a</button>
+              </div>
+              <div class="c2-native-ar">${esc(fb.suggestion.ar)}</div>
+              <div class="c2-native-ph">${esc(fb.suggestion.ph)}</div>
+              <div class="c2-sug-en">${esc(fb.suggestion.en)}</div>
             </div>
           </div>
           ${kept.length || swaps.length ? `
           <div class="c2-chips-row">
-            ${kept.length ? `<span class="c2-kept-label">✦ kept</span>${kept.map(v => `<span class="c2-kept-chip" dir="auto">${esc(v)}</span>`).join('')}` : ''}
+            ${kept.length ? `<span class="c2-kept-label">\u2726 kept</span>${kept.map(v => `<span class="c2-kept-chip" dir="auto">${esc(v)}</span>`).join('')}` : ''}
             ${swaps.length ? `<span class="c2-swap-label">swap</span>${swaps.map(s => `
               <span class="c2-swap-pair">
                 <span class="c2-swap-from" dir="auto">${esc(s.from)}</span>
-                <span class="c2-swap-arrow">→</span>
+                <span class="c2-swap-arrow">\u2192</span>
                 <span class="c2-swap-to" dir="auto">${esc(s.to)}</span>
               </span>`).join('')}` : ''}
           </div>` : ''}
-          ${notes.length ? `
-          <div class="c2-notes">
-            ${notes.map(x => `<div class="c2-note-line">${x.q ? `<b dir="auto">"${esc(x.q)}"</b> — ` : ''}${esc(x.n)}</div>`).join('')}
-          </div>` : ''}
+          <div class="c2-sug-say" style="border-top:1px solid rgba(255,255,255,.06)">Now say the upgraded version out loud. Twice. That's the whole trick.</div>
         </div>
 
-        <div class="c2-sug coach-stagger" ${delay()}>
-          <div class="c2-sug-head">
-            <span class="c2-sug-label">💛 Your answer, upgraded — one natural way</span>
-            <button class="c2-speak-btn" onclick="coachSpeakSuggestion()" title="Hear it">🔊</button>
+        <div class="coach-stagger" ${delay()} style="text-align:center">
+          <button class="c2-linklike" onclick="coachFbToggle('coach-fb-model', this)">\u25b8 another natural way a speaker might say this</button>
+          <div id="coach-fb-model" style="display:none;text-align:left">
+            <div class="c2-panel" style="margin-top:10px">
+              <div class="c2-col-label native">A native speaker</div>
+              <div class="c2-native-ar">${esc(closest.ar)}</div>
+              <div class="c2-native-ph">${esc(closest.ph)}</div>
+              <div class="c2-sug-en">${esc(closest.en)}</div>
+              ${fb.comparison_note ? `<div class="c2-note-line" style="margin-top:10px">${esc(fb.comparison_note)}</div>` : ''}
+            </div>
           </div>
-          <div class="c2-sug-ar">${esc(fb.suggestion.ar)}</div>
-          <div class="c2-sug-ph">${esc(fb.suggestion.ph)}</div>
-          <div class="c2-sug-en">${esc(fb.suggestion.en)}</div>
-          <div class="c2-sug-say">Now say it out loud. Twice. That's the whole trick.</div>
         </div>
+
+        ${notes.length ? `
+        <div class="coach-stagger" ${delay()} style="text-align:center">
+          <button class="c2-linklike" onclick="coachFbToggle('coach-fb-notes', this)">\u25b8 specific notes (${notes.length})</button>
+          <div id="coach-fb-notes" style="display:none;text-align:left">
+            <div class="c2-panel" style="margin-top:10px">
+              <div class="c2-notes" style="margin-top:0">
+                ${notes.map(x => `<div class="c2-note-line">${x.q ? `<b dir="auto">"${esc(x.q)}"</b> \u2014 ` : ''}${esc(x.n)}</div>`).join('')}
+              </div>
+            </div>
+          </div>
+        </div>` : ''}
 
         <div class="c2-encourage coach-stagger" ${delay()}>${esc(fb.encouragement)}</div>
 
         <div class="c2-fb-actions coach-stagger" ${delay()}>
-          <button class="c2-ghost-pill" onclick="coachTryAgain()">↻ Answer again</button>
-          ${attempts.length >= 2 ? `<button class="c2-gold-pill" onclick="coachShowJourney()">✦ See your journey</button>` : ''}
-          <button class="c2-gold-pill" onclick="coachNextScenario()">Next scenario →</button>
+          <button class="c2-ghost-pill" onclick="coachTryAgain()">\u21bb Answer again</button>
+          ${attempts.length >= 2 ? `<button class="c2-gold-pill" onclick="coachShowJourney()">\u2726 See your journey</button>` : ''}
+          <button class="c2-gold-pill" onclick="coachNextScenario()">Next scenario \u2192</button>
         </div>
       </div>
     </div>
   `;
+}
+
+function coachFbToggle(id, btn) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const open = el.style.display !== 'none';
+  el.style.display = open ? 'none' : '';
+  if (btn) btn.textContent = (open ? '\u25b8' : '\u25be') + btn.textContent.slice(1);
 }
 
 // Speak the suggested answer with the browser voice — rough, but it gives

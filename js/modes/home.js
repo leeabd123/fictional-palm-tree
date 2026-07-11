@@ -1,6 +1,6 @@
-// Home — the design prototype's dashboard, wired to real app state.
-// Greeting by time of day, streak, orb CTA into the coach, live progress
-// ring, deck source switcher, and the path of modes.
+// Home — domain-first, single recommended action (learning-design doc §2).
+// One "Today's focus" card up top; everything else lives below the fold as
+// the practice library, not competing for attention.
 
 const SRC_LABELS = {
   v1: ['Solja episode', '89 phrases from ونسا مع أس (Wansa ma3 Us)'],
@@ -18,10 +18,20 @@ function homeGreeting() {
   return { ar: 'مساء النور يا زول', ph: 'masa an-noor ya zool', en: 'Good evening — your family’s dialect is waiting for you.' };
 }
 
+function homeStart() {
+  const focus = nextFocus('family');
+  if (focus.kind === 'guided') guidedOpen(focus.id);
+  else if (focus.kind === 'call') callOpen(focus.id);
+  else setMode('speak');
+}
+
 function renderHome() {
   const ca = document.getElementById('content-area');
   const g = homeGreeting();
+  const profile = getProfile();
   const streak = getStreak();
+  const focus = nextFocus('family');
+  const gDone = Object.keys(getGuidedProgress()).length;
   const coached = Object.keys(JSON.parse(localStorage.getItem('tariga_attempts_v1') || '{}')).length;
   const attempts = totalAttemptCount();
   const starredN = starredItems.size;
@@ -41,18 +51,32 @@ function renderHome() {
       </div>
       <div class="home-tagline">طريقة كلامك · TARIGAT KALAMAK · THE WAY YOU SPEAK</div>
 
-      <div class="home-greet-ar">${g.ar}</div>
+      <div class="home-greet-ar">${g.ar}${profile.name ? '' : ''}</div>
       <div class="home-greet-ph">${g.ph}</div>
-      <div class="home-greet-en">${g.en}</div>
+      <div class="home-greet-en">${profile.name ? escAttr(profile.name) + ' — ' : ''}${g.en}</div>
 
-      <button class="home-cta" onclick="setMode('speak')">
-        <span class="home-cta-orbwrap"><tariga-orb mode="idle"></tariga-orb></span>
-        <span class="home-cta-body">
-          <span class="home-cta-title">Practice out loud</span>
-          <span class="home-cta-sub">Your coach is always listening — يلا نتكلم (yalla nitkallam)</span>
-        </span>
-        <span class="home-cta-chev">›</span>
-      </button>
+      <div class="home-focus">
+        <div class="home-focus-label">Today's focus · Family</div>
+        <div class="home-focus-title">${escAttr(focus.title)}</div>
+        <div class="home-focus-sub">${escAttr(focus.sub)}</div>
+        <button class="home-cta" style="margin:14px 0 0" onclick="homeStart()">
+          <span class="home-cta-orbwrap"><tariga-orb mode="idle"></tariga-orb></span>
+          <span class="home-cta-body">
+            <span class="home-cta-title">Start</span>
+            <span class="home-cta-sub">يلا نتكلم (yalla nitkallam) — let's talk</span>
+          </span>
+          <span class="home-cta-chev">›</span>
+        </button>
+      </div>
+
+      <div class="home-path-label" style="margin-top:22px">EXPLORE OTHER DOMAINS</div>
+      <div class="home-domains">
+        ${DOMAINS.map(dm => `
+          <button class="d2-tab ${dm.id === 'family' ? 'on' : ''}" ${dm.live ? `onclick="homeStart()"` : 'disabled'}
+            title="${escAttr(dm.desc)}" style="${dm.live ? '' : 'opacity:.45;cursor:default'}">
+            ${dm.icon} ${dm.label}${dm.live ? '' : ' · soon'}
+          </button>`).join('')}
+      </div>
 
       <div class="home-stats">
         <div class="home-ring-wrap">
@@ -68,8 +92,8 @@ function renderHome() {
           <div class="home-ring-label"><b>${pct}%</b><span>COACHED</span></div>
         </div>
         <div class="home-stat-rows">
-          <div class="home-stat-row"><span>Scenarios coached</span><b class="c-teal">${coached}</b></div>
-          <div class="home-stat-row"><span>Practice attempts</span><b class="c-gold">${attempts}</b></div>
+          <div class="home-stat-row"><span>Guided practiced</span><b class="c-teal">${gDone}</b></div>
+          <div class="home-stat-row"><span>Coach attempts</span><b class="c-gold">${attempts}</b></div>
           <div class="home-stat-row"><span>Starred to review</span><b class="c-green">${starredN}</b></div>
         </div>
       </div>
@@ -83,14 +107,16 @@ function renderHome() {
         <span class="home-src-switch">switch ›</span>
       </button>
 
-      <div class="home-path-label">YOUR PATH</div>
+      <div class="home-path-label">PRACTICE LIBRARY</div>
       <div class="home-grid">
-        ${homeCard('flash', '🃏', 'Flashcards', '① Build vocab · ' + deck.length + ' in deck')}
-        ${homeCard('speak', '🎙️', 'Your coach', '② Speak it · scenario ' + (coachIdx + 1), true)}
-        ${homeCard('listen', '👂', 'Tune your ear', '③ Immerse · podcast lines')}
-        ${homeCard('journey', '✦', 'Your journey', coached ? 'Then → now · ' + coached + ' scenario' + (coached === 1 ? '' : 's') : 'Then → now · starts with the coach')}
-        ${homeCard('convo', '🎧', 'Conversation', 'the real podcast, scene by scene')}
-        ${homeCard('contribute', '🫶', 'Contribute', '④ Preserve it · one prompt')}
+        ${homeCard('guided', '🤲', 'Guided', 'Family basics · ' + GUIDED_SCENARIOS.length + ' scenarios', true)}
+        ${homeCard('speak', '🎙️', 'Your coach', 'Free scenarios · AI coaching')}
+        ${homeCard('flash', '🃏', 'Flashcards', deck.length + ' in deck')}
+        ${homeCard('listen', '👂', 'Tune your ear', 'podcast lines')}
+        ${homeCard('journey', '✦', 'Your journey', 'then → now')}
+        ${homeCard('convo', '🎧', 'Conversation', 'the real podcast')}
+        ${homeCard('contribute', '🫶', 'Contribute', 'preserve it · one prompt')}
+        ${homeCard('deep', '📚', 'Deep cards', 'synonyms & context')}
       </div>
 
       <button class="home-map-card" onclick="setMode('map')">
@@ -106,7 +132,7 @@ function renderHome() {
 
 function homeCard(mode, icon, title, sub, glow) {
   return `
-    <button class="home-card ${glow ? 'home-card-glow' : ''}" onclick="setMode('${mode}')">
+    <button class="home-card ${glow ? 'home-card-glow' : ''}" onclick="${mode === 'guided' ? 'setMode(\'guided\')' : `setMode('${mode}')`}">
       <span class="home-card-icon">${icon}</span>
       <span class="home-card-title">${title}</span>
       <span class="home-card-sub">${sub}</span>
