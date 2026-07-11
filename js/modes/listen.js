@@ -5,7 +5,7 @@
 //   'next'    — read one side of an exchange, predict the natural reply
 // Difficulty is self-adjustable by toggling the Arabic/phonetic layers.
 
-let listenKind = 'meaning';       // 'meaning' | 'next'
+let listenKind = 'meaning';       // 'meaning' | 'next' | 'dicto'
 let listenPool = [];
 let listenIdx = 0;
 let listenPicked = null;
@@ -14,7 +14,22 @@ let listenRight = 0;
 let listenTotal = 0;
 let listenLayers = { ar: true, ph: true };
 
+let dictoInput = '';
+let dictoChecked = false;
+let dictoRevealed = false;
+
 function buildListenPool() {
+  if (listenKind === 'dicto') {
+    const lines = [];
+    CONVO_SCENES.forEach(scene => scene.lines.forEach(l => {
+      const words = (l.ar || '').split(/\s+/).length;
+      if (l.ar && l.ph && l.en && words >= 3 && words <= 10) lines.push(l);
+    }));
+    listenPool = shuf(lines);
+    listenIdx = 0; listenPicked = null; listenOptions = []; listenRight = 0; listenTotal = 0;
+    dictoInput = ''; dictoChecked = false; dictoRevealed = false;
+    return;
+  }
   if (listenKind === 'meaning') {
     const lines = [];
     CONVO_SCENES.forEach(scene => scene.lines.forEach(l => {
@@ -54,6 +69,7 @@ function renderListen() {
   const ca = document.getElementById('content-area');
   if (!listenPool.length) buildListenPool();
   if (listenIdx >= listenPool.length) buildListenPool();
+  if (listenKind === 'dicto') { renderDicto(ca); return; }
   const item = listenPool[listenIdx];
   const answer = listenAnswerOf(item);
   if (listenPicked === null && !listenOptions.includes(answer)) listenMakeOptions(item);
@@ -71,6 +87,7 @@ function renderListen() {
       <div class="d2-tab-row">
         <button class="d2-tab ${listenKind === 'meaning' ? 'on' : ''}" onclick="listenSetKind('meaning')">Meaning</button>
         <button class="d2-tab ${listenKind === 'next' ? 'on' : ''}" onclick="listenSetKind('next')">What comes next?</button>
+        <button class="d2-tab ${listenKind === 'dicto' ? 'on' : ''}" onclick="listenSetKind('dicto')">Reconstruct 🔊</button>
         <span style="flex:1"></span>
         <button class="d2-tab ${listenLayers.ar ? 'on' : ''}" onclick="listenToggle('ar')">عربي</button>
         <button class="d2-tab ${listenLayers.ph ? 'on' : ''}" onclick="listenToggle('ph')">phonetic</button>
@@ -132,5 +149,76 @@ function listenNext() {
   listenIdx++;
   listenPicked = null;
   listenOptions = [];
+  renderListen();
+}
+
+
+// ── Dictogloss (§11): hear a real podcast line, reconstruct it in your own
+// words, then compare against the original. Uses existing transcript
+// content directly — a genuinely different exercise from recognition. ──
+function renderDicto(ca) {
+  const line = listenPool[listenIdx];
+  const m = dictoChecked ? prodMatch(dictoInput, line.ar, line.ph) : null;
+  ca.innerHTML = `
+    <div class="coach-wrap">
+      <button class="d2-back" onclick="setMode('home')">← all modes</button>
+      <div class="d2-title lav" style="margin-bottom:4px">Tune your ear</div>
+      <div class="d2-note">${listenIdx + 1} of ${listenPool.length} · reconstruct what you hear — the struggle IS the exercise</div>
+      <div class="d2-tab-row">
+        <button class="d2-tab" onclick="listenSetKind('meaning')">Meaning</button>
+        <button class="d2-tab" onclick="listenSetKind('next')">What comes next?</button>
+        <button class="d2-tab on" onclick="void 0">Reconstruct 🔊</button>
+      </div>
+
+      <div class="d2-card" style="text-align:center;margin-bottom:14px">
+        <div class="d2-label lav">Listen — then rebuild it</div>
+        <button class="c2-mic-big" style="margin:8px auto" onclick="sayAr('${encodeURIComponent(line.ar)}')" title="play the line">🔊</button>
+        <div class="d2-note" style="margin:8px 0 0">tap to hear it (again as often as you like) · browser voice for now — real audio comes with community recordings</div>
+        ${dictoRevealed ? `
+          <div class="d2-gold-box" style="text-align:right">
+            <div class="d2-inset-ar" style="font-size:18px">${escAttr(line.ar)}</div>
+            <div class="d2-inset-ph">${escAttr(line.ph)}</div>
+            <div class="d2-inset-en" style="text-align:left">${escAttr(line.en)}</div>
+          </div>` : ''}
+      </div>
+
+      ${!dictoChecked ? `
+        <div class="c2-textbox">
+          <textarea id="dicto-input" dir="auto" rows="2" placeholder="write what you heard — your own words count too"></textarea>
+          <div class="c2-textbox-row">
+            <button class="c2-linklike" onclick="dictoRevealed=!dictoRevealed;renderListen()">${dictoRevealed ? 'hide' : 'peek at'} the line</button>
+            <span style="flex:1"></span>
+            <button class="c2-compare" onclick="dictoCheck()">Compare →</button>
+          </div>
+        </div>
+      ` : `
+        ${prodCompareGridHTML(dictoInput, line.ar, line.ph, 'What was actually said')}
+        <div class="f2-p-chips">${prodChipsHTML(m)}</div>
+        <div class="d2-inset" style="margin-top:12px"><span class="d2-when-body">${escAttr(line.en)}${line.note ? ' — ' + escAttr(line.note) : ''}</span></div>
+        <div class="d2-pill-row" style="margin-top:14px">
+          <button class="c2-ghost-pill" onclick="dictoChecked=false;renderListen()">↻ Hear it again</button>
+          <button class="d2-pill-gold" onclick="dictoNext()">Next line →</button>
+        </div>
+      `}
+    </div>`;
+  const ta = document.getElementById('dicto-input');
+  if (ta) {
+    ta.value = dictoInput;
+    ta.addEventListener('input', () => { dictoInput = ta.value; });
+  }
+}
+
+function dictoCheck() {
+  const ta = document.getElementById('dicto-input');
+  dictoInput = (ta ? ta.value : dictoInput).trim();
+  if (!dictoInput) { if (ta) ta.focus(); return; }
+  dictoChecked = true;
+  recordActivity();
+  renderListen();
+}
+
+function dictoNext() {
+  listenIdx++;
+  dictoInput = ''; dictoChecked = false; dictoRevealed = false;
   renderListen();
 }

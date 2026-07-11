@@ -28,13 +28,15 @@ Core rules — these define the product, do not bend them:
 
 10. VOCAB ACCOUNTING. Report which of the scenario's required/bonus vocabulary items appear in the learner's response (in Arabic script or recognizable Arabizi). Report English code-switched words as a list (excluding accepted loanwords per rule 4).
 
-11. TRANSITION WORDS. The connectors (يعني، صراحة، طيب، فاهمني/فاهماني، بالجد، هسه، وبتاع، لكن، عشان) are what make speech sound fluent. If the response naturally invited one and the learner didn't use it, flag it in missed_transitions — at most one or two, only where it would genuinely help, phrased as an invitation not a correction ("this is a perfect spot for a يعني"). Empty array when nothing is missed.`;
+11. TRANSITION WORDS. The connectors (يعني، صراحة، طيب، فاهمني/فاهماني، بالجد، هسه، وبتاع، لكن، عشان) are what make speech sound fluent. If the response naturally invited one and the learner didn't use it, flag it in missed_transitions — at most one or two, only where it would genuinely help, phrased as an invitation not a correction ("this is a perfect spot for a يعني"). Empty array when nothing is missed.
+
+12. REGISTER CALIBRATION. Formality is its own dimension, separate from vocabulary accuracy. If the response's register doesn't fit the scenario (too casual for an elder, too stiff for a friend), flag it in register_notes — "correct Arabic, but a bit too casual for an elder" — with the adjusted phrasing. Empty array when the register fits.`;
 
 // JSON schema for the structured coaching feedback.
 const COACH_SCHEMA = {
   type: 'object',
   additionalProperties: false,
-  required: ['overall','strengths','sounds_msa','sounds_english_shaped','code_switched_words','vocab_used_required','vocab_used_bonus','missed_transitions','closest_model_index','comparison_note','suggestion','encouragement'],
+  required: ['overall','strengths','sounds_msa','sounds_english_shaped','code_switched_words','vocab_used_required','vocab_used_bonus','missed_transitions','register_notes','closest_model_index','comparison_note','suggestion','encouragement'],
   properties: {
     overall: { type: 'string', description: 'One or two warm sentences reacting to the response as a whole.' },
     strengths: {
@@ -78,6 +80,18 @@ const COACH_SCHEMA = {
     },
     vocab_used_required: { type: 'array', items: { type: 'string' }, description: "Scenario 'required' vocab items present in the response (as listed in the scenario)." },
     vocab_used_bonus: { type: 'array', items: { type: 'string' }, description: "Scenario 'bonus' vocab items present in the response." },
+    register_notes: {
+      type: 'array',
+      description: 'Formality/politeness mismatches for this scenario (empty when the register fits).',
+      items: {
+        type: 'object', additionalProperties: false, required: ['quote','note','adjusted'],
+        properties: {
+          quote: { type: 'string', description: "The learner's words that miss the register." },
+          note: { type: 'string', description: 'Why the register misses (e.g. too casual for an elder) — one sentence.' },
+          adjusted: { type: 'string', description: 'The same idea at the right register (Arabic script).' },
+        },
+      },
+    },
     missed_transitions: {
       type: 'array',
       description: 'Transition-word opportunities the response invited but did not use (at most 1-2; empty when none).',
@@ -155,5 +169,64 @@ ${userText}`;
     system: COACH_SYSTEM,
     messages: [{ role: 'user', content: user }],
     output_schema: COACH_SCHEMA,
+  };
+}
+
+// ══════════════════════════════════════════════
+// FULL PHONE CALL MODE (§19.2) — the AI plays a family member across
+// multiple dynamic turns. Heavily few-shot grounded against the verified
+// call sequences and glossary so it never invents ungrounded dialect.
+// ══════════════════════════════════════════════
+
+function callGroundingText() {
+  // the verified call sequences ARE the grounding — every few-shot line
+  // below passed the native correction round
+  return CALL_SEQUENCES.map(seq =>
+    `VERIFIED CALL — ${seq.title}:\n` + seq.turns.map(t =>
+      `${t.who === 'family' ? 'FAMILY' : 'LEARNER'}: ${t.ar} (${t.ph}) — ${t.en}`).join('\n')
+  ).join('\n\n');
+}
+
+const LIVECALL_SYSTEM_BASE = `LIVE CALL MODE. You are playing حبوبة (habooba — the learner's Sudanese grandmother) on a phone call with a diaspora heritage speaker who is practicing Sudanese Arabic. You are warm, loving, a little teasing, endlessly proud of them.
+
+HARD RULES — these protect dialect authenticity:
+1. GROUNDED SUDANESE ONLY. Speak ONLY in the register and vocabulary shown in the verified call transcripts below plus very common pan-Sudanese phrases (السلام عليكم، الحمد لله، إن شاء الله، معلش، يا حبيبي/حبيبتي، الله يحفظك). When in doubt, reuse a verified line or a close variation of one. NEVER invent slang or regionalisms not evidenced in the grounding.
+2. SHORT TURNS. One or two short sentences per turn, like a real call. Ask one question at a time.
+3. MEET THEM WHERE THEY ARE. If the learner answers in English or heavy Arabizi, stay in simple Sudanese — never switch to English yourself, but keep your Arabic simple enough to follow.
+4. NO CORRECTIONS IN CHARACTER. Habooba never corrects grammar. If the learner's Arabic has a gap worth noting, put ONE gentle observation in coach_whisper (English, one sentence) — the app shows it quietly outside the conversation.
+5. END NATURALLY. After several exchanges (the app tells you the turn count), wind down with a blessing like the verified calls do, and set call_done true.
+6. EVERY ARABIC LINE needs its transliteration (3/7/kh style) and English meaning.`;
+
+const LIVECALL_SCHEMA = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['reply', 'coach_whisper', 'call_done'],
+  properties: {
+    reply: {
+      type: 'object', additionalProperties: false, required: ['ar','ph','en'],
+      properties: {
+        ar: { type: 'string', description: "Habooba's next line (Arabic script, short)." },
+        ph: { type: 'string', description: 'Transliteration.' },
+        en: { type: 'string', description: 'English meaning.' },
+      },
+    },
+    coach_whisper: { type: 'string', description: 'One gentle English coaching observation about the learner\u2019s last turn, or empty string.' },
+    call_done: { type: 'boolean', description: 'true when the call has wound down naturally with a blessing.' },
+  },
+};
+
+function buildLiveCallRequest(history, userText, turnCount, maxTurns) {
+  const system = LIVECALL_SYSTEM_BASE + '\n\nVERIFIED GROUNDING TRANSCRIPTS:\n' + callGroundingText();
+  const convo = history.map(h =>
+    `${h.who === 'family' ? 'HABOOBA' : 'LEARNER'}: ${h.ar || h.text}`).join('\n');
+  const user = `CALL SO FAR (turn ${turnCount} of at most ${maxTurns} — wind down with a blessing when close to the limit):
+${convo || '(call just connected — you answer first, greet them)'}
+
+LEARNER'S NEW TURN (may be Arabic, Arabizi, or English):
+${userText || '(the learner just picked up — open the call)'}`;
+  return {
+    system,
+    messages: [{ role: 'user', content: user }],
+    output_schema: LIVECALL_SCHEMA,
   };
 }

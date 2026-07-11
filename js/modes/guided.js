@@ -145,7 +145,8 @@ function renderGuided() {
 
       ${domainTier(focusDomain()) !== 'Beginning' ? `
       <div class="d2-pill-row" style="margin-top:22px">
-        <button class="d2-pill-teal" onclick="setMode('freeform')">✨ Free-form unlocked — speak without the scaffolding →</button>
+        <button class="d2-pill-teal" onclick="setMode('freeform')">✨ Free-form unlocked →</button>
+        ${typeof speedAvailable === 'function' && speedAvailable() ? `<button class="d2-pill-gold" onclick="speedStart()">⚡ Speed round</button>` : ''}
       </div>` : ''}
 
       ${CALL_SEQUENCES.some(c => c.domain === focusDomain()) ? `
@@ -197,6 +198,7 @@ function guidedCheck() {
   const mm = prodMatch(guidedInput, t.ar, t.ph);
   saveGuidedProgress(it.id, { ts: Date.now(), hits: mm.hits.length, total: mm.words.length });
   recordActivity();
+  if (typeof logEvent === 'function') logEvent('guided_check', { id: it.id, hits: mm.hits.length, total: mm.words.length });
   renderGuided();
 }
 function guidedSwapTarget(i) { guidedTargetIdx = i; renderGuided(); }
