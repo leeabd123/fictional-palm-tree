@@ -55,6 +55,35 @@ export default {
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
 
     const url = new URL(request.url);
+
+    // ── anonymized event logging (learning-design doc §9) ──
+    // POST /api/events {events:[{t, mode, id?, ms?, extra?}]}. No PII, no
+    // user ids. Written to D1 when a database is bound as `DB`
+    // (wrangler d1 create tariga && add binding), silently accepted otherwise
+    // so the client never has to care.
+    if (url.pathname === '/api/events' && request.method === 'POST') {
+      let evBody;
+      try {
+        const raw = await request.text();
+        if (raw.length > MAX_BODY_BYTES) return json({ error: 'payload_too_large' }, 413, cors);
+        evBody = JSON.parse(raw);
+      } catch { return json({ error: 'bad_json' }, 400, cors); }
+      const events = Array.isArray(evBody && evBody.events) ? evBody.events.slice(0, 50) : [];
+      if (env.DB && events.length) {
+        try {
+          await env.DB.prepare(
+            'CREATE TABLE IF NOT EXISTS events (ts INTEGER, t TEXT, mode TEXT, id TEXT, ms INTEGER, extra TEXT)'
+          ).run();
+          const stmt = env.DB.prepare('INSERT INTO events (ts, t, mode, id, ms, extra) VALUES (?, ?, ?, ?, ?, ?)');
+          await env.DB.batch(events.map(e => stmt.bind(
+            Date.now(), String(e.t || '').slice(0, 40), String(e.mode || '').slice(0, 40),
+            String(e.id || '').slice(0, 80), Number(e.ms) || 0, JSON.stringify(e.extra || null).slice(0, 500)
+          )));
+        } catch (e) { /* logging must never break the app */ }
+      }
+      return new Response(null, { status: 204, headers: cors });
+    }
+
     if (url.pathname !== '/api/coach' || request.method !== 'POST') {
       return json({ error: 'not_found' }, 404, cors);
     }

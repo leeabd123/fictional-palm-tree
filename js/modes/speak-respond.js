@@ -390,6 +390,7 @@ async function coachSubmit() {
     coachFeedback = fb;
     addAttempt(it, text, fb);
     recordActivity();
+    if (typeof logEvent === 'function') logEvent('coach_eval', { scenario: coachIdx, words: text.split(/\s+/).length });
     coachPhase = 'feedback';
   } catch (e) {
     coachPhase = 'prompt';
@@ -448,6 +449,7 @@ function coachFeedbackHTML() {
     .filter(s => s.quote && s.sudanese)
     .map(s => ({ from: s.quote, to: s.sudanese }));
   const notes = [
+    ...(fb.register_notes || []).map(t => ({ q: t.quote, n: t.note + ' \u2014 try: ' + t.adjusted })),
     ...(fb.missed_transitions || []).map(t => ({ q: t.phrase + ' (' + t.ph + ')', n: t.note })),
     ...fb.strengths.map(s => ({ q: s.quote, n: s.note })),
     ...fb.sounds_msa.map(s => ({ q: s.quote, n: s.note })),

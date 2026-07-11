@@ -899,3 +899,9 @@ button.home-map-card { text-align: left; font-family: var(--sans); cursor: point
 .intro-box textarea { min-height: 52px; }
 .intro-skip { margin-top: 14px; }
 .intro-name { max-width: 280px; text-align: center; }
+
+/* live-call coaching whispers — quiet, outside the conversation */
+.lc-whisper {
+  font-size: 11.5px; color: var(--lav); font-style: italic; margin: 6px 6px 0 0;
+  text-align: right; opacity: .85; line-height: 1.5;
+}

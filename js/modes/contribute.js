@@ -23,10 +23,33 @@ function _saveContribs(list) {
   try { localStorage.setItem(CONTRIB_KEY, JSON.stringify(list)); } catch (e) {}
 }
 
+// ── gap detection (§17.8) — the agent scans the content database for thin
+// coverage and turns it into a targeted ask. It routes and structures;
+// it NEVER invents dialect content — humans fill the gap it found.
+function contribGap() {
+  const gaps = [];
+  DOMAINS.filter(d => d.live).forEach(d => {
+    const beg = GUIDED_SCENARIOS.filter(g => g.domain === d.id && g.tier === 'Beginning').length;
+    const com = GUIDED_SCENARIOS.filter(g => g.domain === d.id && g.tier === 'Comfortable').length;
+    const pending = GUIDED_SCENARIOS.filter(g => g.domain === d.id && g.verification_status === 'pending-review').length;
+    if (pending) gaps.push({ w: pending * 3, ask: `${pending} ${d.label} scenario${pending === 1 ? '' : 's'} awaiting a native ear — reviewing them beats writing new ones` });
+    if (com < 2) gaps.push({ w: 2, ask: `${d.label} is thin at Comfortable tier — how would YOUR family handle a harder ${d.label.toLowerCase()} moment?` });
+    if (beg < 5) gaps.push({ w: 5 - beg, ask: `${d.label} needs more everyday basics — the first phrases someone would reach for` });
+  });
+  const live = _loadContribs().filter(c => c.status === 'live');
+  const regions = new Set(live.map(c => c.tags && c.tags.region).filter(Boolean));
+  ['Port Sudan', 'North', 'West'].forEach(rg => {
+    if (!regions.has(rg)) gaps.push({ w: 1, ask: `no verified phrases from ${rg} yet — does your family come from there?` });
+  });
+  gaps.sort((a, b) => b.w - a.w);
+  return gaps[0] || null;
+}
+
 function renderContribute() {
   const ca = document.getElementById('content-area');
   const prompt = CONTRIB_PROMPTS[contribPromptIdx % CONTRIB_PROMPTS.length];
   const mine = _loadContribs();
+  const gap = contribGap();
 
   if (contribSubmitted) {
     ca.innerHTML = `
@@ -50,6 +73,12 @@ function renderContribute() {
       <button class="d2-back" onclick="setMode('home')">← all modes</button>
       <div class="d2-title">Contribute</div>
       <div class="d2-note" style="margin-bottom:18px">Help preserve the dialect — answer the way <em style="color:var(--accent2)">your</em> family actually says it.</div>
+
+      ${gap ? `
+      <div class="d2-inset" style="border-color:rgba(201,169,110,.3);margin-bottom:14px">
+        <div class="d2-label gold" style="margin-bottom:6px">Where the library is thin right now</div>
+        <div class="d2-when-body">${escAttr(gap.ask)}</div>
+      </div>` : ''}
 
       <div class="d2-tab-row">
         <button class="d2-tab ${contribKind === 'prompt' ? 'on' : ''}" onclick="contribSetKind('prompt')">Answer the prompt</button>
@@ -104,8 +133,9 @@ function contribMineHTML(mine) {
           <div style="flex:1">
             <div class="d2-star-en" style="margin:0;color:var(--text)" dir="auto">${escAttr(c.text)}</div>
             <div class="d2-item-note">${escAttr(c.prompt)} · ${[c.tags.region, c.tags.generation, c.tags.formality].filter(Boolean).map(escAttr).join(' · ') || 'untagged'}</div>
+            ${c.status === 'returned' && c.reviewerNote ? `<div class="d2-when-body" style="margin-top:6px;color:#e0b3a8">reviewer: "${escAttr(c.reviewerNote)}" <button class="c2-linklike" onclick="contribResubmit(${c.ts})">fix & resubmit →</button></div>` : ''}
           </div>
-          <span class="d2-badge" style="white-space:nowrap;${c.status === 'live' ? 'color:var(--mint);border-color:rgba(86,201,143,.4)' : c.status === 'flagged' ? 'color:#e08a7a;border-color:rgba(217,107,90,.4)' : ''}">${c.status === 'live' ? '✓ live' : c.status === 'flagged' ? 'flagged — ' + escAttr(c.flagReason || '') : 'pending · ' + ((c.votes || []).reduce((n, v) => n + v.w, 0)) + '/' + TARIGA_CONFIG.review.liveThreshold}</span>
+          <span class="d2-badge" style="white-space:nowrap;${c.status === 'live' ? 'color:var(--mint);border-color:rgba(86,201,143,.4)' : (c.status === 'flagged' || c.status === 'returned') ? 'color:#e08a7a;border-color:rgba(217,107,90,.4)' : ''}">${c.status === 'live' ? '✓ live' : c.status === 'returned' ? 'sent back — ' + escAttr(c.flagReason || '') : c.status === 'flagged' ? 'flagged — ' + escAttr(c.flagReason || '') : 'pending · ' + ((c.votes || []).reduce((n, v) => n + v.w, 0)) + '/' + TARIGA_CONFIG.review.liveThreshold}</span>
         </div>`).join('')}
     </div>`;
 }
@@ -157,5 +187,21 @@ function contribAnother() {
   contribSubmitted = false;
   contribPromptIdx++;
   contribTags = { region: null, generation: null, formality: null };
+  renderContribute();
+}
+
+
+// a returned submission goes back to pending after the contributor edits it
+function contribResubmit(ts) {
+  const all = _loadContribs();
+  const item = all.find(c => c.ts === ts);
+  if (!item) return;
+  const fixed = prompt('Fix it and resubmit — the reviewer said: ' + (item.reviewerNote || item.flagReason || ''), item.text);
+  if (!fixed || !fixed.trim()) return;
+  item.text = fixed.trim();
+  item.status = 'pending';
+  item.votes = [];
+  item.resubmitted = true;
+  _saveContribs(all);
   renderContribute();
 }

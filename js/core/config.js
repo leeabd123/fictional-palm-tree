@@ -25,6 +25,12 @@ const TARIGA_CONFIG = {
       { name: 'Contributor', min: 5, weight: 2 },
       { name: 'Trusted reviewer', min: 15, weight: 3 },
     ],
+    // vouched fast track (§17.1 Track 2): an elder vouched in by a trusted
+    // member lands with full authority from day one
+    elder: { name: 'Community Elder', weight: 3 },
+    vouchMinTier: 'Trusted reviewer',   // who may vouch someone in
   },
+  speed: { seconds: 60 },  // timed automatization rounds (DeKeyser)
+  livecall: { maxTurns: 8 },
   coach: { maxTokens: 3000 },
 };

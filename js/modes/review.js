@@ -26,8 +26,49 @@ function _saveReviewer(r) {
   try { localStorage.setItem(REVIEWER_KEY, JSON.stringify(r)); } catch (e) {}
 }
 function reviewerTier(r) {
+  const rec = r || _reviewer();
+  // vouched fast track (§17.1 Track 2): real-world linguistic authority is
+  // the credential — a vouched elder lands with full weight from day one
+  if (rec.vouched) return { ...TARIGA_CONFIG.review.elder };
   const tiers = TARIGA_CONFIG.review.tiers;
-  return [...tiers].reverse().find(t => (r || _reviewer()).count >= t.min) || tiers[0];
+  return [...tiers].reverse().find(t => rec.count >= t.min) || tiers[0];
+}
+
+// ── vouch codes — created by trusted members, redeemed by elders ──
+const VOUCH_KEY = 'tariga_vouches_v1';
+function _vouches() {
+  try { return JSON.parse(localStorage.getItem(VOUCH_KEY) || '[]'); } catch (e) { return []; }
+}
+function _saveVouches(v) {
+  try { localStorage.setItem(VOUCH_KEY, JSON.stringify(v)); } catch (e) {}
+}
+function reviewCanVouch() {
+  const t = reviewerTier();
+  return t.name === TARIGA_CONFIG.review.vouchMinTier || t.name === TARIGA_CONFIG.review.elder.name;
+}
+function reviewCreateVouch() {
+  const code = 'TRG-' + Math.random().toString(36).slice(2, 7).toUpperCase();
+  const v = _vouches();
+  v.push({ code, ts: Date.now(), used: false });
+  _saveVouches(v);
+  renderReview();
+}
+function reviewRedeemVouch() {
+  const code = (document.getElementById('vouch-code')?.value || '').trim().toUpperCase();
+  if (!code) return;
+  const v = _vouches();
+  const hit = v.find(x => x.code === code && !x.used);
+  if (!hit) {
+    const el = document.getElementById('vouch-code');
+    if (el) { el.style.borderColor = 'rgba(217,107,90,.6)'; setTimeout(() => el.style.borderColor = '', 1200); }
+    return;
+  }
+  hit.used = true;
+  _saveVouches(v);
+  const r = _reviewer();
+  r.vouched = true; r.vouchedTs = Date.now();
+  _saveReviewer(r);
+  renderReview();
 }
 
 // queue = pending items in the contributions store (seeded once if empty)
@@ -108,11 +149,16 @@ function renderReview() {
           <button class="c2-ghost-pill" onclick="reviewEditOpen=false;renderReview()">cancel</button>
           <button class="d2-pill-green" onclick="reviewEditApprove()">Save fix & approve ✓</button>
         </div>` : reviewFlagOpen ? `
-        <div class="d2-note" style="margin:14px 0 8px">Why doesn't it work?</div>
-        <div class="d2-tab-row">
+        <div class="d2-note" style="margin:14px 0 8px">Why doesn't it work? It goes back to the contributor with your note — never silently gone (§17.2).</div>
+        <div class="d2-tab-row" id="review-flag-reasons">
           ${['wrong register', 'not natural', 'other dialect', 'misspelled'].map(rr =>
-            `<button class="d2-tab" onclick="reviewFlag('${rr}')">${rr}</button>`).join('')}
-          <button class="d2-tab" onclick="reviewFlagOpen=false;renderReview()">cancel</button>
+            `<button class="d2-tab" onclick="reviewPickReason(this,'${rr}')">${rr}</button>`).join('')}
+        </div>
+        <textarea id="review-flag-note" dir="auto" rows="2" placeholder="a sentence for the contributor — what would make it work?"
+          style="width:100%;margin-top:10px;border:1px solid rgba(217,107,90,.3);border-radius:14px;background:rgba(255,255,255,0.03);color:#f0ede8;font-family:var(--sans),'Noto Naskh Arabic';font-size:13.5px;line-height:1.6;padding:10px 14px;resize:none;outline:none"></textarea>
+        <div class="d2-pill-row" style="margin-top:10px">
+          <button class="c2-ghost-pill" onclick="reviewFlagOpen=false;renderReview()">cancel</button>
+          <button class="d2-pill-red" onclick="reviewSendBack()">Send back with note</button>
         </div>` : `
         <div class="d2-pill-row" style="margin-top:16px">
           <button class="d2-pill-red" onclick="reviewFlagOpen=true;renderReview()">Flag</button>
@@ -121,6 +167,27 @@ function renderReview() {
         </div>
         <div class="d2-note" style="text-align:center;margin:10px 0 0">${pending.length - 1} more waiting · your vote counts ×${tier.weight}</div>`}
       </div>`}
+
+      <div class="j2-sec-label" style="margin-top:24px">The vouch fast-track</div>
+      <div class="d2-card" style="padding:18px">
+        ${r.vouched ? `
+          <div class="d2-prompt" style="font-size:14px">🌟 You were vouched in as a <b style="color:var(--accent2)">Community Elder</b> — your single approval takes a phrase live. Your ear is the credential.</div>
+        ` : `
+          <div class="d2-note" style="margin-bottom:8px">Were you vouched in by a trusted member? Elders shouldn't grind points — identity does that work.</div>
+          <div style="display:flex;gap:8px">
+            <input id="vouch-code" placeholder="TRG-XXXXX" style="flex:1;border:1px solid rgba(255,255,255,0.12);border-radius:100px;background:rgba(255,255,255,0.04);color:#f0ede8;font-family:var(--sans);font-size:13px;padding:10px 16px;outline:none;text-transform:uppercase">
+            <button class="d2-pill-teal" onclick="reviewRedeemVouch()">Redeem</button>
+          </div>
+        `}
+        ${reviewCanVouch() ? `
+          <div style="border-top:1px solid rgba(255,255,255,.06);margin-top:14px;padding-top:12px">
+            <div class="d2-note" style="margin-bottom:8px">You can vouch someone in — a khalto, a habooba, anyone whose Sudanese is the real thing. Share a code:</div>
+            <div class="d2-tab-row" style="margin-bottom:8px">
+              ${_vouches().filter(v => !v.used).slice(-3).map(v => `<span class="d2-badge" style="font-family:monospace">${v.code}</span>`).join('') || '<span class="d2-item-note">no open codes</span>'}
+            </div>
+            <button class="c2-ghost-pill" onclick="reviewCreateVouch()">+ Create a vouch code</button>
+          </div>` : ''}
+      </div>
 
       ${liveAll.length ? `
       <div class="j2-sec-label" style="margin-top:24px">Verified — live for learners</div>
@@ -185,11 +252,21 @@ function reviewEditApprove() {
   }, true);
 }
 
-function reviewFlag(reason) {
+let _flagReason = null;
+function reviewPickReason(btn, reason) {
+  _flagReason = reason;
+  document.querySelectorAll('#review-flag-reasons .d2-tab').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+}
+function reviewSendBack() {
+  const note = (document.getElementById('review-flag-note')?.value || '').trim();
+  const reason = _flagReason || 'not natural';
   _reviewApply(item => {
-    item.status = 'flagged';
+    item.status = 'returned';           // §17.2: back to the contributor, not gone
     item.flagReason = reason;
+    item.reviewerNote = note || null;
   }, false);
+  _flagReason = null;
 }
 
 // live community counts per map region (§17.5 — the map pulls from this)
