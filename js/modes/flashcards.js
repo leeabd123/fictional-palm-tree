@@ -22,7 +22,7 @@ const MIC_SVG = `<svg width="19" height="19" viewBox="0 0 20 20" fill="#dcd2ff">
 function sayAr(enc) {
   if (!('speechSynthesis' in window)) return;
   const u = new SpeechSynthesisUtterance(decodeURIComponent(enc));
-  u.lang = 'ar-SA'; u.rate = 0.85;
+  u.lang = 'ar-SA'; u.rate = 0.88;
   window.speechSynthesis.cancel();
   window.speechSynthesis.speak(u);
 }
@@ -84,13 +84,12 @@ function renderFlash() {
 }
 
 // ── the design's 3D card carousel ──
-// d = offset from the active card. Exact values from the design export:
-// translateX(-50 + d*64 %) translateZ(active?0:-90px) rotateY(d*-26deg)
-// scale(active?1:.84) · neighbors at opacity .55 · |d|>=2 hidden.
+// d = offset from the active card. Spec: neighbors ±72% X, pushed back
+// translateZ(-120px), rotateY(∓12deg), opacity .55; |d|>=2 hidden.
 function flashCardTf(d) {
   const active = d === 0;
   return {
-    tf: `translateX(${-50 + d * 64}%) translateZ(${active ? 0 : -90}px) rotateY(${d * -26}deg) scale(${active ? 1 : 0.84})`,
+    tf: `translateX(${-50 + d * 72}%) translateZ(${active ? 0 : -120}px) rotateY(${d * -12}deg)`,
     op: active ? 1 : Math.abs(d) >= 2 ? 0 : 0.55,
     z: 5 - Math.abs(d),
     pe: Math.abs(d) >= 2 ? 'none' : 'auto',
@@ -129,7 +128,7 @@ function flashCardHTML(it, d, isAR) {
               <div class="f2-back-ar">${escAttr(it.a)}</div>
               <span style="display:inline-flex;gap:6px;align-items:center">
                 <span class="f2-ph" style="font-size:12px;white-space:nowrap">${escAttr(it.p)}</span>
-                ${speakerSVG('#a09e9a', encodeURIComponent(it.a))}
+                ${speakerSVG('#a09e9a', encodeURIComponent(it.a + '… ' + it.ex))}
               </span>
             </div>
             <div class="f2-back-en">${escAttr(it.e)}</div>
@@ -163,9 +162,9 @@ function flashBindSwipe() {
     if (flashSwipeX === null) return;
     const dx = e.clientX - flashSwipeX;
     flashSwipeX = null;
-    if (Math.abs(dx) > 48) {
+    if (Math.abs(dx) > 45) {
       flashJustSwiped = true;
-      setTimeout(() => { flashJustSwiped = false; }, 350);
+      setTimeout(() => { flashJustSwiped = false; }, 300);
       navCard(dx < 0 ? 1 : -1);
     }
   });
@@ -218,12 +217,16 @@ function flashCompareHTML(it) {
   const isAR = flashDir === 'ar';
   const target = isWord ? (isAR ? it.e : it.a) : (isAR ? it.exen : it.ex);
   const targetPh = isAR ? null : (isWord ? it.p : getExPh(it));
-  const words = target.split(/\s+/).filter(w => w.length > 1);
-  const norm = flashInput.toLowerCase();
-  const hit = (w) => norm.includes(w.toLowerCase().replace(/[.,!?،؟]/g, ''));
-  const hits = words.filter(hit);
-  const chips = words.map(w =>
-    `<span class="f2-p-chip ${hit(w) ? 'hit' : ''}" dir="auto">${escAttr(w)}</span>`).join('');
+  const clean = (w) => w.toLowerCase().replace(/[.,!?،؟—"']/g, '');
+  const words = target.split(/\s+/).map(clean).filter(w => w.length > 1);
+  // spec: a word counts if the learner typed the Arabic script OR its
+  // transliteration (Arabizi), case-insensitive
+  const phWords = (targetPh || '').split(/\s+/).map(clean);
+  const norm = clean(flashInput);
+  const hit = (w, i) => norm.includes(w) || (!!phWords[i] && phWords[i].length > 1 && norm.includes(phWords[i]));
+  const hits = words.filter((w, i) => hit(w, i));
+  const chips = words.map((w, i) =>
+    `<span class="f2-p-chip ${hit(w, i) ? 'hit' : ''}" dir="auto">${escAttr(w)}</span>`).join('');
   return `
     <div class="f2-p-compare">
       <div>
@@ -240,7 +243,7 @@ function flashCompareHTML(it) {
       </div>
     </div>
     <div class="f2-p-chips">
-      <span class="f2-p-score">matched ${hits.length} of ${words.length}</span>
+      <span class="f2-p-score">${hits.length} of ${words.length} words</span>
       ${chips}
     </div>
     <div class="d2-pill-row" style="margin-top:14px">
