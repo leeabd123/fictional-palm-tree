@@ -86,6 +86,10 @@ function renderContribute() {
       </div>
 
       ${contribMineHTML(mine)}
+
+      <div style="text-align:center;margin-top:26px">
+        <button class="c2-linklike" onclick="setMode('review')">Native speaker? Enter reviewer mode →</button>
+      </div>
     </div>
   `;
 }
@@ -101,7 +105,7 @@ function contribMineHTML(mine) {
             <div class="d2-star-en" style="margin:0;color:var(--text)" dir="auto">${escAttr(c.text)}</div>
             <div class="d2-item-note">${escAttr(c.prompt)} · ${[c.tags.region, c.tags.generation, c.tags.formality].filter(Boolean).map(escAttr).join(' · ') || 'untagged'}</div>
           </div>
-          <span class="d2-badge" style="white-space:nowrap">pending · 0/2</span>
+          <span class="d2-badge" style="white-space:nowrap;${c.status === 'live' ? 'color:var(--mint);border-color:rgba(86,201,143,.4)' : c.status === 'flagged' ? 'color:#e08a7a;border-color:rgba(217,107,90,.4)' : ''}">${c.status === 'live' ? '✓ live' : c.status === 'flagged' ? 'flagged — ' + escAttr(c.flagReason || '') : 'pending · ' + ((c.votes || []).reduce((n, v) => n + v.w, 0)) + '/' + TARIGA_CONFIG.review.liveThreshold}</span>
         </div>`).join('')}
     </div>`;
 }

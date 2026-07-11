@@ -119,6 +119,7 @@ function renderHome() {
       <div class="home-grid">
         ${homeCard('guided', '🤲', 'Guided', GUIDED_SCENARIOS.length + ' scenarios · 5 domains', true)}
         ${homeCard('speak', '🎙️', 'Your coach', 'Free scenarios · AI coaching')}
+        ${homeCard('freeform', domainTier(focusDomain()) !== 'Beginning' ? '✨' : '🔒', 'Free-form', domainTier(focusDomain()) !== 'Beginning' ? 'no scaffolding — just you' : 'unlocks at Comfortable tier')}
         ${homeCard('flash', '🃏', 'Flashcards', deck.length + ' in deck')}
         ${homeCard('listen', '👂', 'Tune your ear', 'podcast lines')}
         ${homeCard('journey', '✦', 'Your journey', 'then → now')}

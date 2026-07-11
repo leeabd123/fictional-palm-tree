@@ -139,3 +139,21 @@ If the new response shows growth over the old one (more Sudanese vocabulary, les
     output_schema: COACH_SCHEMA,
   };
 }
+
+// Free-form mode (§4, low scaffolding): open prompt, no reference answers.
+// The coach evaluates against natural spoken Sudanese patterns generally,
+// with an explicitly gentler bar — shorter answers are expected.
+function buildFreeformRequest(prompt, userText) {
+  const user = `OPEN PROMPT (free-form mode — no reference answers exist for this):
+${prompt.en}
+
+There are NO scenario reference answers here. Evaluate the learner's response against natural spoken Sudanese patterns from your knowledge of the dialect, with a gentler bar than scenario mode: this is open expression, shorter and looser answers are expected and fine. Set closest_model_index to 0 and use comparison_note for a general note on how the response reads as spoken Sudanese. There is no required/bonus vocab — return empty arrays for vocab_used_required and vocab_used_bonus.
+
+LEARNER'S RESPONSE (may be Arabic script, Arabizi, or a mix):
+${userText}`;
+  return {
+    system: COACH_SYSTEM,
+    messages: [{ role: 'user', content: user }],
+    output_schema: COACH_SCHEMA,
+  };
+}

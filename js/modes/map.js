@@ -14,6 +14,9 @@ const MAP_REGION_BARS = [
 
 function renderMap() {
   const ca = document.getElementById('content-area');
+  const live = typeof communityRegionCounts === 'function' ? communityRegionCounts() : {};
+  const REGION_BAR_ID = { 'Khartoum': 'khartoum', 'Red Sea': 'red_sea', 'Darfur': 'darfur', 'Northern': 'northern' };
+  const liveTotal = Object.values(live).reduce((a, b) => a + b, 0);
   ca.innerHTML = `
     <div class="coach-wrap">
       <button class="d2-back" onclick="setMode('home')">← home</button>
@@ -50,13 +53,13 @@ function renderMap() {
             ${MAP_REGION_BARS.map((r, i) => `
             <div class="m2-bar-row">
               <span class="m2-bar-name">${r.name}</span>
-              <div class="m2-bar"><i style="width:${r.pct}%; background:rgba(${r.col},.85); box-shadow:0 0 8px rgba(${r.col},.6);"></i></div>
-              <span class="m2-bar-n" style="color:rgba(${r.col},1)">${r.n}</span>
+              <div class="m2-bar"><i style="width:${Math.min(100, r.pct + (live[REGION_BAR_ID[r.name]] || 0) * 3)}%; background:rgba(${r.col},.85); box-shadow:0 0 8px rgba(${r.col},.6);"></i></div>
+              <span class="m2-bar-n" style="color:rgba(${r.col},1)">${r.n + (live[REGION_BAR_ID[r.name]] || 0)}${live[REGION_BAR_ID[r.name]] ? ' <span style="color:var(--mint)">+' + live[REGION_BAR_ID[r.name]] + '</span>' : ''}</span>
             </div>`).join('')}
           </div>` : ''}
         </div>
       </div>
-      <div class="m2-foot">Illustrative data — region tags grow from community contributions in Contribute mode.</div>
+      <div class="m2-foot">${liveTotal ? `<span style="color:var(--mint)">${liveTotal} community-verified phrase${liveTotal === 1 ? '' : 's'} live</span> — green counts come from real reviewed contributions; ` : ''}base numbers are illustrative until more regions report.</div>
     </div>
   `;
 }

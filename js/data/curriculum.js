@@ -399,6 +399,180 @@ const CALL_SEQUENCES = [
   },
 ];
 
+
+// ── Stage 3: Comfortable tier — two per domain. Wherever possible the
+// Arabic is lifted VERBATIM from lines that already passed the native
+// correction round (call sequences / corrected scenarios) — those keep
+// 'native-corrected'; anything newly assembled is 'pending-review'. ──
+GUIDED_SCENARIOS.push(
+  {
+    id: 'fam-fi-balna', domain: 'family', tier: 'Comfortable',
+    title: 'Telling family they\u2019re on your mind',
+    setup: 'On a call, family gently complains you\u2019ve all been out of touch. Apologize — and reassure them it isn\u2019t distance of the heart.',
+    register_note: 'warm, plural — the whole household',
+    prompt: { ar: 'مالكم مختفيين؟ طولتوا مننا', ph: 'malkum mukhtafyeen? tawaltu minna', en: 'Why have you all disappeared? It\u2019s been too long.' },
+    say_en: 'Sorry, I swear — we\u2019re busy with work and studying… but you\u2019re always on our mind',
+    targets: [
+      { ar: 'معلش والله، نحن مشغولين مع الشغل والقراية... لكن والله في بالنا', ph: 'ma3lash wallahi, nihna mashghooleen ma3 ash-shughl wal-giraya... lakin wallahi fi balna', en: 'Sorry, I swear — we\u2019re busy with work and studying… but you\u2019re always on our mind', gender: 'any' },
+    ],
+    required: ['معلش', 'في بالنا'],
+    note: 'The apology lands because of the second half — في بالنا ("on our mind") turns "sorry, busy" into "never forgotten".',
+    source: 'derived-from-corrected-call', verification_status: 'native-corrected',
+  },
+  {
+    id: 'fam-yahfazkum', domain: 'family', tier: 'Comfortable',
+    title: 'The protective goodbye',
+    setup: 'Ending a call with family — send them off with the blessing an elder would use.',
+    register_note: 'warm, blessing register',
+    prompt: null,
+    say_en: 'God protect you all — take care of yourselves, and don\u2019t lose touch',
+    targets: [
+      { ar: 'الله يحفظكم، خلوا بالكم من نفسكم، وما تنقطعوا', ph: 'allah yahfazkum, khallu balkum min nafsikum, wa ma tinqati3u', en: 'God protect you all, take care of yourselves, and don\u2019t lose touch', gender: 'any' },
+    ],
+    required: ['الله يحفظكم'],
+    note: 'Habooba\u2019s exact closing line from the call — goodbyes in Sudanese families are blessings, not just "bye".',
+    source: 'derived-from-corrected-call', verification_status: 'native-corrected',
+  },
+  {
+    id: 'fr-3uzur', domain: 'friends', tier: 'Comfortable',
+    title: 'Giving someone the excuse',
+    setup: 'A friend is worked up about something someone said about them. Offer the podcast\u2019s famous advice.',
+    register_note: 'wise, caring',
+    prompt: { ar: 'شفت الزول دا قال شنو عني؟', ph: 'shufta az-zool da gaal shinoo 3anni?', en: 'Did you see what that guy said about me?' },
+    say_en: 'Give the person the excuse — so YOUR mind can rest, not for his sake',
+    targets: [
+      { ar: 'خُذ للزول العذر عشان نفسيتك ترتاح — مش عشان الزول', ph: 'khuz lil-zool al-3uzur 3ashan nafseeytak tirtah — mish 3ashan az-zool', en: 'Give the person an excuse so your mind can rest — not for the person\u2019s sake', gender: 'any' },
+    ],
+    required: ['العذر', 'نفسيتك'],
+    note: 'Straight from Solja\u2019s episode — the most-quoted line in it. Making excuses FOR people protects YOUR peace.',
+    source: 'podcast-derived', verification_status: 'pending-review',
+  },
+  {
+    id: 'fr-haqquh', domain: 'friends', tier: 'Comfortable',
+    title: 'Disagreeing gracefully',
+    setup: 'A friend has an opinion you don\u2019t share. Hold your ground without making it a fight.',
+    register_note: 'calm, generous',
+    prompt: null,
+    say_en: 'He has the right to say whatever opinion he has — and I have mine',
+    targets: [
+      { ar: 'من حقه يقول أي رأي عنده — وأنا عندي رأيي', ph: 'min haqquh yaqool ayy ra\u2019y 3anduh — w-ana 3indi ra\u2019yi', en: 'He has the right to any opinion he has — and I have mine', gender: 'any' },
+    ],
+    required: ['من حقه'],
+    note: 'من حقه ("it\u2019s his right") is how the podcast guests defuse disagreement — space for the other view before your own.',
+    source: 'podcast-derived', verification_status: 'pending-review',
+  },
+  {
+    id: 'cm-question', domain: 'community', tier: 'Comfortable',
+    title: 'Approaching a stranger politely',
+    setup: 'You need help from someone you don\u2019t know at a community event.',
+    register_note: 'polite, warm opener',
+    prompt: null,
+    say_en: 'Peace be upon you — may I ask you a question?',
+    targets: [
+      { ar: 'السلام عليكم، ممكن أسألك سؤال؟', ph: 'as-salamu alaykum, mumkin as\u2019alak su\u2019aal?', en: 'Peace be upon you — can I ask you a question?', gender: 'any' },
+    ],
+    required: ['السلام عليكم', 'ممكن'],
+    note: 'Opening with the greeting before the request is non-negotiable politeness — the question comes second.',
+    source: 'founder-seeded', verification_status: 'pending-review',
+  },
+  {
+    id: 'cm-bless-back', domain: 'community', tier: 'Comfortable',
+    title: 'Returning a kindness with a blessing',
+    setup: 'Someone went out of their way for you. Thank them the full way.',
+    register_note: 'gracious, blessing register',
+    prompt: null,
+    say_en: 'May your goodness increase — God bless you all',
+    targets: [
+      { ar: 'كتّر خيرك، الله يبارك فيكم', ph: 'kattar khayrak, allah ybarik feekum', en: 'May your goodness increase — God bless you', gender: 'any' },
+    ],
+    required: ['كتّر خيرك'],
+    note: 'Stacking the two blessings is how real gratitude sounds — one thanks the act, one blesses the person.',
+    source: 'derived-from-corrected', verification_status: 'pending-review',
+  },
+  {
+    id: 'id-eid-greeting', domain: 'identity', tier: 'Comfortable',
+    title: 'The full Eid greeting',
+    setup: 'It\u2019s Eid morning and you\u2019re calling home. Open the call the proper way.',
+    register_note: 'celebratory, formulaic',
+    prompt: null,
+    say_en: 'Peace be upon you, may you be well every year — blessed Eid',
+    targets: [
+      { ar: 'السلام عليكم، كل سنة وإنتو طيبين، عيد مبارك', ph: 'as-salamu alaykum, kull sana wa intu tayybeen, eid mubarak', en: 'Peace be upon you, may you be well every year, blessed Eid', gender: 'any' },
+    ],
+    required: ['كل سنة وإنتو طيبين', 'عيد مبارك'],
+    note: 'The exact opening of the verified Eid call — كل سنة وإنتو طيبين is the chunk to keep whole.',
+    source: 'derived-from-corrected-call', verification_status: 'native-corrected',
+  },
+  {
+    id: 'id-next-year', domain: 'identity', tier: 'Comfortable',
+    title: 'The diaspora promise',
+    setup: 'Ending the Eid call — say the sentence every diaspora family says across the distance.',
+    register_note: 'hopeful, tender',
+    prompt: { ar: 'والله؟ نحن خلاص قرب يومنا انتهى', ph: 'wallahi? nihna khalas garrab yomna intaha', en: 'Really? Our day is almost over already' },
+    say_en: 'Next year, God willing, we\u2019ll celebrate together',
+    targets: [
+      { ar: 'سنة جاية إن شاء الله معايدين مع بعض', ph: 'sana jaya inshallah mu3ayydeen ma3 ba3d', en: 'Next year, God willing, we\u2019ll celebrate together', gender: 'any' },
+    ],
+    required: ['إن شاء الله'],
+    note: 'The closing line of the verified Eid call — the whole diaspora condition in seven words.',
+    source: 'derived-from-corrected-call', verification_status: 'native-corrected',
+  },
+  {
+    id: 'cu-intro-work', domain: 'culture', tier: 'Comfortable',
+    title: 'Introducing what you do — podcast style',
+    setup: 'Someone asks what you do and how long you\u2019ve been doing it. Answer like a podcast guest.',
+    register_note: 'natural, flowing',
+    prompt: { ar: 'بتعمل شنو وكم قاعد تعمله؟', ph: 'bita3mal shinoo w-kam qa3id ta3maluh?', en: 'What do you do and how long have you been doing it?' },
+    say_en: 'Honestly I\u2019ve been doing my work for about a year and a half now',
+    targets: [
+      { ar: 'صراحة أنا بعمل شغلي من حوالي سنة ونص هسه', ph: 'saraha ana ba3mil shughli min hawali sana w-nus hissa', en: 'Honestly I\u2019ve been doing my work for about a year and a half now', gender: 'any' },
+    ],
+    required: ['صراحة', 'هسه'],
+    note: 'The model answer from the flagship coach scenario — صراحة opens, هسه lands it in the present.',
+    source: 'podcast-derived', verification_status: 'pending-review',
+  },
+  {
+    id: 'cu-going-well', domain: 'culture', tier: 'Comfortable',
+    title: 'Saying things are going well — fully',
+    setup: 'A longer status update, the way the guests actually give one.',
+    register_note: 'flowing, grateful',
+    prompt: { ar: 'الشغل ماشي كيف؟', ph: 'ash-shughl mashi kayf?', en: 'How\u2019s the work going?' },
+    say_en: 'I mean, praise God, things are going well and I\u2019m happy',
+    targets: [
+      { ar: 'يعني الحمد لله الموضوع ماشي كويس وأنا مبسوط', ph: 'ya3ni al-hamdu lillah al-mawdoo3 mashi kuayis w-ana mabsoot', en: 'I mean, praise God, things are going well and I\u2019m happy', gender: 'm' },
+      { ar: 'يعني الحمد لله الموضوع ماشي كويس وأنا مبسوطة', ph: 'ya3ni al-hamdu lillah al-mawdoo3 mashi kuayis w-ana mabsoota', en: 'I mean, praise God, things are going well and I\u2019m happy', gender: 'f' },
+    ],
+    required: ['يعني', 'الحمد لله'],
+    note: 'يعني opens the thought, الحمد لله carries it — a whole sentence built from the two most Sudanese connectors.',
+    source: 'podcast-derived', verification_status: 'pending-review',
+  }
+);
+
+// ── Free-form prompts (§4 low scaffolding) — open questions, minimal help.
+// Unlocks per domain at Comfortable tier (§13 progressive unlock). ──
+const FREEFORM_PROMPTS = [
+  { id: 'ff-fam-1', domain: 'family', en: 'Tell me about your favorite person in your family — who are they to you?', hint: 'a few sentences, any way you want' },
+  { id: 'ff-fam-2', domain: 'family', en: 'What does a Friday at your family\u2019s house look like?', hint: 'paint the scene' },
+  { id: 'ff-fr-1', domain: 'friends', en: 'Tell me about the last time you laughed really hard with a friend.', hint: 'the story, not just the fact' },
+  { id: 'ff-cm-1', domain: 'community', en: 'Describe your neighborhood to someone from Sudan who\u2019s never seen it.', hint: 'what would surprise them?' },
+  { id: 'ff-id-1', domain: 'identity', en: 'What does being Sudanese mean to you — in your own words?', hint: 'there is no wrong answer here' },
+  { id: 'ff-cu-1', domain: 'culture', en: 'Tell me about a Sudanese song, dish, or tradition you love — and why.', hint: 'speak like you\u2019re telling a friend' },
+];
+
+// domain tier progression: Beginning until (nearly) all Beginning-tier items
+// in the domain are practiced, then Comfortable (config-driven threshold)
+function domainTier(domainId) {
+  const done = getGuidedProgress();
+  const beg = GUIDED_SCENARIOS.filter(g => g.domain === domainId && g.tier === 'Beginning');
+  if (!beg.length) return 'Beginning';
+  const practiced = beg.filter(g => done[g.id]).length;
+  const need = Math.ceil(beg.length * (window.TARIGA_CONFIG ? TARIGA_CONFIG.unlock.beginningShare : 0.8));
+  return practiced >= need ? 'Comfortable' : 'Beginning';
+}
+
+// map contribute-form region tags onto map region ids (live map data, §17.5)
+const REGION_TAG_MAP = { 'Khartoum': 'khartoum', 'Omdurman': 'khartoum', 'Port Sudan': 'red_sea', 'North': 'northern', 'West': 'darfur' };
+
 // ── learner profile + guided progress (localStorage) ──
 function getProfile() {
   try { return JSON.parse(localStorage.getItem('tariga_profile_v1') || '{}'); } catch (e) { return {}; }

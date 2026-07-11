@@ -14,7 +14,11 @@ let guidedGender = (getProfile().gender === 'm') ? 'm' : 'f';
 
 function guidedList() {
   const dm = focusDomain();
-  return GUIDED_SCENARIOS.filter(g => g.domain === dm);
+  const list = GUIDED_SCENARIOS.filter(g => g.domain === dm);
+  return [...list.filter(g => g.tier === 'Beginning'), ...list.filter(g => g.tier !== 'Beginning')];
+}
+function guidedLocked(it) {
+  return it.tier === 'Comfortable' && domainTier(it.domain) === 'Beginning';
 }
 function guidedDomain() { return DOMAINS.find(d => d.id === focusDomain()) || DOMAINS[0]; }
 function guidedItem() { return guidedList()[guidedIdx]; }
@@ -36,6 +40,31 @@ function renderGuided() {
   const ca = document.getElementById('content-area');
   if (guidedIdx >= guidedList().length) guidedIdx = 0;
   const it = guidedItem();
+  if (guidedLocked(it)) {
+    ca.innerHTML = `
+      <div class="coach-wrap">
+        <button class="d2-back" onclick="setMode('home')">← home</button>
+        <div class="c2-head">
+          <div>
+            <div class="c2-title">Guided · ${guidedDomain().label}</div>
+            <div class="c2-sub">${guidedIdx + 1} of ${guidedList().length} · Comfortable tier</div>
+          </div>
+          <div class="speak-q-nav" style="margin:0">
+            <button class="arrow-btn" onclick="guidedNav(-1)" ${guidedIdx === 0 ? 'disabled' : ''}>←</button>
+            <button class="arrow-btn" onclick="guidedNav(1)" ${guidedIdx >= guidedList().length - 1 ? 'disabled' : ''}>→</button>
+          </div>
+        </div>
+        <div class="d2-card" style="text-align:center">
+          <div style="font-size:34px">🔒</div>
+          <div class="c2-title" style="font-size:19px;margin:10px 0 6px">${escAttr(it.title)}</div>
+          <div class="d2-note" style="margin:0 auto;max-width:380px">This one unlocks at Comfortable tier — finish the ${guidedDomain().label} basics first and it opens on its own.</div>
+          <div class="d2-pill-row" style="margin-top:16px">
+            <button class="d2-pill-gold" onclick="guidedIdx=0;renderGuided()">Back to the basics →</button>
+          </div>
+        </div>
+      </div>`;
+    return;
+  }
   const targets = guidedTargets(it);
   const target = targets[Math.min(guidedTargetIdx, targets.length - 1)];
   const hasGenderVariants = it.targets.some(t => t.gender !== 'any') || (it.prompt && it.prompt.variants);
@@ -50,7 +79,7 @@ function renderGuided() {
       <div class="c2-head">
         <div>
           <div class="c2-title">Guided · ${guidedDomain().label}</div>
-          <div class="c2-sub">${guidedIdx + 1} of ${guidedList().length} · ${escAttr(it.tier)} tier · say it like family would</div>
+          <div class="c2-sub">${guidedIdx + 1} of ${guidedList().length} · ${escAttr(it.tier)} tier · domain: ${domainTier(focusDomain())}${domainTier(focusDomain()) !== 'Beginning' ? ' ✓' : ''}</div>
         </div>
         <div class="speak-q-nav" style="margin:0">
           <button class="arrow-btn" onclick="guidedNav(-1)" ${guidedIdx === 0 ? 'disabled' : ''}>←</button>
@@ -113,6 +142,11 @@ function renderGuided() {
           <button class="d2-pill-gold" onclick="guidedNext()">${guidedIdx >= guidedList().length - 1 ? 'The calls →' : 'Next →'}</button>
         </div>
       `}
+
+      ${domainTier(focusDomain()) !== 'Beginning' ? `
+      <div class="d2-pill-row" style="margin-top:22px">
+        <button class="d2-pill-teal" onclick="setMode('freeform')">✨ Free-form unlocked — speak without the scaffolding →</button>
+      </div>` : ''}
 
       ${CALL_SEQUENCES.some(c => c.domain === focusDomain()) ? `
       <div class="j2-sec-label" style="margin-top:26px">The calls — put it together</div>
