@@ -101,6 +101,11 @@ function renderContribute() {
         <textarea id="contrib-text" dir="auto" rows="2" placeholder="${contribKind === 'prompt' ? "اكتب هنا… your family's way (Arabic script or Arabizi)" : 'اكتب العبارة هنا… the phrase itself (Arabic script or Arabizi)'}"
           style="width:100%;margin-top:14px;border:1px solid rgba(255,255,255,0.1);border-radius:14px;background:rgba(255,255,255,0.03);color:#f0ede8;font-family:var(--sans),'Noto Naskh Arabic';font-size:15px;line-height:1.7;padding:12px 14px;resize:none;outline:none"></textarea>
 
+        ${apiConfigured() ? `
+        <div style="text-align:right;margin-top:8px">
+          <button class="c2-linklike" id="contrib-suggest-btn" onclick="contribSuggestTags()">✨ suggest tags (AI proposes, you confirm)</button>
+          <span id="contrib-suggest-out" class="d2-item-note" style="display:block;text-align:left;margin-top:6px"></span>
+        </div>` : ''}
         <div class="d2-note" style="margin:14px 0 8px">Region</div>
         <div class="d2-tab-row" style="margin-bottom:0">${['Khartoum', 'Omdurman', 'Port Sudan', 'North', 'West', 'Diaspora'].map(t =>
           `<button class="d2-tab ${contribTags.region === t ? 'on' : ''}" onclick="contribTag('region','${t}')">${t}</button>`).join('')}
@@ -204,4 +209,26 @@ function contribResubmit(ts) {
   item.resubmitted = true;
   _saveContribs(all);
   renderContribute();
+}
+
+
+// §17.4 — AI suggests domain/tier/register from the raw text; the human
+// confirms. Region and generation stay human-only (they are personal facts).
+async function contribSuggestTags() {
+  const text = (document.getElementById('contrib-text')?.value || '').trim();
+  if (!text) { document.getElementById('contrib-text')?.focus(); return; }
+  const btn = document.getElementById('contrib-suggest-btn');
+  const out = document.getElementById('contrib-suggest-out');
+  if (btn) btn.textContent = 'thinking…';
+  try {
+    const meaning = (document.getElementById('contrib-meaning')?.value || '').trim();
+    const sug = await coachEvaluate(buildTagSuggestRequest(text, meaning));
+    if (out) out.textContent = `suggested: ${sug.domain} · ${sug.tier} · ${sug.register} — ${sug.reasoning} (tap the pills below to confirm or change)`;
+    // pre-select the matching register pill when one exists
+    const regMap = { 'warm/family': 'Warm/family', 'respectful/formal': 'Respectful/formal', 'playful/teasing': 'Playful/teasing' };
+    if (regMap[sug.register]) contribTags.formality = regMap[sug.register];
+  } catch (e) {
+    if (out) out.textContent = 'could not reach the tagger — pick tags by hand.';
+  }
+  if (btn) btn.textContent = '✨ suggest tags (AI proposes, you confirm)';
 }

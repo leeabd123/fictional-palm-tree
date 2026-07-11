@@ -84,6 +84,26 @@ export default {
       return new Response(null, { status: 204, headers: cors });
     }
 
+    // ── scrappy internal stats (§9): GET /api/stats?key=... reads the D1
+    // event log. Guarded by a STATS_KEY secret; founder-only, not public.
+    if (url.pathname === '/api/stats' && request.method === 'GET') {
+      if (!env.STATS_KEY || url.searchParams.get('key') !== env.STATS_KEY) {
+        return json({ error: 'forbidden' }, 403, cors);
+      }
+      if (!env.DB) return json({ error: 'no_database', detail: 'bind a D1 database as DB' }, 501, cors);
+      try {
+        const byType = await env.DB.prepare(
+          'SELECT t, COUNT(*) n FROM events GROUP BY t ORDER BY n DESC').all();
+        const byMode = await env.DB.prepare(
+          "SELECT mode, COUNT(*) n FROM events WHERE t='mode_enter' GROUP BY mode ORDER BY n DESC").all();
+        const days = await env.DB.prepare(
+          "SELECT date(ts/1000,'unixepoch') d, COUNT(*) n FROM events GROUP BY d ORDER BY d DESC LIMIT 14").all();
+        return json({ byType: byType.results, byMode: byMode.results, days: days.results }, 200, cors);
+      } catch (e) {
+        return json({ error: 'query_failed', detail: String(e) }, 500, cors);
+      }
+    }
+
     if (url.pathname !== '/api/coach' || request.method !== 'POST') {
       return json({ error: 'not_found' }, 404, cors);
     }

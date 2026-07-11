@@ -36,12 +36,21 @@ function renderMap() {
             <span class="m2-cell-label">Featured word</span>
             <span class="m2-cell-chev">${mapC1Open ? '▴' : '▾'}</span>
           </button>
-          ${mapC1Open ? `
+          ${mapC1Open ? (() => {
+            const liveOnes = (typeof _loadContribs === 'function' ? _loadContribs() : []).filter(c => c.status === 'live');
+            const latest = liveOnes[liveOnes.length - 1];
+            return latest ? `
+          <div class="m2-cell-body">
+            <div class="m2-feat-ar">${escAttr(latest.text)}</div>
+            <div class="m2-feat-ph">community-verified ✓</div>
+            <div class="m2-feat-note">The newest phrase to go live${latest.tags && latest.tags.region ? ' — from <b>' + escAttr(latest.tags.region) + '</b>' : ''}, straight from the review pipeline.</div>
+          </div>` : `
           <div class="m2-cell-body">
             <div class="m2-feat-ar">فاهماني</div>
             <div class="m2-feat-ph">fahimani</div>
             <div class="m2-feat-note">Most heard in <b>Khartoum &amp; Omdurman</b> — glowing gold on the map.</div>
-          </div>` : ''}
+          </div>`;
+          })() : ''}
         </div>
         <div class="m2-cell">
           <button class="m2-cell-head" onclick="mapToggle(2)">

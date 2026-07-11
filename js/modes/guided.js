@@ -11,6 +11,8 @@ let guidedInput = '';
 let guidedChecked = false;
 let guidedTargetIdx = 0;      // which model target the learner is compared against
 let guidedGender = (getProfile().gender === 'm') ? 'm' : 'f';
+let guidedBrowse = false;
+let guidedFilter = 'all';   // 'all' | 'Beginning' | 'Comfortable' | 'verified' | 'pending'
 
 function guidedList() {
   const dm = focusDomain();
@@ -87,6 +89,11 @@ function renderGuided() {
         </div>
       </div>
 
+      <div style="text-align:center;margin-bottom:12px">
+        <button class="c2-linklike" onclick="guidedBrowse=!guidedBrowse;renderGuided()">${guidedBrowse ? 'hide the list' : 'browse all ' + guidedDomain().label.toLowerCase() + ' scenarios'}</button>
+      </div>
+      ${guidedBrowse ? guidedBrowseHTML() : ''}
+
       <div class="c2-qcard">
         <div class="c2-qlabel">${escAttr(it.title)} ${done[it.id] ? '· ✓ practiced' : ''}</div>
         ${it.verification_status === 'pending-review' ? '<div class="d2-badge" style="margin-bottom:10px">founder-seeded · pending native review</div>' : ''}
@@ -137,6 +144,9 @@ function renderGuided() {
           <span class="d2-when-body">${escAttr(it.note)}</span>
         </div>
         <div class="c2-encourage">Now say it out loud. Twice. That's the whole trick.</div>
+        <div class="d2-note" style="text-align:center;margin:2px 0 0">
+          <button class="c2-linklike" onclick="setMode('listen')">hear phrases like this in the real podcast →</button>
+        </div>
         <div class="d2-pill-row">
           <button class="c2-ghost-pill" onclick="guidedTryAgain()">↻ Try again</button>
           <button class="d2-pill-gold" onclick="guidedNext()">${guidedIdx >= guidedList().length - 1 ? 'The calls →' : 'Next →'}</button>
@@ -216,6 +226,35 @@ function guidedNav(dir) {
   if (n < 0 || n >= guidedList().length) return;
   guidedIdx = n; guidedInput = ''; guidedChecked = false; guidedTargetIdx = 0;
   renderGuided();
+}
+
+
+// §15 — one flat list per domain, sorted by tier, filter chips additive.
+// Community-approved scenarios will slot into this same list via their tags.
+function guidedBrowseHTML() {
+  const done = getGuidedProgress();
+  const list = guidedList().filter(g =>
+    guidedFilter === 'all' ? true :
+    guidedFilter === 'verified' ? g.verification_status === 'native-corrected' :
+    guidedFilter === 'pending' ? g.verification_status === 'pending-review' :
+    g.tier === guidedFilter);
+  return `
+    <div class="d2-card" style="padding:16px;margin-bottom:14px">
+      <div class="d2-tab-row">
+        ${['all', 'Beginning', 'Comfortable', 'verified', 'pending'].map(f =>
+          `<button class="d2-tab ${guidedFilter === f ? 'on' : ''}" onclick="guidedFilter='${f}';renderGuided()">${f}</button>`).join('')}
+      </div>
+      ${list.length ? list.map(g => {
+        const i = guidedList().indexOf(g);
+        const locked = guidedLocked(g);
+        return `
+        <button class="d2-acc-head" style="border-top:1px solid rgba(255,255,255,.05)" onclick="${locked ? 'void 0' : `guidedIdx=${i};guidedChecked=false;guidedInput='';guidedBrowse=false;renderGuided()`}">
+          <span class="d2-acc-num">${locked ? '🔒' : done[g.id] ? '✓' : '·'}</span>
+          <span class="d2-acc-en" style="${locked ? 'opacity:.5' : ''}">${escAttr(g.title)}</span>
+          <span class="d2-badge" style="${g.verification_status === 'native-corrected' ? 'color:var(--mint);border-color:rgba(86,201,143,.35)' : ''}">${g.tier}${g.verification_status === 'pending-review' ? ' · pending' : ''}</span>
+        </button>`;
+      }).join('') : '<div class="d2-note" style="margin:8px 0 0">nothing matches this filter</div>'}
+    </div>`;
 }
 
 // ── Phone Call Lite ──

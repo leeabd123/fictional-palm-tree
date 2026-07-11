@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tariga — internal stats</title>
+<style>
+  body{background:#0f0d0b;color:#f0ede8;font-family:system-ui,sans-serif;max-width:560px;margin:40px auto;padding:0 20px}
+  h1{font-size:18px;color:#c9a96e} input,button{padding:10px 14px;border-radius:10px;border:1px solid #3a362f;background:#1c1915;color:#f0ede8;font-size:14px}
+  button{background:#c9a96e;color:#1a1206;font-weight:700;cursor:pointer;border:none}
+  table{width:100%;border-collapse:collapse;margin:14px 0}
+  td,th{padding:7px 10px;border-bottom:1px solid #2a2620;font-size:13px;text-align:left}
+  th{color:#7a756e;text-transform:uppercase;font-size:10px;letter-spacing:.1em}
+  .note{color:#7a756e;font-size:12px;line-height:1.6}
+</style></head><body>
+<h1>طريقة — internal stats (founder only)</h1>
+<p class="note">Scrappy on purpose (§9 of the learning-design doc). Reads the Worker's D1 event log.
+Set a <code>STATS_KEY</code> secret on the Worker (<code>wrangler secret put STATS_KEY</code>) and bind a D1 database as <code>DB</code>.
+Do not publish this page's URL with the key filled in.</p>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin:16px 0">
+  <input id="w" placeholder="https://tariga-coach.you.workers.dev" style="flex:2;min-width:220px">
+  <input id="k" placeholder="STATS_KEY" style="flex:1;min-width:120px">
+  <button onclick="load()">Load</button>
+</div>
+<div id="out" class="note">—</div>
+<script>
+async function load(){
+  const w=document.getElementById('w').value.replace(/\/$/,''), k=document.getElementById('k').value;
+  const out=document.getElementById('out'); out.textContent='loading…';
+  try{
+    const r=await fetch(w+'/api/stats?key='+encodeURIComponent(k));
+    const d=await r.json();
+    if(!r.ok){out.textContent='error: '+(d.error||r.status)+(d.detail?' — '+d.detail:'');return;}
+    const table=(title,rows,c1,c2)=>'<h1>'+title+'</h1><table><tr><th>'+c1+'</th><th>'+c2+'</th></tr>'+
+      rows.map(x=>'<tr><td>'+(x[c1]||'—')+'</td><td>'+x[c2]+'</td></tr>').join('')+'</table>';
+    out.innerHTML=table('Events by type',d.byType,'t','n')+table('Mode popularity',d.byMode,'mode','n')+table('Last 14 days',d.days,'d','n');
+  }catch(e){out.textContent='unreachable: '+e;}
+}
+</script></body></html>

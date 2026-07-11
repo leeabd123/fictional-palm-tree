@@ -2,104 +2,69 @@
 
 *A voice-first, community-verified Sudanese Arabic coach for diaspora heritage speakers.*
 *Use this document as the briefing when discussing curriculum, functionality, or strategy improvements.*
+*All four roadmap stages of the learning-design doc are built (Stage 1 → 4).*
 
 ---
 
 ## 1. The core idea
 
 - **Audience:** diaspora heritage speakers who understand some Sudanese Arabic but freeze when speaking — the goal is sounding like family, not passing a test.
-- **Philosophy:** comparison, never judgment. Nothing in the app says "correct/incorrect" — feedback is always "here's a natural way speakers say it" next to what you said.
-- **Content source:** real podcast transcripts (Wansa ma3 Us — Solja episode, Ala Al-Shareef episode) plus a Sudanese slang glossary and deep vocab bank, so every phrase is something a real speaker actually said.
-- **Arabizi is a first-class citizen:** every input accepts Arabic script or Latin-letter Arabizi (saraha, 3ashan…), because that's how the diaspora actually types.
+- **Philosophy:** comparison, never judgment. Feedback is always "here's a natural way speakers say it" next to what you said — the primary comparison is *your answer vs. an upgraded version of your own answer*.
+- **Content sources:** real podcast transcripts (Wansa ma3 Us — Solja; Ala Al-Shareef), a Sudanese glossary, and native-speaker-corrected scenario content. Anything not yet through the native correction round is badged "pending native review" in-app.
+- **Arabizi is a first-class citizen** in every input, everywhere.
 
-## 2. The AI coach (Speak & Respond) — the flagship loop
+## 2. The curriculum (§14 schema)
 
-- **22 real-life scenarios** (podcast-style questions: introduce yourself, handle hate comments, what success means…), each with:
-  - English question + Arabic + phonetic behind a "show hint" reveal
-  - required + bonus vocab chips ("try using") that glow teal live as you weave them into your answer
-  - 2–3 native-speaker model answers (never called "the correct answer")
-  - a coaching tip
-- **Tiered response modes:** voice-first (big mic → full-screen listening orb with live transcript, Stop / Compare-with-a-native / cancel) with graceful fallback to a text box; whisper-quiet speech works.
-- **Claude-powered comparison feedback** (structured JSON, enforced schema):
-  - overall impression, strengths ("already sounds Sudanese") with quotes
-  - MSA-flagged phrases with the Sudanese swap (e.g. الآن → هسه)
-  - English-shaped phrasing with more natural alternatives
-  - code-switched English words (framed as normal, swap one at a time)
-  - which model answer yours was closest to + comparison note
-  - an upgraded version of *your own* answer (stays close to what you said) with a speak-aloud 🔊 button
-  - encouragement in the app's warm voice
-- **Attempt history per scenario** stored locally with client-side metrics (Sudanese key phrases used, English words mixed in, natural score 0–100).
-- **The Journey view:** first try → latest side by side, score grid with glowing bars, "the numbers" deltas, new Sudanese vocab picked up, English no longer leaned on, every-attempt timeline.
+- **Five life domains** (Family · Friends · Community · Identity · Culture), each with its own comfort tier (Beginning → Comfortable → Natural → Native-like) — progress is a shape across domains (radar chart on Journey), never one global level.
+- **32+ guided scenarios** across all domains at Beginning + Comfortable tiers, with `gender_variant` targets (شبعان/شبعانة), register notes, required vocab, cultural notes, source + verification status on every item.
+- **Progressive unlock:** Comfortable scenarios, Free-form, speed rounds, and the Live call unlock per-domain as Beginning items are practiced — mode discovery as a side effect of progress.
+- **Flat, filterable scenario browser** per domain (tier/verified/pending chips) — community-approved items will slot into the same list via tags.
 
-## 3. Learning modes (the path)
+## 3. The practice ladder (§4 — scaffolding fades as you grow)
 
-| Mode | What it does |
-|---|---|
-| **Home** | Time-of-day Sudanese greeting, streak pill, progress ring (% of scenarios coached), stat rows, deck-source switcher, path cards, map preview |
-| **Flashcards** | Floating 3D card (tap to flip, swipe to browse), عربي→EN and EN→عربي directions, speak-aloud, star, progress dots, + a Word/Sentence practice panel that works in both directions (type or speak → compare vs the card with matched-word chips) |
-| **Deep cards + synonyms** | Word + context + example + teal "swap in" synonym chips |
-| **Quiz** | 4-choice recognition, instant green/red, streak dots |
-| **Deep quiz** | 4 drill types: context cloze, mixed drill, EN→AR production, word-order arrange — built on retrieval practice/interleaving research |
-| **Shadowing** | English prompt → say it out loud → blurred Arabic behind a dashed reveal → Try again / Nailed it |
-| **Sentence builder** | Situation + target phrase (gold keyword box) → build your own → "show one natural way" |
-| **Flow translation** | Whole-paragraph production, then check line by line (accordion with vocab chips) |
-| **Tune your ear** | Comprehension without production: predict the *meaning* of a real podcast line, or predict *what comes next* in an exchange; Arabic/phonetic layers toggleable; session score |
-| **Conversation mode** | The real podcast scene by scene as chat bubbles; full-read mode (blur-reveal every line) or respond mode ("Your turn — you're Solja" with vocab chips) |
-| **Transitions guide** | The connectors that make you sound fluent (pivots, fillers) with when-to-use rules and examples |
-| **Vocab lists** | Curated lists (Essential 30 first) as a scannable grid |
-| **Full reference** | Every phrase in one searchable/filterable table |
-| **Starred items** | Star anything anywhere; persists across sessions; review list with examples + speak-aloud |
-| **Word origins map** | Animated globe finds Sudan → dotted-particle map with real borders, the Nile, region groups; tap a region for its phrases + learner counts; featured word of the week |
+| Tier | Mode | What happens |
+|---|---|---|
+| Highest | **Guided** | English shown → produce the Arabic → compared word-by-word against a native-verified target (Arabic script OR Arabizi counts) |
+| High | **Phone Call Lite** | Real calls turn by turn — every family line pre-written and verified (Habooba checks in · Eid across time zones · a condolence visit) |
+| Medium | **Your coach (Scenario)** | Free response → Claude compares against 2-3 native model answers |
+| Low | **Free-form** | Open prompt, no vocab list, no references — gentler bar |
+| None | **📞 Live call** | Habooba answers *dynamically* — every turn generated but few-shot grounded on the verified transcripts; coaching arrives as quiet whispers, never in character |
 
-## 4. Community & preservation (Contribute)
+## 4. The AI coach
 
-- Micro-prompts, not open-ended asks ("your khalto says you look too thin — what do you say?")
-- Answers tagged by **region** (Khartoum, Omdurman, Port Sudan…) and **generation** (grandparents' / parents' / my generation) — because there is no single "correct way"
-- Trust threshold stated up front: goes live only after **2–3 independent native speakers** confirm it sounds natural
-- Submissions persist locally as "pending review" (the real review backend is the next build)
-- Region tags are what will eventually power real data on the map
+- Structured JSON feedback: overall, strengths, MSA→Sudanese swaps, English-shaped phrasing, code-switching (framed kindly), **missed transition words** (يعني، صراحة…), **missed formulaic chunks** (إن شاء الله as one unit), **register calibration** ("correct Arabic, but a bit too casual for an elder"), closest model answer, an upgraded version of *your own* answer with speak-aloud, encouragement.
+- Feedback hierarchy (§0): upgraded-own-answer is primary; model answers + specific flags are collapsed secondary.
+- Journey "the numbers": Sudanese phrases · English mixed in · transition words · formulaic chunks, then → now, per scenario.
 
-## 5. Progress & motivation systems
+## 5. Learning modes (the full library)
 
-- Practice streak (consecutive days, any mode counts)
-- Scenarios-coached progress ring on home
-- Mastered / still-learning card marking
-- Natural score per coach attempt (client-side heuristic; the AI does the qualitative part)
-- Before/after journey per scenario (the "look how far you've come" moment)
-- Starred-items count in the nav
+Flashcards (3D carousel, both directions, shared compare engine) · Deep cards + synonyms · Quiz · Deep quiz (cloze/production/word-order) · Shadowing · Sentence builder · Flow translation · Tune your ear (meaning · what-comes-next · **dictogloss reconstruct**) · Conversation mode (real podcast scenes) · **Speed rounds** (timed automatization over practiced items) · Transitions guide · Vocab lists · Full reference · Starred · Word origins map · **Warm-up** (returning users: 2+ days away → review from your own history first) · **How Tariga works** (plain-language research grounding: Output Hypothesis, Noticing, desirable difficulties, TBLT, ZPD, recasts…)
 
-## 6. Design system
+## 6. Community & trust (§16–17)
 
-- Dark, warm, Sudanese-gold identity: Instrument Serif italics + DM Sans + Noto Naskh Arabic
-- Glass panels, pill buttons, teal coach accents, lavender-pink voice gradients, gold CTAs
-- Animated WebGL orb (idle / listening / thinking states) as the coach's presence
-- Collapsible sidebar on desktop (persisted), off-canvas drawer + bottom tab bar on mobile
-- Every screen matches the Claude-design export
+- **Contribute:** weekly prompts + free "suggest a phrase", tagged by region/generation/register; **AI-assisted tag suggestion** (Claude proposes domain/tier/register, human confirms — region/generation stay human-only); **gap-detection agent** surfaces one targeted ask from real coverage data.
+- **Reviewer mode** — a distinct surface: one submission at a time, Approve / Edit-and-approve / Flag with reason **and a note back to the contributor** (returned items show the note + fix-and-resubmit; never silently gone).
+- **Dual-track trust ladder:** organic (New ×1 → Contributor ×2 → Trusted ×3, weighted votes, config-driven live threshold) + **vouch fast-track** (Trusted members mint codes; a redeemed elder lands as Community Elder at full weight — identity as the credential).
+- "Did you know" discovery after each review; communal verified-this-week stat; personal impact numbers.
+- **Live map data:** verified region-tagged phrases add green +N counts per region and replace the featured word with the newest live phrase.
 
-## 7. Architecture (for functionality discussions)
+## 7. Progress & motivation
 
-- **Zero-build static app** — vanilla JS + CSS, deployable on GitHub Pages; works offline except the AI coach
-- **Cloudflare Worker proxy** for the Claude API: the API key lives only as a Worker secret, never in the front-end; origin allowlist, rate limiting, model + token caps (`worker/README.md`, ~10-min deploy, ~$0.02/eval)
-- Dev fallback: personal API key stored in the browser only
-- All user data in localStorage: stars, attempts, activity/streak, contributions, API config, sidebar state
-- Browser SpeechRecognition for rough voice input (accuracy on Sudanese is limited — that's why text ships first); browser speechSynthesis for speak-aloud
+Streaks · progress ring · per-domain tiers + radar · before/after journey per scenario · natural score · starred persistence · first-run intro (السلام عليكم exchange + comfort self-report, first win < 1 min).
 
-## 8. Known gaps — the improvement backlog to discuss
+## 8. Architecture
 
-**Curriculum**
-- No spaced-repetition scheduler yet (cards don't resurface on a forgetting curve)
-- No leveling/sequencing — all scenarios and decks are flat; no "start here" path by proficiency
-- No listening comprehension with *actual audio* — Tune your ear is text-based until native recordings exist
-- Only 2 podcast episodes + glossary as source content; no grammar micro-lessons (verb conjugation, negation patterns)
-- No assessment/placement ("how Sudanese do I sound today?" baseline test)
+- **Zero-build static app** (GitHub Pages) + **Cloudflare Worker** proxy: API key server-side only, origin allowlist, rate limits, model/token caps.
+- **Event logging (§9):** `/api/events` (anonymized, batched, no PII → D1 when bound) + `/api/stats` (STATS_KEY-guarded) + `stats.html` scrappy internal dashboard.
+- **Config-driven** (`js/core/config.js`): copy + thresholds as data, A/B-ready.
+- All user data localStorage; shapes (votes/tiers/statuses/events) designed for the D1 backend to slot behind.
+- Browser STT/TTS as placeholders until native recordings exist.
 
-**Functionality**
-- Community review pipeline is front-end only (no backend, no reviewer accounts)
-- No user accounts / cross-device sync (everything is per-browser)
-- TTS is generic Arabic, not a Sudanese voice; STT struggles with the dialect — native-speaker audio recordings are the real fix for both
-- Map region data is illustrative until contributions carry real tags
-- No push/reminder loop to protect streaks; no social features (share your journey, family leaderboard)
-- Voice mode records transcript only — no pronunciation scoring or audio playback of your own attempt
+## 9. The honest backlog
+
+- **The one real engineering gap:** the trust/review/vouch/event shapes run on localStorage — wiring the D1 backend makes it multi-user. Everything is shaped for that already.
+- Native-speaker sign-off needed on: all "pending native review" scenarios (Stage 2/3 batches), the live-call transcript quality, scenario 4's reconstructed script, the condolence phrasing, and the ذ/ث/ظ checklist in `docs/PHONETICS-AUDIT.md`.
+- No spaced-repetition scheduler yet (warm-up approximates it); no real native audio (fixes TTS + STT quality at once); no accounts/sync; licensed podcast partnerships (§6) are relationship work, not code.
 
 ---
-*Repo: leeabd123/fictional-palm-tree · static app at index.html · AI proxy in worker/*
+*Repo: leeabd123/fictional-palm-tree · static app at index.html · AI proxy + events in worker/ · internal stats at stats.html*

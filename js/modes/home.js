@@ -129,6 +129,10 @@ function renderHome() {
         ${homeCard('deep', '📚', 'Deep cards', 'synonyms & context')}
       </div>
 
+      <div style="text-align:center;margin:4px 0 14px">
+        <button class="c2-linklike" onclick="setMode('about')">how Tariga works — the research behind it →</button>
+      </div>
+
       <button class="home-map-card" onclick="setMode('map')">
         <span class="home-map-wrap"><sudan-map highlight="khartoum"></sudan-map></span>
         <span class="home-map-overlay">
