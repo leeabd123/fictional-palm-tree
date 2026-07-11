@@ -33,10 +33,6 @@ function renderFlash() {
   const it = deck[idx];
   const isAR = flashDir === 'ar';
 
-  // 5-dot window centered on the current card
-  const dotStart = Math.max(0, Math.min(idx - 2, deck.length - 5));
-  const dots = deck.slice(dotStart, dotStart + 5)
-    .map((_, i) => `<div class="f2-dot ${dotStart + i === idx ? 'on' : ''}"></div>`).join('');
 
   ca.innerHTML = `
     <div class="coach-wrap">
@@ -58,23 +54,38 @@ function renderFlash() {
         }).join('')}
       </div>
       <div class="f2-shadow"></div>
-      <div class="f2-dots">${dots}</div>
+      <div class="f2-dots">${flashDotsHTML()}</div>
 
-      ${flipped ? `
-      <div class="f2-mark-row">
-        <button class="d2-pill-red" onclick="mark(false)">Still learning</button>
-        <button class="d2-pill-green" onclick="mark(true)">Got it ✓</button>
-      </div>` : `
-      <div class="f2-navround">
-        <button onclick="navCard(-1)" ${idx === 0 ? 'disabled' : ''}>‹</button>
-        <button onclick="navCard(1)" ${idx >= deck.length - 1 ? 'disabled' : ''}>›</button>
-      </div>`}
+      ${flashRowHTML()}
 
       ${flashPracticeHTML(it)}
     </div>
   `;
 
   flashBindSwipe();
+  flashBindInput();
+}
+
+// 5-dot window centered on the current card
+function flashDotsHTML() {
+  const dotStart = Math.max(0, Math.min(idx - 2, deck.length - 5));
+  return deck.slice(dotStart, dotStart + 5)
+    .map((_, i) => `<div class="f2-dot ${dotStart + i === idx ? 'on' : ''}"></div>`).join('');
+}
+
+function flashRowHTML() {
+  return flipped ? `
+      <div class="f2-mark-row">
+        <button class="d2-pill-red" onclick="flashMark(false)">Still learning</button>
+        <button class="d2-pill-green" onclick="flashMark(true)">Got it ✓</button>
+      </div>` : `
+      <div class="f2-navround">
+        <button onclick="navCard(-1)" ${idx === 0 ? 'disabled' : ''}>‹</button>
+        <button onclick="navCard(1)" ${idx >= deck.length - 1 ? 'disabled' : ''}>›</button>
+      </div>`;
+}
+
+function flashBindInput() {
   const inp = document.getElementById('f2-input');
   if (inp) {
     inp.value = flashInput;
@@ -142,6 +153,22 @@ function flashCardHTML(it, d, isAR) {
         </div>
       </div>
     </div>`;
+}
+
+
+// Mark buttons advance through the glide (the global mark() re-renders the
+// whole screen, which reads as a flash). Same bookkeeping, smooth motion.
+function flashMark(know) {
+  streak.push(know);
+  recordActivity();
+  const it = deck[idx];
+  if (know) knowSet.add(it.a); else learnSet.add(it.a);
+  if (idx >= deck.length - 1) { idx++; updStats(); renderFlash(); return; } // deck done -> result screen
+  flipped = false;
+  // un-flip the card first so the carousel glides face-up
+  const flipEl = document.querySelector('#f2-scene .f2-cardwrap[data-off="0"] .f2-flip');
+  if (flipEl) flipEl.classList.remove('flipped');
+  navCard(1);
 }
 
 // tap: active card flips, a side card slides into focus (like the design)
@@ -314,10 +341,48 @@ function navCard(dir) {
       const fl = w.querySelector('.f2-float');
       if (fl) fl.style.animation = nd === 0 ? 'f2Floaty 6.5s ease-in-out infinite' : 'none';
     });
-    setTimeout(() => { flashGliding = false; renderFlash(); }, 660);
+    setTimeout(() => { flashGliding = false; flashSettle(dir); }, 660);
   } else {
     renderFlash();
   }
+}
+
+// After the glide, patch the DOM surgically — a full re-render repaints the
+// whole screen (visible flash) and replays the sweep. Here only the cards
+// that changed roles are swapped; positions/styles are already correct.
+function flashSettle(dir) {
+  const scene = document.getElementById('f2-scene');
+  if (!scene) { renderFlash(); return; }
+  const isAR = flashDir === 'ar';
+  // drop cards pushed outside the window
+  scene.querySelectorAll('.f2-cardwrap').forEach(w => {
+    if (Math.abs(parseInt(w.dataset.off, 10)) >= 3) w.remove();
+  });
+  // demote the previous active card (loses back face / sweep / live star)
+  const prevOff = -dir;
+  const prevEl = scene.querySelector(`.f2-cardwrap[data-off="${prevOff}"]`);
+  const prevIdx = idx + prevOff;
+  if (prevEl && prevIdx >= 0 && prevIdx < deck.length) prevEl.outerHTML = flashCardHTML(deck[prevIdx], prevOff, isAR);
+  // promote the new active card (gains back face / sweep / star button)
+  const nowEl = scene.querySelector('.f2-cardwrap[data-off="0"]');
+  if (nowEl) nowEl.outerHTML = flashCardHTML(deck[idx], 0, isAR);
+  else scene.insertAdjacentHTML('beforeend', flashCardHTML(deck[idx], 0, isAR));
+  // make sure every window slot that should exist does (hidden edges too)
+  [-2, -1, 1, 2].forEach(off => {
+    const k = idx + off;
+    if (k >= 0 && k < deck.length && !scene.querySelector(`.f2-cardwrap[data-off="${off}"]`)) {
+      scene.insertAdjacentHTML('beforeend', flashCardHTML(deck[k], off, isAR));
+    }
+  });
+  // header counter, dots, nav row, practice panel — updated in place
+  const counter = document.querySelector('.f2-counter');
+  if (counter) counter.textContent = `${idx + 1} of ${deck.length} · ${FLASH_SRC_LABEL[src] || 'deck'}`;
+  const dots = document.querySelector('.f2-dots');
+  if (dots) dots.innerHTML = flashDotsHTML();
+  const row = document.querySelector('.f2-mark-row, .f2-navround');
+  if (row) row.outerHTML = flashRowHTML();
+  const practice = document.querySelector('.f2-practice');
+  if (practice) { practice.outerHTML = flashPracticeHTML(deck[idx]); flashBindInput(); }
 }
 
 function flip() {
@@ -329,18 +394,7 @@ function flip() {
     const sw = flipEl.querySelector('.f2-sweep');
     if (sw) { sw.style.animation = 'none'; void sw.offsetWidth; sw.style.animation = 'f2Sweep 1.1s .1s cubic-bezier(.3,.7,.4,1) both'; }
     const markRow = document.querySelector('.f2-mark-row, .f2-navround');
-    if (markRow) {
-      const html = flipped
-        ? `<div class="f2-mark-row">
-            <button class="d2-pill-red" onclick="mark(false)">Still learning</button>
-            <button class="d2-pill-green" onclick="mark(true)">Got it ✓</button>
-          </div>`
-        : `<div class="f2-navround">
-            <button onclick="navCard(-1)" ${idx === 0 ? 'disabled' : ''}>‹</button>
-            <button onclick="navCard(1)" ${idx >= deck.length - 1 ? 'disabled' : ''}>›</button>
-          </div>`;
-      markRow.outerHTML = html;
-    }
+    if (markRow) markRow.outerHTML = flashRowHTML();
     return;
   }
   renderFlash();
