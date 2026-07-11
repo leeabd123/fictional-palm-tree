@@ -13,6 +13,7 @@ const CONTRIB_PROMPTS = [
 
 let contribPromptIdx = 0;
 let contribSubmitted = false;
+let contribKind = 'prompt';   // 'prompt' — answer this week's prompt · 'phrase' — suggest any phrase
 let contribTags = { region: null, generation: null, formality: null };
 
 function _loadContribs() {
@@ -50,15 +51,25 @@ function renderContribute() {
       <div class="d2-title">Contribute</div>
       <div class="d2-note" style="margin-bottom:18px">Help preserve the dialect — answer the way <em style="color:var(--accent2)">your</em> family actually says it.</div>
 
+      <div class="d2-tab-row">
+        <button class="d2-tab ${contribKind === 'prompt' ? 'on' : ''}" onclick="contribSetKind('prompt')">Answer the prompt</button>
+        <button class="d2-tab ${contribKind === 'phrase' ? 'on' : ''}" onclick="contribSetKind('phrase')">Suggest a phrase</button>
+      </div>
+
       <div class="d2-card">
+        ${contribKind === 'prompt' ? `
         <div class="d2-label">This week's prompt <span style="letter-spacing:0;text-transform:none;color:var(--text3)">· ${(contribPromptIdx % CONTRIB_PROMPTS.length) + 1} of ${CONTRIB_PROMPTS.length}</span></div>
         <div class="d2-prompt" style="font-size:17px">${escAttr(prompt.en)}</div>
         <div class="d2-acc-ar" style="font-size:16px;color:var(--text2);margin-top:8px">${escAttr(prompt.ar)}</div>
         <div style="text-align:right;margin-top:6px">
           <button class="c2-linklike" onclick="contribSkip()">different prompt ↻</button>
-        </div>
+        </div>` : `
+        <div class="d2-label">Suggest any phrase</div>
+        <div class="d2-prompt" style="font-size:15px">A word or saying your family uses that learners should know — the way it's <em>actually</em> said.</div>
+        <input id="contrib-meaning" placeholder="what it means in English" style="width:100%;margin-top:14px;border:1px solid rgba(255,255,255,0.1);border-radius:14px;background:rgba(255,255,255,0.03);color:#f0ede8;font-family:var(--sans);font-size:14px;padding:11px 14px;outline:none">
+        <input id="contrib-when" placeholder="when you'd say it (optional)" style="width:100%;margin-top:8px;border:1px solid rgba(255,255,255,0.1);border-radius:14px;background:rgba(255,255,255,0.03);color:#f0ede8;font-family:var(--sans);font-size:14px;padding:11px 14px;outline:none">`}
 
-        <textarea id="contrib-text" dir="auto" rows="2" placeholder="اكتب هنا… your family's way (Arabic script or Arabizi)"
+        <textarea id="contrib-text" dir="auto" rows="2" placeholder="${contribKind === 'prompt' ? "اكتب هنا… your family's way (Arabic script or Arabizi)" : 'اكتب العبارة هنا… the phrase itself (Arabic script or Arabizi)'}"
           style="width:100%;margin-top:14px;border:1px solid rgba(255,255,255,0.1);border-radius:14px;background:rgba(255,255,255,0.03);color:#f0ede8;font-family:var(--sans),'Noto Naskh Arabic';font-size:15px;line-height:1.7;padding:12px 14px;resize:none;outline:none"></textarea>
 
         <div class="d2-note" style="margin:14px 0 8px">Region</div>
@@ -71,7 +82,7 @@ function renderContribute() {
         </div>
 
         <button class="c2-compare" style="width:100%;margin-top:18px;padding:14px;font-size:14px" onclick="contribSubmit()">Add to the library →</button>
-        <div class="d2-note" style="text-align:center;margin:10px 0 0">Reviewed by 2–3 native speakers before going live.</div>
+        <div class="d2-note" style="text-align:center;margin:10px 0 0">Reviewed by hand before going live — the community reviewer network is the next build.</div>
       </div>
 
       ${contribMineHTML(mine)}
@@ -93,6 +104,12 @@ function contribMineHTML(mine) {
           <span class="d2-badge" style="white-space:nowrap">pending · 0/2</span>
         </div>`).join('')}
     </div>`;
+}
+
+function contribSetKind(k) {
+  if (k === contribKind) return;
+  contribKind = k;
+  renderContribute();
 }
 
 function contribTag(k, v) {
@@ -117,7 +134,11 @@ function contribSubmit() {
   }
   const mine = _loadContribs();
   mine.push({
-    prompt: CONTRIB_PROMPTS[contribPromptIdx % CONTRIB_PROMPTS.length].en,
+    kind: contribKind,
+    prompt: contribKind === 'prompt'
+      ? CONTRIB_PROMPTS[contribPromptIdx % CONTRIB_PROMPTS.length].en
+      : ('Suggested phrase' + ((document.getElementById('contrib-meaning')?.value || '').trim() ? ' — ' + document.getElementById('contrib-meaning').value.trim() : '')),
+    when: (document.getElementById('contrib-when')?.value || '').trim() || null,
     text,
     tags: { ...contribTags },
     ts: Date.now(),

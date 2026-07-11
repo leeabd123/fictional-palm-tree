@@ -26,13 +26,15 @@ Core rules — these define the product, do not bend them:
 
 9. KEEP IT TIGHT. Every note one or two sentences. This is a quick coaching moment, not an essay. Write feedback prose in English (the learner's dominant language), with Arabic examples inline.
 
-10. VOCAB ACCOUNTING. Report which of the scenario's required/bonus vocabulary items appear in the learner's response (in Arabic script or recognizable Arabizi). Report English code-switched words as a list (excluding accepted loanwords per rule 4).`;
+10. VOCAB ACCOUNTING. Report which of the scenario's required/bonus vocabulary items appear in the learner's response (in Arabic script or recognizable Arabizi). Report English code-switched words as a list (excluding accepted loanwords per rule 4).
+
+11. TRANSITION WORDS. The connectors (يعني، صراحة، طيب، فاهمني/فاهماني، بالجد، هسه، وبتاع، لكن، عشان) are what make speech sound fluent. If the response naturally invited one and the learner didn't use it, flag it in missed_transitions — at most one or two, only where it would genuinely help, phrased as an invitation not a correction ("this is a perfect spot for a يعني"). Empty array when nothing is missed.`;
 
 // JSON schema for the structured coaching feedback.
 const COACH_SCHEMA = {
   type: 'object',
   additionalProperties: false,
-  required: ['overall','strengths','sounds_msa','sounds_english_shaped','code_switched_words','vocab_used_required','vocab_used_bonus','closest_model_index','comparison_note','suggestion','encouragement'],
+  required: ['overall','strengths','sounds_msa','sounds_english_shaped','code_switched_words','vocab_used_required','vocab_used_bonus','missed_transitions','closest_model_index','comparison_note','suggestion','encouragement'],
   properties: {
     overall: { type: 'string', description: 'One or two warm sentences reacting to the response as a whole.' },
     strengths: {
@@ -76,6 +78,18 @@ const COACH_SCHEMA = {
     },
     vocab_used_required: { type: 'array', items: { type: 'string' }, description: "Scenario 'required' vocab items present in the response (as listed in the scenario)." },
     vocab_used_bonus: { type: 'array', items: { type: 'string' }, description: "Scenario 'bonus' vocab items present in the response." },
+    missed_transitions: {
+      type: 'array',
+      description: 'Transition-word opportunities the response invited but did not use (at most 1-2; empty when none).',
+      items: {
+        type: 'object', additionalProperties: false, required: ['phrase','ph','note'],
+        properties: {
+          phrase: { type: 'string', description: 'The transition word/connector (Arabic script), e.g. يعني.' },
+          ph: { type: 'string', description: 'Its transliteration.' },
+          note: { type: 'string', description: 'Where it would fit in THEIR sentence — one warm sentence.' },
+        },
+      },
+    },
     closest_model_index: { type: 'integer', description: '0-based index of the reference answer closest in spirit to the learner response.' },
     comparison_note: { type: 'string', description: "One or two sentences: how the learner's response compares to that reference — what they share, what the native phrasing does differently." },
     suggestion: {

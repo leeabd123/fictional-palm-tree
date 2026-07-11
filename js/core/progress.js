@@ -4,6 +4,12 @@
 
 const PROGRESS_KEY = 'tariga_attempts_v1';
 
+// the connectors that make speech sound fluent — tracked as a journey metric
+const TRANSITION_WORDS = ['يعني','صراحة','طيب','فاهمني','فاهماني','بالجد','هسه','وبتاع','لكن','عشان','زاتو','خلاص'];
+function countTransitions(text) {
+  return TRANSITION_WORDS.filter(w => text.includes(w)).length;
+}
+
 function _loadAttempts() {
   try { return JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}'); } catch (e) { return {}; }
 }
@@ -33,6 +39,8 @@ function addAttempt(scenario, text, feedback) {
       msa: feedback.sounds_msa.length,
       englishShaped: feedback.sounds_english_shaped.length,
       strengths: feedback.strengths.length,
+      transitions: countTransitions(text),
+      missedTransitions: (feedback.missed_transitions || []).length,
       words: text.trim().split(/\s+/).filter(Boolean).length,
     },
     vocabUsed: [...feedback.vocab_used_required, ...feedback.vocab_used_bonus],
