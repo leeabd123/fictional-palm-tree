@@ -30,13 +30,15 @@ Core rules — these define the product, do not bend them:
 
 11. TRANSITION WORDS. The connectors (يعني، صراحة، طيب، فاهمني/فاهماني، بالجد، هسه، وبتاع، لكن، عشان) are what make speech sound fluent. If the response naturally invited one and the learner didn't use it, flag it in missed_transitions — at most one or two, only where it would genuinely help, phrased as an invitation not a correction ("this is a perfect spot for a يعني"). Empty array when nothing is missed.
 
-12. REGISTER CALIBRATION. Formality is its own dimension, separate from vocabulary accuracy. If the response's register doesn't fit the scenario (too casual for an elder, too stiff for a friend), flag it in register_notes — "correct Arabic, but a bit too casual for an elder" — with the adjusted phrasing. Empty array when the register fits.`;
+12. FORMULAIC CHUNKS. Real fluency leans on pre-packaged multi-word expressions deployed as single units (إن شاء الله، الحمد لله، كتّر خيرك، ما شاء الله) rather than building every sentence word by word. If the learner constructed piece-by-piece what a speaker would say as one chunk, flag it in missed_chunks — "you could have used this chunk here" — at most one per response. Empty array when none apply.
+
+13. REGISTER CALIBRATION. Formality is its own dimension, separate from vocabulary accuracy. If the response's register doesn't fit the scenario (too casual for an elder, too stiff for a friend), flag it in register_notes — "correct Arabic, but a bit too casual for an elder" — with the adjusted phrasing. Empty array when the register fits.`;
 
 // JSON schema for the structured coaching feedback.
 const COACH_SCHEMA = {
   type: 'object',
   additionalProperties: false,
-  required: ['overall','strengths','sounds_msa','sounds_english_shaped','code_switched_words','vocab_used_required','vocab_used_bonus','missed_transitions','register_notes','closest_model_index','comparison_note','suggestion','encouragement'],
+  required: ['overall','strengths','sounds_msa','sounds_english_shaped','code_switched_words','vocab_used_required','vocab_used_bonus','missed_transitions','missed_chunks','register_notes','closest_model_index','comparison_note','suggestion','encouragement'],
   properties: {
     overall: { type: 'string', description: 'One or two warm sentences reacting to the response as a whole.' },
     strengths: {
@@ -80,6 +82,18 @@ const COACH_SCHEMA = {
     },
     vocab_used_required: { type: 'array', items: { type: 'string' }, description: "Scenario 'required' vocab items present in the response (as listed in the scenario)." },
     vocab_used_bonus: { type: 'array', items: { type: 'string' }, description: "Scenario 'bonus' vocab items present in the response." },
+    missed_chunks: {
+      type: 'array',
+      description: 'Formulaic chunk opportunities the response built word-by-word instead (at most 1; empty when none).',
+      items: {
+        type: 'object', additionalProperties: false, required: ['chunk','ph','note'],
+        properties: {
+          chunk: { type: 'string', description: 'The fixed expression (Arabic script), e.g. إن شاء الله.' },
+          ph: { type: 'string', description: 'Its transliteration.' },
+          note: { type: 'string', description: 'Where it fits in THEIR sentence — one sentence.' },
+        },
+      },
+    },
     register_notes: {
       type: 'array',
       description: 'Formality/politeness mismatches for this scenario (empty when the register fits).',
@@ -228,5 +242,27 @@ ${userText || '(the learner just picked up — open the call)'}`;
     system,
     messages: [{ role: 'user', content: user }],
     output_schema: LIVECALL_SCHEMA,
+  };
+}
+
+// §17.4 — AI-assisted categorization at intake: Claude reads a raw
+// submission and SUGGESTS tags; the contributor confirms or adjusts.
+// "AI organizes, humans provide the language" — at intake too.
+const TAG_SUGGEST_SCHEMA = {
+  type: 'object', additionalProperties: false,
+  required: ['domain', 'tier', 'register', 'reasoning'],
+  properties: {
+    domain: { type: 'string', enum: ['family', 'friends', 'community', 'identity', 'culture'], description: 'Which life domain the phrase belongs to.' },
+    tier: { type: 'string', enum: ['Beginning', 'Comfortable', 'Natural', 'Native-like'], description: 'Difficulty tier for a heritage learner.' },
+    register: { type: 'string', enum: ['warm/family', 'respectful/formal', 'playful/teasing', 'neutral'], description: 'Formality register of the phrase.' },
+    reasoning: { type: 'string', description: 'One short sentence explaining the suggestion.' },
+  },
+};
+
+function buildTagSuggestRequest(text, meaning) {
+  return {
+    system: 'You categorize Sudanese Arabic phrases submitted to a community dialect library. Suggest tags only — never alter or judge the phrase itself. The submission may be Arabic script or Arabizi.',
+    messages: [{ role: 'user', content: `Suggest tags for this community submission.\nPhrase: ${text}\nMeaning (if given): ${meaning || 'not provided'}` }],
+    output_schema: TAG_SUGGEST_SCHEMA,
   };
 }

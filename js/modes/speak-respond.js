@@ -449,6 +449,7 @@ function coachFeedbackHTML() {
     .filter(s => s.quote && s.sudanese)
     .map(s => ({ from: s.quote, to: s.sudanese }));
   const notes = [
+    ...(fb.missed_chunks || []).map(t => ({ q: t.chunk + ' (' + t.ph + ')', n: t.note })),
     ...(fb.register_notes || []).map(t => ({ q: t.quote, n: t.note + ' \u2014 try: ' + t.adjusted })),
     ...(fb.missed_transitions || []).map(t => ({ q: t.phrase + ' (' + t.ph + ')', n: t.note })),
     ...fb.strengths.map(s => ({ q: s.quote, n: s.note })),
@@ -634,6 +635,8 @@ function coachJourneyHTML() {
             <span class="j2-num-vals"><span class="j2-num-then">${first.metrics.english}</span><span class="j2-num-arrow">→</span><span class="j2-num-now">${last.metrics.english}</span></span></div>
           <div class="j2-num-row"><span>Transition words (يعني، صراحة…)</span>
             <span class="j2-num-vals"><span class="j2-num-then">${first.metrics.transitions || 0}</span><span class="j2-num-arrow">→</span><span class="j2-num-now">${last.metrics.transitions || 0}</span></span></div>
+          <div class="j2-num-row"><span>Formulaic chunks (إن شاء الله…)</span>
+            <span class="j2-num-vals"><span class="j2-num-then">${first.metrics.chunks || 0}</span><span class="j2-num-arrow">→</span><span class="j2-num-now">${last.metrics.chunks || 0}</span></span></div>
           <div class="j2-num-row"><span>Natural score</span>
             <span class="j2-num-vals"><span class="j2-num-then">${s1}</span><span class="j2-num-arrow">→</span><span class="j2-num-now">${s2}</span></span></div>
         </div>

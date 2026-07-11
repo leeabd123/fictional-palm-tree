@@ -10,6 +10,12 @@ function countTransitions(text) {
   return TRANSITION_WORDS.filter(w => text.includes(w)).length;
 }
 
+// fixed multi-word expressions deployed as single units (the lexical approach)
+const FORMULAIC_CHUNKS = ['إن شاء الله','الحمد لله','ما شاء الله','كتّر خيرك','كثر خيرك','ألف مبروك','الله يحفظك','الله يبارك','كل سنة وإنتو طيبين','السلام عليكم','بيت مال وعيال'];
+function countChunks(text) {
+  return FORMULAIC_CHUNKS.filter(c => text.includes(c)).length;
+}
+
 function _loadAttempts() {
   try { return JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}'); } catch (e) { return {}; }
 }
@@ -40,6 +46,7 @@ function addAttempt(scenario, text, feedback) {
       englishShaped: feedback.sounds_english_shaped.length,
       strengths: feedback.strengths.length,
       transitions: countTransitions(text),
+      chunks: countChunks(text),
       missedTransitions: (feedback.missed_transitions || []).length,
       words: text.trim().split(/\s+/).filter(Boolean).length,
     },
