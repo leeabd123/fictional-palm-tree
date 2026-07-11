@@ -11,13 +11,9 @@ function journeyDomainsHTML() {
   return `
     <div class="j2-sec-label" style="margin-top:26px">Your domains — comfort is per-domain, not one level</div>
     ${DOMAINS.map(dm => {
-      const items = dm.id === 'family'
-        ? [...GUIDED_SCENARIOS, ...CALL_SEQUENCES].filter(x => x.domain === dm.id)
-        : [];
+      const items = [...GUIDED_SCENARIOS, ...CALL_SEQUENCES].filter(x => x.domain === dm.id);
       const done = items.filter(x => gDone[x.id]).length;
-      const tier = dm.id === 'family'
-        ? (COMFORT_LABEL[profile.comfort] || 'Beginning')
-        : null;
+      const tier = dm.live ? (dm.id === 'family' ? (COMFORT_LABEL[profile.comfort] || 'Beginning') : 'Beginning') : null;
       const pct = items.length ? Math.round((done / items.length) * 100) : 0;
       return `
       <div class="d2-item" style="margin-bottom:8px;display:flex;align-items:center;gap:12px">

@@ -448,6 +448,7 @@ function coachFeedbackHTML() {
     .filter(s => s.quote && s.sudanese)
     .map(s => ({ from: s.quote, to: s.sudanese }));
   const notes = [
+    ...(fb.missed_transitions || []).map(t => ({ q: t.phrase + ' (' + t.ph + ')', n: t.note })),
     ...fb.strengths.map(s => ({ q: s.quote, n: s.note })),
     ...fb.sounds_msa.map(s => ({ q: s.quote, n: s.note })),
     ...fb.sounds_english_shaped.map(s => ({ q: s.quote, n: s.note })),
@@ -629,6 +630,8 @@ function coachJourneyHTML() {
             <span class="j2-num-vals"><span class="j2-num-then">${v1}</span><span class="j2-num-arrow">→</span><span class="j2-num-now">${v2}</span></span></div>
           <div class="j2-num-row"><span>English words mixed in</span>
             <span class="j2-num-vals"><span class="j2-num-then">${first.metrics.english}</span><span class="j2-num-arrow">→</span><span class="j2-num-now">${last.metrics.english}</span></span></div>
+          <div class="j2-num-row"><span>Transition words (يعني، صراحة…)</span>
+            <span class="j2-num-vals"><span class="j2-num-then">${first.metrics.transitions || 0}</span><span class="j2-num-arrow">→</span><span class="j2-num-now">${last.metrics.transitions || 0}</span></span></div>
           <div class="j2-num-row"><span>Natural score</span>
             <span class="j2-num-vals"><span class="j2-num-then">${s1}</span><span class="j2-num-arrow">→</span><span class="j2-num-now">${s2}</span></span></div>
         </div>

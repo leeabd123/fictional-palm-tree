@@ -19,7 +19,7 @@ function homeGreeting() {
 }
 
 function homeStart() {
-  const focus = nextFocus('family');
+  const focus = nextFocus(focusDomain());
   if (focus.kind === 'guided') guidedOpen(focus.id);
   else if (focus.kind === 'call') callOpen(focus.id);
   else setMode('speak');
@@ -30,7 +30,8 @@ function renderHome() {
   const g = homeGreeting();
   const profile = getProfile();
   const streak = getStreak();
-  const focus = nextFocus('family');
+  const dm = DOMAINS.find(d => d.id === focusDomain()) || DOMAINS[0];
+  const focus = nextFocus(focusDomain());
   const gDone = Object.keys(getGuidedProgress()).length;
   const coached = Object.keys(JSON.parse(localStorage.getItem('tariga_attempts_v1') || '{}')).length;
   const attempts = totalAttemptCount();
@@ -55,8 +56,15 @@ function renderHome() {
       <div class="home-greet-ph">${g.ph}</div>
       <div class="home-greet-en">${profile.name ? escAttr(profile.name) + ' — ' : ''}${g.en}</div>
 
+      ${typeof warmupAvailable === 'function' && warmupAvailable() ? `
+      <button class="home-focus" style="width:100%;text-align:left;cursor:pointer;border-color:rgba(79,216,196,.3)" onclick="warmupStart()">
+        <div class="home-focus-label" style="color:var(--teal)">Welcome back — ease in first</div>
+        <div class="home-focus-title" style="font-size:18px">A ${warmupBuildSteps().length}-phrase warm-up from your own history</div>
+        <div class="home-focus-sub">review before new material — the forgetting curve is real ›</div>
+      </button>` : ''}
+
       <div class="home-focus">
-        <div class="home-focus-label">Today's focus · Family</div>
+        <div class="home-focus-label">Today's focus · ${dm.label}</div>
         <div class="home-focus-title">${escAttr(focus.title)}</div>
         <div class="home-focus-sub">${escAttr(focus.sub)}</div>
         <button class="home-cta" style="margin:14px 0 0" onclick="homeStart()">
@@ -71,10 +79,10 @@ function renderHome() {
 
       <div class="home-path-label" style="margin-top:22px">EXPLORE OTHER DOMAINS</div>
       <div class="home-domains">
-        ${DOMAINS.map(dm => `
-          <button class="d2-tab ${dm.id === 'family' ? 'on' : ''}" ${dm.live ? `onclick="homeStart()"` : 'disabled'}
-            title="${escAttr(dm.desc)}" style="${dm.live ? '' : 'opacity:.45;cursor:default'}">
-            ${dm.icon} ${dm.label}${dm.live ? '' : ' · soon'}
+        ${DOMAINS.map(d2 => `
+          <button class="d2-tab ${d2.id === focusDomain() ? 'on' : ''}" ${d2.live ? `onclick="setFocusDomain('${d2.id}');renderHome()"` : 'disabled'}
+            title="${escAttr(d2.desc)}" style="${d2.live ? '' : 'opacity:.45;cursor:default'}">
+            ${d2.icon} ${d2.label}${d2.live ? '' : ' · soon'}
           </button>`).join('')}
       </div>
 
@@ -109,7 +117,7 @@ function renderHome() {
 
       <div class="home-path-label">PRACTICE LIBRARY</div>
       <div class="home-grid">
-        ${homeCard('guided', '🤲', 'Guided', 'Family basics · ' + GUIDED_SCENARIOS.length + ' scenarios', true)}
+        ${homeCard('guided', '🤲', 'Guided', GUIDED_SCENARIOS.length + ' scenarios · 5 domains', true)}
         ${homeCard('speak', '🎙️', 'Your coach', 'Free scenarios · AI coaching')}
         ${homeCard('flash', '🃏', 'Flashcards', deck.length + ' in deck')}
         ${homeCard('listen', '👂', 'Tune your ear', 'podcast lines')}

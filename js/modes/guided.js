@@ -12,7 +12,11 @@ let guidedChecked = false;
 let guidedTargetIdx = 0;      // which model target the learner is compared against
 let guidedGender = (getProfile().gender === 'm') ? 'm' : 'f';
 
-function guidedList() { return GUIDED_SCENARIOS; }
+function guidedList() {
+  const dm = focusDomain();
+  return GUIDED_SCENARIOS.filter(g => g.domain === dm);
+}
+function guidedDomain() { return DOMAINS.find(d => d.id === focusDomain()) || DOMAINS[0]; }
 function guidedItem() { return guidedList()[guidedIdx]; }
 
 // pick the target: prefer the selected variant's gender, else 'any'
@@ -21,6 +25,8 @@ function guidedTargets(it) {
 }
 
 function guidedOpen(id) {
+  const g = GUIDED_SCENARIOS.find(s => s.id === id);
+  if (g) setFocusDomain(g.domain);
   const i = guidedList().findIndex(s => s.id === id);
   if (i >= 0) { guidedIdx = i; guidedInput = ''; guidedChecked = false; guidedTargetIdx = 0; }
   setMode('guided');
@@ -28,6 +34,7 @@ function guidedOpen(id) {
 
 function renderGuided() {
   const ca = document.getElementById('content-area');
+  if (guidedIdx >= guidedList().length) guidedIdx = 0;
   const it = guidedItem();
   const targets = guidedTargets(it);
   const target = targets[Math.min(guidedTargetIdx, targets.length - 1)];
@@ -42,8 +49,8 @@ function renderGuided() {
       <button class="d2-back" onclick="setMode('home')">← home</button>
       <div class="c2-head">
         <div>
-          <div class="c2-title">Guided · Family</div>
-          <div class="c2-sub">${guidedIdx + 1} of ${guidedList().length} · Beginning tier · say it like family would</div>
+          <div class="c2-title">Guided · ${guidedDomain().label}</div>
+          <div class="c2-sub">${guidedIdx + 1} of ${guidedList().length} · ${escAttr(it.tier)} tier · say it like family would</div>
         </div>
         <div class="speak-q-nav" style="margin:0">
           <button class="arrow-btn" onclick="guidedNav(-1)" ${guidedIdx === 0 ? 'disabled' : ''}>←</button>
@@ -53,6 +60,7 @@ function renderGuided() {
 
       <div class="c2-qcard">
         <div class="c2-qlabel">${escAttr(it.title)} ${done[it.id] ? '· ✓ practiced' : ''}</div>
+        ${it.verification_status === 'pending-review' ? '<div class="d2-badge" style="margin-bottom:10px">founder-seeded · pending native review</div>' : ''}
         <div class="c2-sub" style="margin-top:0;margin-bottom:12px">${escAttr(it.setup)}</div>
         ${prompt ? `
           <div class="d2-inset" style="text-align:right">
@@ -106,15 +114,16 @@ function renderGuided() {
         </div>
       `}
 
+      ${CALL_SEQUENCES.some(c => c.domain === focusDomain()) ? `
       <div class="j2-sec-label" style="margin-top:26px">The calls — put it together</div>
       <div class="d2-grid2">
-        ${CALL_SEQUENCES.map(c => `
+        ${CALL_SEQUENCES.filter(c => c.domain === focusDomain()).map(c => `
           <button class="home-card" style="text-align:left" onclick="callOpen('${c.id}')">
             <span class="home-card-icon">${c.icon}</span>
             <span class="home-card-title">${escAttr(c.title)}</span>
             <span class="home-card-sub">${done[c.id] ? '✓ completed · replay' : c.turns.filter(t => t.who === 'you').length + ' turns are yours'}</span>
           </button>`).join('')}
-      </div>
+      </div>` : ''}
     </div>
   `;
   const ta = document.getElementById('guided-input');
@@ -159,7 +168,11 @@ function guidedCheck() {
 function guidedSwapTarget(i) { guidedTargetIdx = i; renderGuided(); }
 function guidedTryAgain() { guidedChecked = false; renderGuided(); }
 function guidedNext() {
-  if (guidedIdx >= guidedList().length - 1) { callOpen(CALL_SEQUENCES[0].id); return; }
+  if (guidedIdx >= guidedList().length - 1) {
+    const c = CALL_SEQUENCES.find(x => x.domain === focusDomain());
+    if (c) { callOpen(c.id); return; }
+    setMode('home'); return;
+  }
   guidedNav(1);
 }
 function guidedNav(dir) {
