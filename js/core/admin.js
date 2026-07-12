@@ -88,7 +88,7 @@ function adminWipeAll() {
 
 // ── the panel ──
 const ADMIN_JUMPS = [
-  ['home', 'Home'], ['guided', 'Guided'], ['speak', 'Your coach'], ['freeform', 'Free-form'],
+  ['home', 'Home'], ['tree', '🗺️ Domain map'], ['guided', 'Guided'], ['speak', 'Your coach'], ['freeform', 'Free-form'],
   ['livecall', '📞 Live call'], ['speed', '⚡ Speed round'], ['warmup', 'Warm-up'],
   ['flash', 'Flashcards'], ['deep', 'Deep cards'], ['listen', 'Tune your ear'], ['convo', 'Conversation'],
   ['journey', 'Journey'], ['map', 'Map'], ['contribute', 'Contribute'], ['review', 'Reviewer mode'],
@@ -115,6 +115,11 @@ function adminStorageRows() {
   }).join('');
 }
 
+// two distinct founder surfaces under one entry point (§28.2):
+// 'demo' simulates app states for presentation; 'content' manages the database
+let adminTab = 'demo';
+function adminSetTab(t) { adminTab = t; renderAdmin(); }
+
 function renderAdmin() {
   const ca = document.getElementById('content-area');
   const on = adminOn();
@@ -126,10 +131,16 @@ function renderAdmin() {
       <div class="c2-head">
         <div>
           <div class="c2-title" style="color:var(--accent2)">🔓 Founder tools</div>
-          <div class="c2-sub">demo & testing only — everything here is local to this browser</div>
+          <div class="c2-sub">two jobs, two tabs — demos on the left, the content database on the right</div>
         </div>
       </div>
 
+      <div class="d2-tab-row" style="margin-bottom:14px">
+        <button class="d2-tab ${adminTab === 'demo' ? 'on' : ''}" onclick="adminSetTab('demo')">🔓 Demo & simulate</button>
+        <button class="d2-tab ${adminTab === 'content' ? 'on' : ''}" onclick="adminSetTab('content')">🗂 Content manager</button>
+      </div>
+
+      ${adminTab === 'content' ? renderAdminContentHTML() : `
       <div class="d2-card" style="padding:18px;margin-bottom:12px">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
           <div>
@@ -168,7 +179,7 @@ function renderAdmin() {
       <div class="d2-note" style="text-align:center;margin-top:16px">
         internal usage stats live at <b>stats.html</b> (needs the Worker's STATS_KEY + D1) ·
         reopen this panel anytime via <b>#admin</b> in the URL or the link on "How Tariga works"
-      </div>
+      </div>`}
     </div>
   `;
 }

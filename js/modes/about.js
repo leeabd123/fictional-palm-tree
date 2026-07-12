@@ -5,6 +5,16 @@
 // the main flow; this page is where the receipts live.
 // ══════════════════════════════════════════════
 
+// §28 accessibility — opt-in larger type, persisted per browser
+const A11Y_KEY = 'tariga_a11y_v1';
+function a11yLargeOn() { try { return localStorage.getItem(A11Y_KEY) === 'large'; } catch (e) { return false; } }
+function a11yApply() { document.body.classList.toggle('a11y-large', a11yLargeOn()); }
+function a11yToggleLarge() {
+  try { a11yLargeOn() ? localStorage.removeItem(A11Y_KEY) : localStorage.setItem(A11Y_KEY, 'large'); } catch (e) {}
+  a11yApply();
+}
+a11yApply();
+
 const ABOUT_POINTS = [
   {
     icon: '🗣️', title: 'You learn by speaking, not just understanding',
@@ -58,6 +68,15 @@ function renderAbout() {
           </div>
         </div>`).join('')}
       <div class="c2-encourage" style="margin-top:16px">None of this matters without the part research can't give you — wanting to talk to your family. That part is yours. 🤍</div>
+      <div class="d2-card" style="padding:16px;margin-top:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <div>
+            <div style="font-size:14px;font-weight:600;color:var(--text)">Aa · Larger text</div>
+            <div class="d2-item-note" style="margin-top:3px">bigger type everywhere — for elders and anyone who wants it. Animations also calm down automatically when your device asks for reduced motion.</div>
+          </div>
+          <button class="${a11yLargeOn() ? 'd2-pill-green' : 'c2-ghost-pill'}" onclick="a11yToggleLarge();renderAbout()">${a11yLargeOn() ? 'ON ✓' : 'OFF'}</button>
+        </div>
+      </div>
       <div style="text-align:center;margin-top:20px">
         <button class="c2-linklike" style="opacity:.55" onclick="setMode('admin')">founder tools →</button>
       </div>

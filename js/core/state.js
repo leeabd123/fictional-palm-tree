@@ -14,6 +14,14 @@ function getSrc(){
   if(src==='v2') return shuf([...V2,...EXTRA.filter(x=>x.src==='v2')]);
   if(src==='p2') return shuf([...P2,...EXTRA.filter(x=>x.src==='p2')]);
   if(src==='extra') return shuf(EXTRA);
+  if(src==='starred'){
+    // §27.3 — everything starred (cards, words, sentences) is drillable;
+    // fall back to the default deck rather than ever handing modes an empty one
+    const d = (typeof starredDeck === 'function') ? starredDeck() : [];
+    if (d.length) return shuf(d);
+    src = 'v1';
+    return shuf([...V1,...EXTRA.filter(x=>x.src==='v1')]);
+  }
   return shuf([...V1,...V2,...EXTRA]);
 }
 

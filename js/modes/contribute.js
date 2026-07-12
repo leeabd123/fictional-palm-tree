@@ -115,7 +115,19 @@ function renderContribute() {
           `<button class="d2-tab ${contribTags.generation === t ? 'on' : ''}" onclick="contribTag('generation',&quot;${t}&quot;)">${t}</button>`).join('')}
         </div>
 
-        <button class="c2-compare" style="width:100%;margin-top:18px;padding:14px;font-size:14px" onclick="contribSubmit()">Add to the library →</button>
+        ${contribDupWarn ? `
+        <div class="d2-inset" style="border-color:rgba(232,201,154,.35);margin-top:14px">
+          <div class="d2-label gold" style="margin-bottom:6px">This looks similar to something already here</div>
+          <div class="d2-star-ar" style="font-size:16px" dir="auto">${escAttr(contribDupWarn.match.text)}</div>
+          <div class="d2-item-note" style="margin:4px 0 10px">${escAttr(contribDupWarn.match.what)}</div>
+          <div class="d2-when-body" style="margin-bottom:10px">Same thing, a regional variant, or genuinely different? Variation across regions is the data we're collecting — only exact duplicates aren't needed twice.</div>
+          <div class="d2-pill-row">
+            <button class="c2-ghost-pill" onclick="contribDupWarn=null;renderContribute()">same thing — skip it</button>
+            <button class="d2-pill-teal" onclick="contribDupWarn.variant=true;contribSubmit(true)">my region's variant →</button>
+            <button class="d2-pill-green" onclick="contribSubmit(true)">genuinely different →</button>
+          </div>
+        </div>` : `
+        <button class="c2-compare" style="width:100%;margin-top:18px;padding:14px;font-size:14px" onclick="contribSubmit()">Add to the library →</button>`}
         <div class="d2-note" style="text-align:center;margin:10px 0 0">Reviewed by hand before going live — the community reviewer network is the next build.</div>
       </div>
 
@@ -126,6 +138,15 @@ function renderContribute() {
       </div>
     </div>
   `;
+  // keep what they typed visible while the duplicate question is open
+  if (contribDupWarn) {
+    const ta = document.getElementById('contrib-text');
+    if (ta) ta.value = contribDupWarn.text;
+    const m = document.getElementById('contrib-meaning');
+    if (m && contribDupWarn.meaning) m.value = contribDupWarn.meaning;
+    const w = document.getElementById('contrib-when');
+    if (w && contribDupWarn.when) w.value = contribDupWarn.when;
+  }
 }
 
 function contribMineHTML(mine) {
@@ -140,7 +161,7 @@ function contribMineHTML(mine) {
             <div class="d2-item-note">${escAttr(c.prompt)} · ${[c.tags.region, c.tags.generation, c.tags.formality].filter(Boolean).map(escAttr).join(' · ') || 'untagged'}</div>
             ${c.status === 'returned' && c.reviewerNote ? `<div class="d2-when-body" style="margin-top:6px;color:#e0b3a8">reviewer: "${escAttr(c.reviewerNote)}" <button class="c2-linklike" onclick="contribResubmit(${c.ts})">fix & resubmit →</button></div>` : ''}
           </div>
-          <span class="d2-badge" style="white-space:nowrap;${c.status === 'live' ? 'color:var(--mint);border-color:rgba(86,201,143,.4)' : (c.status === 'flagged' || c.status === 'returned') ? 'color:#e08a7a;border-color:rgba(217,107,90,.4)' : ''}">${c.status === 'live' ? '✓ live' : c.status === 'returned' ? 'sent back — ' + escAttr(c.flagReason || '') : c.status === 'flagged' ? 'flagged — ' + escAttr(c.flagReason || '') : 'pending · ' + ((c.votes || []).reduce((n, v) => n + v.w, 0)) + '/' + TARIGA_CONFIG.review.liveThreshold}</span>
+          <span class="d2-badge" style="white-space:nowrap;${c.status === 'live' ? 'color:var(--mint);border-color:rgba(86,201,143,.4)' : (c.status === 'flagged' || c.status === 'returned' || c.status === 'removed') ? 'color:#e08a7a;border-color:rgba(217,107,90,.4)' : ''}">${c.status === 'live' ? '✓ live' : c.status === 'removed' ? 'removed' : c.status === 'returned' ? 'sent back — ' + escAttr(c.flagReason || '') : c.status === 'flagged' ? 'flagged — ' + escAttr(c.flagReason || '') : 'pending · ' + ((c.votes || []).reduce((n, v) => n + v.w, 0)) + '/' + TARIGA_CONFIG.review.liveThreshold}</span>
         </div>`).join('')}
     </div>`;
 }
@@ -164,24 +185,62 @@ function contribSkip() {
   renderContribute();
 }
 
-function contribSubmit() {
-  const text = (document.getElementById('contrib-text')?.value || '').trim();
+// ── duplicate detection (§25): the system checks, not the contributor.
+// Token-overlap similarity against existing content — same thing, a
+// regional variant, or genuinely different is the human's call. ──
+function _contribTokens(s) {
+  return new Set(String(s).replace(/[.,!?؟،—:؛"']/g, ' ').toLowerCase().split(/\s+/).filter(w => w.length > 1));
+}
+function contribFindSimilar(text) {
+  const t = _contribTokens(text);
+  if (!t.size) return null;
+  const pool = [
+    ..._loadContribs().filter(c => c.status !== 'removed').map(c => ({ text: c.text, what: 'a community submission' })),
+    ...[...P2, ...V1.slice(0, 40)].map(v => ({ text: v.a, what: v.e })),
+  ];
+  let best = null;
+  pool.forEach(p => {
+    const u = _contribTokens(p.text);
+    if (!u.size) return;
+    let inter = 0;
+    t.forEach(w => { if (u.has(w)) inter++; });
+    const sim = inter / Math.min(t.size, u.size);
+    if (sim >= 0.6 && (!best || sim > best.sim) && p.text !== text) best = { ...p, sim };
+  });
+  return best;
+}
+
+let contribDupWarn = null;   // { match, text } while waiting for the human's call
+
+function contribSubmit(force) {
+  const text = (document.getElementById('contrib-text')?.value || '').trim() || (contribDupWarn && contribDupWarn.text) || '';
   if (!text) {
     const ta = document.getElementById('contrib-text');
     if (ta) { ta.focus(); ta.style.borderColor = 'var(--red)'; setTimeout(() => ta.style.borderColor = '', 1200); }
     return;
   }
+  if (!force) {
+    const match = contribFindSimilar(text);
+    if (match) {
+      contribDupWarn = { match, text, meaning: (document.getElementById('contrib-meaning')?.value || '').trim(), when: (document.getElementById('contrib-when')?.value || '').trim() };
+      renderContribute();
+      return;
+    }
+  }
   const mine = _loadContribs();
+  const meaning = (document.getElementById('contrib-meaning')?.value || '').trim() || (contribDupWarn && contribDupWarn.meaning) || '';
   mine.push({
     kind: contribKind,
     prompt: contribKind === 'prompt'
       ? CONTRIB_PROMPTS[contribPromptIdx % CONTRIB_PROMPTS.length].en
-      : ('Suggested phrase' + ((document.getElementById('contrib-meaning')?.value || '').trim() ? ' — ' + document.getElementById('contrib-meaning').value.trim() : '')),
-    when: (document.getElementById('contrib-when')?.value || '').trim() || null,
+      : ('Suggested phrase' + (meaning ? ' — ' + meaning : '')),
+    when: (document.getElementById('contrib-when')?.value || '').trim() || (contribDupWarn && contribDupWarn.when) || null,
     text,
     tags: { ...contribTags },
+    variantOf: (contribDupWarn && contribDupWarn.variant) ? contribDupWarn.match.text : null,
     ts: Date.now(),
   });
+  contribDupWarn = null;
   _saveContribs(mine);
   recordActivity();
   contribSubmitted = true;
@@ -190,6 +249,7 @@ function contribSubmit() {
 
 function contribAnother() {
   contribSubmitted = false;
+  contribDupWarn = null;
   contribPromptIdx++;
   contribTags = { region: null, generation: null, formality: null };
   renderContribute();

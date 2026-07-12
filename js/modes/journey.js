@@ -46,6 +46,7 @@ function journeyDomainsHTML() {
   return `
     <div class="j2-sec-label" style="margin-top:26px">Your domains — comfort is per-domain, not one level</div>
     ${journeyRadarHTML()}
+    <div style="text-align:center;margin:10px 0 4px"><button class="c2-linklike" onclick="setMode('tree')">see this as the domain map — every scenario, one tree →</button></div>
     ${DOMAINS.map(dm => {
       const items = [...GUIDED_SCENARIOS, ...CALL_SEQUENCES].filter(x => x.domain === dm.id);
       const done = items.filter(x => gDone[x.id]).length;
