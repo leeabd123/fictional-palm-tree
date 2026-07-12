@@ -84,6 +84,7 @@ function renderJourney() {
             <button class="btn btn-accent" onclick="setMode('speak')">Practice out loud →</button>
           </div>
         </div>
+        ${typeof tutorPanelHTML === 'function' ? tutorPanelHTML() : ''}
         ${journeyDomainsHTML()}
       </div>`;
     return;
@@ -95,6 +96,7 @@ function renderJourney() {
         <div class="coach-journey-title">Then <span class="coach-journey-vs">→</span> now</div>
         <div class="coach-journey-sub">${entries.length} scenario${entries.length === 1 ? '' : 's'} coached · tap one to see your growth</div>
       </div>
+      ${typeof tutorPanelHTML === 'function' ? tutorPanelHTML() : ''}
       ${entries.map(e => {
         const first = e.attempts[0], last = e.attempts[e.attempts.length - 1];
         const s1 = naturalScore(first.metrics), s2 = naturalScore(last.metrics);

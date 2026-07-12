@@ -16,6 +16,12 @@ let contribSubmitted = false;
 let contribKind = 'prompt';   // 'prompt' — answer this week's prompt · 'phrase' — suggest any phrase
 let contribTags = { region: null, generation: null, formality: null };
 
+// §28.4 — pre-select the region they named at onboarding (still changeable)
+try {
+  const _p = JSON.parse(localStorage.getItem('tariga_profile_v1') || '{}');
+  if (_p.region) contribTags.region = _p.region;
+} catch (e) {}
+
 function _loadContribs() {
   try { return JSON.parse(localStorage.getItem(CONTRIB_KEY) || '[]'); } catch (e) { return []; }
 }
@@ -41,6 +47,11 @@ function contribGap() {
   ['Port Sudan', 'North', 'West'].forEach(rg => {
     if (!regions.has(rg)) gaps.push({ w: 1, ask: `no verified phrases from ${rg} yet — does your family come from there?` });
   });
+  // §28.4 / §25 — the ask gets personal when we know their region
+  const myRegion = (typeof getProfile === 'function') ? getProfile().region : null;
+  if (myRegion && !regions.has(myRegion)) {
+    gaps.push({ w: 20, ask: `since your family's from ${myRegion} — there are no verified ${myRegion} phrases yet. Your ear is exactly what's missing.` });
+  }
   gaps.sort((a, b) => b.w - a.w);
   return gaps[0] || null;
 }
@@ -127,7 +138,7 @@ function renderContribute() {
             <button class="d2-pill-green" onclick="contribSubmit(true)">genuinely different →</button>
           </div>
         </div>` : `
-        <button class="c2-compare" style="width:100%;margin-top:18px;padding:14px;font-size:14px" onclick="contribSubmit()">Add to the library →</button>`}
+        <button id="contrib-submit-btn" class="c2-compare" style="width:100%;margin-top:18px;padding:14px;font-size:14px" onclick="contribSubmit()">Add to the library →</button>`}
         <div class="d2-note" style="text-align:center;margin:10px 0 0">Reviewed by hand before going live — the community reviewer network is the next build.</div>
       </div>
 
@@ -212,7 +223,38 @@ function contribFindSimilar(text) {
 
 let contribDupWarn = null;   // { match, text } while waiting for the human's call
 
-function contribSubmit(force) {
+// §25 — the doc asks for SEMANTIC similarity (Claude comparing meaning and
+// context, not just text overlap). When the coach is connected, borderline
+// candidates get a meaning-level check; the token check is the offline fallback.
+async function contribSemanticCheck(text, meaning) {
+  const t = _contribTokens(text);
+  const candidates = [
+    ..._loadContribs().filter(c => c.status !== 'removed').map(c => ({ text: c.text, what: 'a community submission' })),
+    ...P2.map(v => ({ text: v.a, what: v.e })),
+  ].filter(p => {
+    const u = _contribTokens(p.text);
+    let inter = 0; t.forEach(w => { if (u.has(w)) inter++; });
+    return inter > 0 && p.text !== text;
+  }).slice(0, 12);
+  if (!candidates.length) return null;
+  const res = await coachEvaluate({
+    system: 'You check a new Sudanese Arabic phrase submission against existing library entries for MEANING-level duplication — same meaning in different words still counts. Regional variants are valuable, not duplicates. Compare meaning and usage context, not spelling.',
+    messages: [{ role: 'user', content: `New submission: ${text}${meaning ? '\nSubmitter says it means: ' + meaning : ''}\n\nExisting entries:\n${candidates.map((c, i) => (i + 1) + '. ' + c.text + ' — ' + c.what).join('\n')}` }],
+    output_schema: {
+      type: 'object',
+      properties: {
+        similar: { type: 'boolean', description: 'true if any existing entry means the same thing' },
+        existing: { type: 'string', description: 'the closest existing entry text, empty if none' },
+        note: { type: 'string', description: 'one short sentence on the relationship' },
+      },
+      required: ['similar', 'existing', 'note'], additionalProperties: false,
+    },
+    max_tokens: 300,
+  });
+  return (res.similar && res.existing) ? { text: res.existing, what: res.note || 'the AI judged these to mean the same thing' } : null;
+}
+
+async function contribSubmit(force) {
   const text = (document.getElementById('contrib-text')?.value || '').trim() || (contribDupWarn && contribDupWarn.text) || '';
   if (!text) {
     const ta = document.getElementById('contrib-text');
@@ -220,9 +262,16 @@ function contribSubmit(force) {
     return;
   }
   if (!force) {
-    const match = contribFindSimilar(text);
+    const meaning = (document.getElementById('contrib-meaning')?.value || '').trim();
+    let match = contribFindSimilar(text);
+    if (!match && apiConfigured()) {
+      const btn = document.getElementById('contrib-submit-btn');
+      if (btn) btn.textContent = 'checking against the library…';
+      try { match = await contribSemanticCheck(text, meaning); } catch (e) { match = null; }
+      if (btn) btn.textContent = 'Add to the library →';
+    }
     if (match) {
-      contribDupWarn = { match, text, meaning: (document.getElementById('contrib-meaning')?.value || '').trim(), when: (document.getElementById('contrib-when')?.value || '').trim() };
+      contribDupWarn = { match, text, meaning, when: (document.getElementById('contrib-when')?.value || '').trim() };
       renderContribute();
       return;
     }
@@ -251,7 +300,7 @@ function contribAnother() {
   contribSubmitted = false;
   contribDupWarn = null;
   contribPromptIdx++;
-  contribTags = { region: null, generation: null, formality: null };
+  contribTags = { region: (typeof getProfile === 'function' && getProfile().region) || null, generation: null, formality: null };
   renderContribute();
 }
 

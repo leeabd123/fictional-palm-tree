@@ -26,6 +26,11 @@ function homeStart() {
   else setMode('speak');
 }
 
+// §22 — home is a DECISION-MAKER, not an overview: one clear recommended
+// next step and a single deliberate door to exploration (the Domain Map).
+// The library, domain chips, deck switcher, stats, and the Sudan map all
+// live on the Domain Map screen now; every mode also stays one tap away
+// in the sidebar (desktop) and the More tab (mobile).
 function renderHome() {
   const ca = document.getElementById('content-area');
   const g = homeGreeting();
@@ -33,14 +38,6 @@ function renderHome() {
   const streak = getStreak();
   const dm = DOMAINS.find(d => d.id === focusDomain()) || DOMAINS[0];
   const focus = nextFocus(focusDomain());
-  const gDone = Object.keys(getGuidedProgress()).length;
-  const coached = Object.keys(JSON.parse(localStorage.getItem('tariga_attempts_v1') || '{}')).length;
-  const attempts = totalAttemptCount();
-  const starredN = starredItems.size;
-  const totalScenarios = SPEAK_QA.length;
-  const pct = Math.min(100, Math.round((coached / totalScenarios) * 100));
-  const ringC = 2 * Math.PI * 52;
-  const srcInfo = SRC_LABELS[src] || SRC_LABELS.v1;
 
   ca.innerHTML = `
     <div class="home-wrap">
@@ -53,7 +50,7 @@ function renderHome() {
       </div>
       <div class="home-tagline">طريقة كلامك · TARIGAT KALAMAK · THE WAY YOU SPEAK</div>
 
-      <div class="home-greet-ar">${g.ar}${profile.name ? '' : ''}</div>
+      <div class="home-greet-ar">${g.ar}</div>
       <div class="home-greet-ph">${g.ph}</div>
       <div class="home-greet-en">${profile.name ? escAttr(profile.name) + ' — ' : ''}${g.en}</div>
 
@@ -78,10 +75,35 @@ function renderHome() {
         </button>
       </div>
 
-      <div class="home-path-label" style="margin-top:22px">EXPLORE OTHER DOMAINS</div>
+      <button class="home-focus" style="width:100%;text-align:left;cursor:pointer;margin-top:14px" onclick="setMode('tree')">
+        <div class="home-focus-label" style="color:var(--accent2)">Want to look around instead?</div>
+        <div class="home-focus-title" style="font-size:18px">🗺️ The domain map — your whole journey</div>
+        <div class="home-focus-sub">every domain, every scenario, the full practice library ›</div>
+      </button>
+
+      <div class="d2-item-note" style="text-align:center;margin:18px 0 8px">tip: press &amp; hold any Arabic word, anywhere in the app, to look it up and star it</div>
+      <div style="text-align:center;margin:4px 0 14px">
+        <button class="c2-linklike" onclick="setMode('about')">how Tariga works — the research behind it →</button>
+      </div>
+    </div>
+  `;
+}
+
+// the exploration half of the §22 split — rendered by the Domain Map screen
+function homeExploreHTML() {
+  const gDone = Object.keys(getGuidedProgress()).length;
+  const coached = Object.keys(JSON.parse(localStorage.getItem('tariga_attempts_v1') || '{}')).length;
+  const attempts = totalAttemptCount();
+  const starredN = (typeof starredDeckCount === 'function') ? starredDeckCount() : starredItems.size;
+  const totalScenarios = SPEAK_QA.length;
+  const pct = Math.min(100, Math.round((coached / totalScenarios) * 100));
+  const ringC = 2 * Math.PI * 52;
+  const srcInfo = SRC_LABELS[src] || SRC_LABELS.v1;
+  return `
+      <div class="home-path-label" style="margin-top:26px">EXPLORE OTHER DOMAINS</div>
       <div class="home-domains">
         ${DOMAINS.map(d2 => `
-          <button class="d2-tab ${d2.id === focusDomain() ? 'on' : ''}" ${d2.live ? `onclick="setFocusDomain('${d2.id}');renderHome()"` : 'disabled'}
+          <button class="d2-tab ${d2.id === focusDomain() ? 'on' : ''}" ${d2.live ? `onclick="setFocusDomain('${d2.id}');renderTree()"` : 'disabled'}
             title="${escAttr(d2.desc)}" style="${d2.live ? '' : 'opacity:.45;cursor:default'}">
             ${d2.icon} ${d2.label}${d2.live ? '' : ' · soon'}
           </button>`).join('')}
@@ -124,16 +146,10 @@ function renderHome() {
         ${homeCard('livecall', comfortUnlocked('family') ? '📞' : '🔒', 'Live call', comfortUnlocked('family') ? 'habooba answers for real' : 'unlocks with Family comfort')}
         ${homeCard('flash', '🃏', 'Flashcards', deck.length + ' in deck')}
         ${homeCard('listen', '👂', 'Tune your ear', 'podcast lines')}
-        ${homeCard('tree', '🗺️', 'Domain map', 'your whole journey, one tree')}
         ${homeCard('journey', '✦', 'Your journey', 'then → now')}
         ${homeCard('convo', '🎧', 'Conversation', 'the real podcast')}
         ${homeCard('contribute', '🫶', 'Contribute', 'preserve it · one prompt')}
         ${homeCard('deep', '📚', 'Deep cards', 'synonyms & context')}
-      </div>
-
-      <div class="d2-item-note" style="text-align:center;margin:2px 0 8px">tip: press &amp; hold any Arabic word, anywhere in the app, to look it up and star it</div>
-      <div style="text-align:center;margin:4px 0 14px">
-        <button class="c2-linklike" onclick="setMode('about')">how Tariga works — the research behind it →</button>
       </div>
 
       <button class="home-map-card" onclick="setMode('map')">
@@ -142,9 +158,7 @@ function renderHome() {
           <span class="home-map-title">Word origins — map of Sudan</span>
           <span class="home-map-sub">Watch the globe find Sudan — tap to explore regions ›</span>
         </span>
-      </button>
-    </div>
-  `;
+      </button>`;
 }
 
 function homeCard(mode, icon, title, sub, glow) {

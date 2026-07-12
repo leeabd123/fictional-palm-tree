@@ -26,9 +26,16 @@ function renderMap() {
       </div>
       <div class="d2-note" style="margin-bottom:16px">Where the dialect lives — watch the globe find Sudan, then tap a region.</div>
 
+      ${(() => {
+        // §28.4 — light up their own region when we know it
+        const myRegion = (typeof getProfile === 'function') ? getProfile().region : null;
+        const hl = (myRegion && REGION_TAG_MAP[myRegion]) || 'khartoum';
+        return `
       <div class="m2-mapcard">
-        <div class="m2-mapbox"><sudan-map highlight="khartoum"></sudan-map></div>
-      </div>
+        <div class="m2-mapbox"><sudan-map highlight="${hl}"></sudan-map></div>
+        ${myRegion ? `<div class="d2-item-note" style="text-align:center;margin-top:8px">glowing: <b style="color:var(--accent2)">${escAttr(myRegion)}</b> — where your family's from 🤍</div>` : ''}
+      </div>`;
+      })()}
 
       <div class="m2-grid">
         <div class="m2-cell gold">
