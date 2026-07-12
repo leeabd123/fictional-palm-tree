@@ -14,6 +14,7 @@ let spTimer = null;
 let spRunning = false;
 
 function speedAvailable() {
+  if (typeof adminOn === 'function' && adminOn()) return true;
   const done = getGuidedProgress();
   return GUIDED_SCENARIOS.filter(g => g.domain === focusDomain() && done[g.id]).length >= 3;
 }
@@ -21,6 +22,9 @@ function speedAvailable() {
 function speedStart() {
   const done = getGuidedProgress();
   spItems = shuf(GUIDED_SCENARIOS.filter(g => g.domain === focusDomain() && done[g.id]));
+  if (!spItems.length && typeof adminOn === 'function' && adminOn()) {
+    spItems = shuf(GUIDED_SCENARIOS.filter(g => g.domain === focusDomain()));
+  }
   if (!spItems.length) { setMode('guided'); return; }
   spIdx = 0; spInput = ''; spScore = 0; spRunning = true;
   spEndsAt = Date.now() + TARIGA_CONFIG.speed.seconds * 1000;

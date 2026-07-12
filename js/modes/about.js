@@ -58,6 +58,9 @@ function renderAbout() {
           </div>
         </div>`).join('')}
       <div class="c2-encourage" style="margin-top:16px">None of this matters without the part research can't give you — wanting to talk to your family. That part is yours. 🤍</div>
+      <div style="text-align:center;margin-top:20px">
+        <button class="c2-linklike" style="opacity:.55" onclick="setMode('admin')">founder tools →</button>
+      </div>
     </div>
   `;
 }

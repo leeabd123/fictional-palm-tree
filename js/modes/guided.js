@@ -20,6 +20,7 @@ function guidedList() {
   return [...list.filter(g => g.tier === 'Beginning'), ...list.filter(g => g.tier !== 'Beginning')];
 }
 function guidedLocked(it) {
+  if (typeof adminOn === 'function' && adminOn()) return false;
   return it.tier === 'Comfortable' && domainTier(it.domain) === 'Beginning';
 }
 function guidedDomain() { return DOMAINS.find(d => d.id === focusDomain()) || DOMAINS[0]; }
@@ -153,7 +154,7 @@ function renderGuided() {
         </div>
       `}
 
-      ${domainTier(focusDomain()) !== 'Beginning' ? `
+      ${comfortUnlocked(focusDomain()) ? `
       <div class="d2-pill-row" style="margin-top:22px">
         <button class="d2-pill-teal" onclick="setMode('freeform')">✨ Free-form unlocked →</button>
         ${typeof speedAvailable === 'function' && speedAvailable() ? `<button class="d2-pill-gold" onclick="speedStart()">⚡ Speed round</button>` : ''}
