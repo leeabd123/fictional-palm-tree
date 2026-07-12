@@ -136,6 +136,7 @@ function renderTree() {
         <span class="d2-badge">📞 call · 🫶 big moment</span>
       </div>
       <div class="d2-note" style="text-align:center;margin-top:10px">the center rings are the five domains filling as you go — <button class="c2-linklike" onclick="setMode('journey')">the numbers behind this live in your journey →</button></div>
+      ${typeof homeExploreHTML === 'function' ? homeExploreHTML() : ''}
     </div>
   `;
 }

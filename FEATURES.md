@@ -47,7 +47,7 @@ Flashcards (3D carousel, both directions, shared compare engine) · Deep cards +
 - **Contribute:** weekly prompts + free "suggest a phrase", tagged by region/generation/register; **AI-assisted tag suggestion** (Claude proposes domain/tier/register, human confirms — region/generation stay human-only); **gap-detection agent** surfaces one targeted ask from real coverage data.
 - **Reviewer mode** — a distinct surface: one submission at a time, Approve / Edit-and-approve / Flag with reason **and a note back to the contributor** (returned items show the note + fix-and-resubmit; never silently gone). Flag reasons include **inappropriate/spam** (§28 moderation) — removed outright, a different path from dialect accuracy.
 - **Two queues (§25):** New submissions + an **Audit queue** — already-live and founder-seeded content resurfaces for independent re-confirmation over time ("still sounds right ✓" / "needs another look" → lands on the founder's desk). Verification is never "permanently done".
-- **Duplicate detection (§25):** on submit, the system checks similarity against existing content and asks — same thing, *your region's variant* (kept, tagged as a variant — variation is the data), or genuinely different.
+- **Duplicate detection (§25):** on submit, the system checks similarity against existing content and asks — same thing, *your region's variant* (kept, tagged as a variant — variation is the data), or genuinely different. With the coach connected it's a **semantic check (Claude comparing meaning and context)**; offline it falls back to token overlap.
 - **Voice notes on reviews (§25):** reviewers can record themselves saying a phrase (explicit consent checkbox first, §28) — a byproduct source for the native-audio gap.
 - **Personal asks:** the gap-detection agent's targeted request is shown on the reviewer dashboard, not just in Contribute.
 - **Dual-track trust ladder:** organic (New ×1 → Contributor ×2 → Trusted ×3, weighted votes, config-driven live threshold) + **vouch fast-track** (Trusted members mint codes; a redeemed elder lands as Community Elder at full weight — identity as the credential).
@@ -56,7 +56,9 @@ Flashcards (3D carousel, both directions, shared compare engine) · Deep cards +
 
 ## 7. Progress & motivation
 
-Streaks · progress ring · per-domain tiers + radar · before/after journey per scenario · natural score · starred persistence · first-run intro (السلام عليكم exchange + comfort self-report, first win < 1 min).
+Streaks · progress ring · per-domain tiers + radar · before/after journey per scenario · natural score · starred persistence · first-run intro (السلام عليكم exchange + comfort self-report + **optional regional background (§28.4)** — their region then personalizes the gap ask, pre-fills contribute tags, and glows on the Sudan map, first win < 1 min).
+
+**Home is a decision-maker, not an overview (§22):** greeting, streak, the warm-up when due, ONE recommended next action with a Start button, and a single deliberate door to exploration. The Domain Map is the overview — the skill tree plus the domain chips, practice library, deck switcher, stats, and the Sudan map card all live there. Every mode also stays one tap away in the sidebar / More tab.
 
 ## 8. Architecture
 
@@ -83,13 +85,13 @@ The product's honest answer to "do you use agents": autonomy lives exactly where
 - **The scaffolding gradient ends agentic (§29.3):** Guided → Scenario → Free-form → Phone Call Lite → **Full Phone Call**. The Live call is genuinely agentic per §29.1 — it decides what happens next in character, holds conversational state across turns, and is few-shot grounded on verified transcripts so it never free-invents dialect. It's the natural endpoint of the pedagogy, not a bolted-on agent feature.
 - **Pipeline agents already shipped (§29.4):** gap detection (scans coverage, decides what to ask for and surfaces it to contributors and reviewers), AI intake tagging (judgment calls on categorization, human confirms), duplicate detection (searches, compares, asks the human the same/variant/different question).
 - **Deliberately NOT agentic (§29.6):** single-turn Guided/Scenario coaching stays deterministic and structured — one prompt, one response, one schema-validated feedback object. Precision beats flexibility in the moment someone needs dependable feedback on exactly what they just said.
-- **Next agent, gated (§29.5):** the tutor agent — real memory of one person across sessions ("struggles with formal register specifically, not vocabulary broadly"), non-obvious sequencing calls, direct database queries for targeted follow-ups. Hard dependency: user accounts (§28.1) — a concrete reason to prioritize that gap.
+- **The tutor agent (§29.5) — browser-local edition, shipped:** "🎓 Your tutor's read" on the Journey page reads this browser's whole attempt history, names the qualitative pattern a progress bar can't see ("code-switches specifically in hospitality moments"), and picks 1–3 targeted scenarios from the verified catalog — resurfacing struggles or skipping ahead on mastery, not bound to tier order. It never invents Arabic; recommendations are validated against the catalog before rendering. Honest limit shown in-app: memory lives in this browser until user accounts (§28.1) exist — the cross-device version is the concrete reason to prioritize that gap.
 
 ## 9. The honest backlog (tracks doc §28)
 
 - **Blocking (§28.1): user accounts / persistent identity** — the trust ladder needs to recognize the same real person across sessions; everything is localStorage per-browser today. The demo tools *simulate* tiers; real tiers need a lightweight account layer + the D1 backend. This is the one real engineering gap.
 - Native-speaker sign-off needed on: all "pending native review" scenarios (Stage 2/3 batches + quick-added founder content), the live-call transcript quality, scenario 4's reconstructed script, the condolence phrasing, and the ذ/ث/ظ checklist in `docs/PHONETICS-AUDIT.md`.
-- **Still open from §28:** re-engagement triggers (notifications/reminders — nothing brings users back yet), a monetization product spec (what's free vs. paid, where prompts surface), pronunciation scoring, deeper onboarding personalization (regional background → map + contributor invitation).
+- **Still open from §28:** re-engagement triggers (notifications/reminders need backend push infrastructure), a monetization product spec (what's free vs. paid — a founder decision before it's an engineering task), pronunciation scoring (needs real native audio to score against).
 - No spaced-repetition scheduler yet (warm-up approximates it); no real native audio (reviewer voice notes are the seed); licensed podcast partnerships (§6) are relationship work, not code.
 
 ---

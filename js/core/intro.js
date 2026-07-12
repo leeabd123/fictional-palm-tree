@@ -18,6 +18,9 @@ function introFinish(skip) {
     const p = getProfile();
     if (name) p.name = name;
     p.comfort = window._introComfort || p.comfort || null;
+    // §28.4 — regional background connects them to the map and, later,
+    // to contributing ("since your family's from Omdurman…")
+    p.region = window._introRegion || p.region || null;
     saveProfile(p);
   }
   try { localStorage.setItem('tariga_intro_v1', '1'); } catch (e) {}
@@ -28,6 +31,12 @@ function introSetComfort(v, btn) {
   window._introComfort = v;
   document.querySelectorAll('#intro-comfort .d2-tab').forEach(b => b.classList.remove('on'));
   btn.classList.add('on');
+}
+
+function introSetRegion(v, btn) {
+  window._introRegion = window._introRegion === v ? null : v;
+  document.querySelectorAll('#intro-region .d2-tab').forEach(b => b.classList.remove('on'));
+  if (window._introRegion) btn.classList.add('on');
 }
 
 function introNext() {
@@ -94,6 +103,11 @@ function renderIntroOverlay() {
           <button class="d2-tab" onclick="introSetComfort('none', this)">Not at all</button>
           <button class="d2-tab" onclick="introSetComfort('little', this)">A little</button>
           <button class="d2-tab" onclick="introSetComfort('good', this)">Pretty good</button>
+        </div>
+        <div class="intro-try" style="margin-top:14px">Where's your family from? (optional — it lights up your region on the map)</div>
+        <div class="d2-tab-row" id="intro-region" style="justify-content:center">
+          ${['Khartoum', 'Omdurman', 'Port Sudan', 'North', 'West'].map(rg =>
+            `<button class="d2-tab" onclick="introSetRegion('${rg}', this)">${rg}</button>`).join('')}
         </div>
         <div class="d2-pill-row"><button class="c2-compare" onclick="introFinish(false)">Start learning →</button></div>
       </div>`;
