@@ -12,7 +12,7 @@ let lcBusy = false;
 let lcDone = false;
 let lcError = null;
 
-function lcUnlocked() { return domainTier('family') !== 'Beginning'; }
+function lcUnlocked() { return comfortUnlocked('family'); }
 function lcTurnCount() { return lcHistory.filter(h => h.who === 'you').length; }
 
 function lcReset() {

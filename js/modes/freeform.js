@@ -11,7 +11,7 @@ let ffFeedback = null;
 let ffError = null;
 
 function ffList() { return FREEFORM_PROMPTS.filter(f => f.domain === focusDomain()); }
-function ffUnlocked() { return domainTier(focusDomain()) !== 'Beginning'; }
+function ffUnlocked() { return comfortUnlocked(focusDomain()); }
 
 function renderFreeform() {
   const ca = document.getElementById('content-area');

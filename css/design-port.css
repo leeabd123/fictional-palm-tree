@@ -905,3 +905,16 @@ button.home-map-card { text-align: left; font-family: var(--sans); cursor: point
   font-size: 11.5px; color: var(--lav); font-style: italic; margin: 6px 6px 0 0;
   text-align: right; opacity: .85; line-height: 1.5;
 }
+
+/* demo-mode badge — never mistake demo state for real progress */
+#admin-badge {
+  position: fixed; bottom: 96px; right: 14px; z-index: 250;
+  padding: 7px 13px; border-radius: 100px; font-size: 10.5px; font-weight: 700;
+  letter-spacing: .06em; font-family: var(--sans); cursor: pointer;
+  background: rgba(201, 169, 110, 0.15); color: var(--accent2);
+  border: 1px solid rgba(201, 169, 110, 0.45);
+  box-shadow: 0 6px 22px -6px rgba(0, 0, 0, 0.6), 0 0 20px -8px rgba(201, 169, 110, 0.5);
+  backdrop-filter: blur(10px);
+}
+#admin-badge:hover { background: rgba(201, 169, 110, 0.25); }
+@media (min-width: 901px) { #admin-badge { bottom: 18px; } }
