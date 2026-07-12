@@ -27,16 +27,38 @@ function apiConfigured() {
 }
 
 // Sends a built coach request; resolves with the parsed feedback object.
+// Graceful-degradation path (§28.1): every call gets a hard timeout, and
+// transient failures (network drop, 5xx, timeout) retry once automatically
+// before surfacing an error — the caller keeps the user's answer either way.
+const COACH_TIMEOUT_MS = 60000;
+
 async function coachEvaluate(req) {
+  try {
+    return await _coachEvaluateOnce(req);
+  } catch (e) {
+    const msg = String(e.message || e);
+    const transient = msg === 'timeout' || msg.startsWith('api_error:5') || /failed to fetch|networkerror|load failed/i.test(msg);
+    if (!transient) throw e;
+    await new Promise(r => setTimeout(r, 1500));
+    return _coachEvaluateOnce(req);
+  }
+}
+
+async function _coachEvaluateOnce(req) {
   const cfg = getApiConfig();
   if (!cfg) throw new Error('not_configured');
 
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), COACH_TIMEOUT_MS);
+
   let res;
+  try {
   if (cfg.mode === 'worker') {
     res = await fetch(cfg.workerUrl.replace(/\/$/, '') + '/api/coach', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(req),
+      signal: ctrl.signal,
     });
   } else {
     res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -54,8 +76,15 @@ async function coachEvaluate(req) {
         messages: req.messages,
         output_config: { format: { type: 'json_schema', schema: req.output_schema } },
       }),
+      signal: ctrl.signal,
     });
   }
+  } catch (e) {
+    clearTimeout(timer);
+    if (e.name === 'AbortError') throw new Error('timeout');
+    throw e;
+  }
+  clearTimeout(timer);
 
   if (!res.ok) {
     let detail = '';

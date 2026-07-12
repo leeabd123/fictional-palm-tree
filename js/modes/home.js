@@ -8,8 +8,9 @@ const SRC_LABELS = {
   all: ['Both episodes', 'the full combined deck'],
   p2: ['Sudanese glossary', 'slang & essentials glossary'],
   extra: ['Deep vocab bank', 'deep cuts from both transcripts'],
+  starred: ['My starred', 'cards, words & sentences you starred yourself'],
 };
-const SRC_ORDER = ['v1', 'v2', 'all', 'p2', 'extra'];
+const SRC_ORDER = ['v1', 'v2', 'all', 'p2', 'extra', 'starred'];
 
 function homeGreeting() {
   const h = new Date().getHours();
@@ -123,12 +124,14 @@ function renderHome() {
         ${homeCard('livecall', comfortUnlocked('family') ? '📞' : '🔒', 'Live call', comfortUnlocked('family') ? 'habooba answers for real' : 'unlocks with Family comfort')}
         ${homeCard('flash', '🃏', 'Flashcards', deck.length + ' in deck')}
         ${homeCard('listen', '👂', 'Tune your ear', 'podcast lines')}
+        ${homeCard('tree', '🗺️', 'Domain map', 'your whole journey, one tree')}
         ${homeCard('journey', '✦', 'Your journey', 'then → now')}
         ${homeCard('convo', '🎧', 'Conversation', 'the real podcast')}
         ${homeCard('contribute', '🫶', 'Contribute', 'preserve it · one prompt')}
         ${homeCard('deep', '📚', 'Deep cards', 'synonyms & context')}
       </div>
 
+      <div class="d2-item-note" style="text-align:center;margin:2px 0 8px">tip: press &amp; hold any Arabic word, anywhere in the app, to look it up and star it</div>
       <div style="text-align:center;margin:4px 0 14px">
         <button class="c2-linklike" onclick="setMode('about')">how Tariga works — the research behind it →</button>
       </div>
@@ -154,7 +157,12 @@ function homeCard(mode, icon, title, sub, glow) {
 }
 
 function homeCycleSrc() {
-  const next = SRC_ORDER[(SRC_ORDER.indexOf(src) + 1) % SRC_ORDER.length];
+  let i = SRC_ORDER.indexOf(src);
+  let next = SRC_ORDER[(i + 1) % SRC_ORDER.length];
+  // skip the starred deck while it's empty
+  if (next === 'starred' && (typeof starredDeckCount !== 'function' || !starredDeckCount())) {
+    next = SRC_ORDER[(i + 2) % SRC_ORDER.length];
+  }
   setSrc(next);
   renderHome();
 }

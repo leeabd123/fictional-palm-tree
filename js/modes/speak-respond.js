@@ -401,6 +401,7 @@ async function coachSubmit() {
       msg === 'rate_limited' ? 'The coach is getting too many requests — wait a minute and try again.' :
       msg === 'not_configured' ? 'Connect the coach first (below).' :
       msg === 'refused' ? 'The coach couldn’t respond to that one — try rephrasing.' :
+      msg === 'timeout' ? 'The coach took too long to answer (it already retried once). Your answer is saved right here — try again in a moment.' :
       'Something went wrong reaching the coach (' + msg + '). Your answer is still here — try again.';
   }
   renderSpeak();
