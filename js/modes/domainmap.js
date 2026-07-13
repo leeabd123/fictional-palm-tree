@@ -46,7 +46,10 @@ function dmDomains() {
       return { ...it, status };
     });
     const doneN = items.filter(x => x.status === 'done').length;
-    return { ...dm, ...DM_CFG[dm.id], items, doneN, total: items.length, tier: domainTier(dm.id) };
+    const cfg = { ...DM_CFG[dm.id] };
+    // System B (2a/2b): same structure, neon accents
+    if (typeof neonOn === 'function' && neonOn() && typeof DM_NEON !== 'undefined') cfg.color = DM_NEON[dm.id];
+    return { ...dm, ...cfg, items, doneN, total: items.length, tier: domainTier(dm.id) };
   });
 }
 
@@ -250,8 +253,9 @@ function dmTreeHTML(doms) {
     </div>`;
 }
 
-// ══════════ 1c — THE ORBITS ══════════
+// ══════════ 1c — THE ORBITS (warm) · 6c — CIRCUIT ORBITS (neon) ══════════
 function dmOrbitsHTML(doms) {
+  const NE = typeof neonOn === 'function' && neonOn();
   const SIZES = [340, 288, 236, 184, 132];
   const SPINS = ['96s linear infinite', '74s linear infinite reverse', '110s linear infinite', '82s linear infinite reverse', '64s linear infinite'];
   let rings = '';
@@ -260,19 +264,23 @@ function dmOrbitsHTML(doms) {
     const pct = Math.max(2.5, Math.round(d.doneN / d.total * 100));
     const dots = d.items.map((it, j) => {
       const th = (-90 + j * 360 / d.items.length) * Math.PI / 180;
-      const r = it.status === 'done' ? 5.5 : it.status === 'next' ? 5 : 3.5;
+      const r = it.status === 'done' ? (NE ? 6 : 5.5) : it.status === 'next' ? 5 : 3.5;
       const R = D / 2;
       const x = R + Math.cos(th) * (R - 1), y = R + Math.sin(th) * (R - 1);
       return `<div title="${escAttr(it.title)}" style="position:absolute;left:${(x - r).toFixed(1)}px;top:${(y - r).toFixed(1)}px;width:${r * 2}px;height:${r * 2}px;border-radius:50%;
-        background:${it.status === 'done' ? d.color : it.status === 'next' ? dmHexA(d.color, .9) : 'rgba(255,255,255,0.16)'};
-        box-shadow:${it.status === 'done' ? '0 0 12px 1px ' + dmHexA(d.color, .85) : it.status === 'next' ? '0 0 10px 1px ' + dmHexA(d.color, .7) : 'none'};
+        background:${it.status === 'done' ? d.color : it.status === 'next' ? dmHexA(d.color, .9) : NE ? 'rgba(255,255,255,0.13)' : 'rgba(255,255,255,0.16)'};
+        box-shadow:${it.status === 'done' ? '0 0 ' + (NE ? 16 : 12) + 'px ' + (NE ? 2 : 1) + 'px ' + dmHexA(d.color, .85) : it.status === 'next' ? '0 0 10px 1px ' + dmHexA(d.color, .7) : 'none'};
         opacity:${it.status === 'locked' ? .35 : 1}"></div>`;
     }).join('');
+    // 6c: dashed circuit-trace track + solid glowing completed arc
     rings += `
       <div style="position:absolute;left:50%;top:50%;width:${D}px;height:${D}px;margin:-${D / 2}px 0 0 -${D / 2}px;border-radius:50%;animation:orbitSpin ${SPINS[i]}">
         <svg viewBox="0 0 100 100" style="position:absolute;left:0;top:0;width:100%;height:100%;transform:rotate(-90deg);overflow:visible">
-          <circle cx="50" cy="50" r="49.6" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="0.5"></circle>
-          <circle cx="50" cy="50" r="49.6" fill="none" stroke="${d.color}" stroke-width="0.9" stroke-linecap="round" pathLength="100" stroke-dasharray="${pct} 100" opacity="0.9"></circle>
+          ${NE
+            ? `<circle cx="50" cy="50" r="49.6" fill="none" stroke="${dmHexA(d.color, .3)}" stroke-width="0.5" stroke-dasharray="0.7 1.6" pathLength="100"></circle>
+               <circle cx="50" cy="50" r="49.6" fill="none" stroke="${d.color}" stroke-width="1.1" stroke-linecap="round" pathLength="100" stroke-dasharray="${pct} 100" style="filter:drop-shadow(0 0 3px ${dmHexA(d.color, .9)})"></circle>`
+            : `<circle cx="50" cy="50" r="49.6" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="0.5"></circle>
+               <circle cx="50" cy="50" r="49.6" fill="none" stroke="${d.color}" stroke-width="0.9" stroke-linecap="round" pathLength="100" stroke-dasharray="${pct} 100" opacity="0.9"></circle>`}
         </svg>
         ${dots}
       </div>`;
@@ -282,14 +290,25 @@ function dmOrbitsHTML(doms) {
   const jr = dmJourneyRows();
   return `
     ${dmHeaderHTML(doms, 'عالمك', 'Your world — five circles of your life, filling as you speak', '#c4b5fd', 'rgba(167,139,250,0.35)', () => '')}
+    ${NE ? `<div class="fui-hud" style="margin-top:6px">DOMAIN ORBITS <span class="sys">// SYS_MAP_02</span></div>
+    <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;letter-spacing:.14em;color:#fff;opacity:.85;margin-top:6px">FIVE DOMAINS · ${totalDone} OF ${totalAll} MOMENTS LIT</div>` : ''}
     <div style="position:relative;height:340px;margin:10px auto 0;max-width:390px;perspective:800px">
       ${rings}
       <div style="position:absolute;left:50%;top:82%;width:210px;height:36px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(ellipse, rgba(0,0,0,0.55), transparent 70%);animation:shadowPulse 5s ease-in-out infinite;pointer-events:none"></div>
+      ${NE ? `
+      <button onclick="treeView='tree';renderTree()" title="view as tree" style="position:absolute;left:50%;top:47%;transform:translate(-50%,-50%);width:104px;height:104px;border-radius:50%;overflow:hidden;background:radial-gradient(circle at 40% 32%, rgba(45,212,191,0.35), rgba(5,8,13,0.95) 65%);border:1px solid rgba(45,212,191,0.5);box-shadow:0 0 44px -8px rgba(45,212,191,0.6), inset 0 0 30px rgba(45,212,191,0.15);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:5;animation:floatyC 6s ease-in-out infinite;cursor:pointer;font-family:'Space Grotesk',sans-serif">
+        <span style="position:absolute;inset:0;background-image:linear-gradient(rgba(45,212,191,0.12) 1px, transparent 1px), linear-gradient(90deg, rgba(45,212,191,0.12) 1px, transparent 1px);background-size:12px 12px;border-radius:50%;pointer-events:none"></span>
+        <span style="font-size:32px;font-weight:700;color:#fff;line-height:1;position:relative">${totalDone}</span>
+        <span style="font-size:7.5px;letter-spacing:.24em;color:#2de3c3;margin-top:4px;position:relative">OF ${totalAll}</span>
+      </button>` : `
       <button onclick="treeView='tree';renderTree()" title="view as tree" style="position:absolute;left:50%;top:47%;transform:translate(-50%,-50%);width:112px;height:112px;border-radius:50%;background:radial-gradient(circle at 38% 30%, rgba(255,250,242,0.1), rgba(15,13,11,0.92) 60%);border:1px solid rgba(232,201,154,0.4);box-shadow:0 24px 50px -18px rgba(0,0,0,0.9), 0 0 44px -10px rgba(232,201,154,0.4);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:5;animation:floatyC 6s ease-in-out infinite;cursor:pointer;font-family:inherit">
         <span style="font-family:var(--serif),serif;font-size:34px;color:#e8c99a;line-height:1;font-variant-numeric:tabular-nums">${totalDone}</span>
         <span style="font-size:8.5px;letter-spacing:.18em;text-transform:uppercase;color:#7a756e;margin-top:4px">of ${totalAll} moments</span>
-      </button>
+      </button>`}
     </div>
+    ${NE ? `<div style="display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:6px">
+      ${doms.map(d => `<span style="font-family:'Space Grotesk',sans-serif;font-size:9px;letter-spacing:.14em;color:${d.color}">${d.glyph} ${d.label.toUpperCase()}</span>`).join('')}
+    </div>` : ''}
     <div style="margin-top:8px;max-width:430px;margin-left:auto;margin-right:auto">
       ${doms.map((d, i) => `
       <button onclick="treeView='list';dmOpen='${d.id}';renderTree()" style="display:flex;align-items:center;gap:10px;width:100%;padding:9px 0;border:none;border-bottom:1px solid rgba(255,255,255,0.05);background:none;cursor:pointer;color:inherit;font-family:inherit;text-align:left">
@@ -421,6 +440,35 @@ function dmDetailHTML() {
       <div style="font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:#7a756e;margin-top:12px">Natural score${multi ? ` · ${s2 - s1 >= 0 ? '+' + (s2 - s1) : s2 - s1} in ${atts.length} attempts` : ' · first attempt'}</div>
       ${multi ? `<div style="display:flex;align-items:flex-end;justify-content:center;gap:10px;height:60px;margin-top:18px">${bars}</div>` : ''}
     </div>
+
+    ${(typeof neonOn === 'function' && neonOn()) ? (() => {
+      // 6d — HUD metric tile: the same attempt metrics as telemetry grooves
+      const m = last.metrics;
+      const dialect = s2;
+      const connectors = Math.min(100, (m.transitions || 0) * 22 + (m.chunks || 0) * 16);
+      const flow = Math.min(100, Math.max(8, (m.words || 0) * 8 - (m.english || 0) * 10));
+      const groove = (label, v, from, to, glow) => `
+        <div style="display:flex;align-items:center;gap:10px;margin-top:10px">
+          <span style="font-family:'Space Grotesk',sans-serif;font-size:9.5px;letter-spacing:.14em;color:#fff;width:88px">${label}</span>
+          <span class="fui-groove" style="flex:1"><span style="display:block;height:100%;width:${v}%;border-radius:4px;background:linear-gradient(90deg,${from},${to});box-shadow:0 0 12px ${glow}"></span></span>
+          <span style="font-family:'Space Grotesk',sans-serif;font-size:10px;color:${to};width:30px;text-align:right">${v}</span>
+        </div>`;
+      return `
+    <div class="fui-hairline" style="padding:18px;margin-top:14px">
+      <div class="fui-hud" style="font-size:11px">NATURAL SCORE <span class="sys">// TELEMETRY</span></div>
+      <div style="display:flex;align-items:baseline;gap:10px;margin-top:12px;font-family:'Space Grotesk',sans-serif">
+        <span style="font-size:20px;color:#5b6272">[</span>
+        ${multi ? `<span style="font-size:26px;color:#5b6272">${s1}</span><span style="font-size:18px;color:#22d3ee">→</span>` : ''}
+        <span style="font-size:44px;font-weight:700;color:#fff;text-shadow:0 0 24px rgba(74,222,128,0.6)">${s2}</span>
+        <span style="font-size:20px;color:#5b6272">]</span>
+        ${multi && s2 - s1 > 0 ? `<span style="font-size:12px;font-weight:600;color:#4ade80;background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.3);padding:3px 10px;border-radius:100px;text-shadow:0 0 14px rgba(74,222,128,0.6)">▲ +${s2 - s1}</span>` : ''}
+      </div>
+      ${groove('DIALECT FIT', dialect, '#059669', '#4ade80', 'rgba(74,222,128,0.8)')}
+      ${groove('CONNECTORS', connectors, '#0e7490', '#22d3ee', 'rgba(34,211,238,0.8)')}
+      ${groove('FLOW', flow, '#7c3aed', '#a78bfa', 'rgba(167,139,250,0.8)')}
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:8.5px;letter-spacing:.14em;color:#5b6272;margin-top:12px">DERIVED FROM THIS ATTEMPT'S REAL METRICS</div>
+    </div>`;
+    })() : ''}
 
     <div style="margin-top:18px;padding:20px 22px;border-radius:22px;background:rgba(255,250,242,0.035);border:1px solid rgba(255,255,255,0.08)">
       ${multi ? `

@@ -1,0 +1,236 @@
+/* ══════════════════════════════════════════════════════════════
+   SYSTEM B — NEON "INK-NAVY GLASS" / FUI (design handoff)
+   Everything scoped under body.neon so the warm system stays the
+   default and each system applies consistently while active.
+   Tokens straight from the README: canvas #070B14, glass
+   rgba(255,255,255,.03–.05) + 1px 6–10% borders + blur, neon accents
+   that always glow, recessed-groove progress bars, Space Grotesk for
+   English / IBM Plex Sans Arabic for Arabic, HUD micro-labels.
+   ══════════════════════════════════════════════════════════════ */
+
+body.neon {
+  --bg: #070B14;
+  --surface: rgba(255,255,255,0.04);
+  --surface2: rgba(255,255,255,0.05);
+  --surface3: rgba(255,255,255,0.07);
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #eef2f8;
+  --text2: #8b93a3;
+  --text3: #5b6272;
+  --accent: #22d3ee;
+  --accent2: #2de3c3;
+  --accent-dim: rgba(34,211,238,0.12);
+  --green: #34d399;
+  --green-dim: rgba(52,211,153,0.12);
+  --red: #fb7185;
+  --red-dim: rgba(251,113,133,0.12);
+  --purple: #a78bfa;
+  --purple-dim: rgba(167,139,250,0.12);
+  --sans: 'Space Grotesk', 'DM Sans', sans-serif;
+  --serif: 'Space Grotesk', sans-serif;
+  --teal: #2dd4bf;
+  --mint: #4ade80;
+  background: #070B14;
+  font-family: 'Space Grotesk', 'DM Sans', sans-serif;
+}
+
+/* dot-grid layer, masked to fade downward (README System B canvas) */
+body.neon::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
+  background-size: 25px 25px;
+  -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,.9), transparent 55%);
+  mask-image: linear-gradient(180deg, rgba(0,0,0,.9), transparent 55%);
+}
+
+/* Arabic always IBM Plex Sans Arabic in System B */
+body.neon [dir="rtl"], body.neon [dir="auto"],
+body.neon .ar-text, body.neon .home-greet-ar, body.neon .f2-ar, body.neon .f2-back-ar,
+body.neon .d2-acc-ar, body.neon .d2-star-ar, body.neon .d2-inset-ar,
+body.neon .c2-hint-ar, body.neon .c2-native-ar, body.neon .intro-ar, body.neon .logo-ar,
+body.neon .m2-feat-ar, body.neon .lc-ar, body.neon .home-logo {
+  font-family: 'IBM Plex Sans Arabic', sans-serif !important;
+}
+
+/* transliteration lines go cyan Space Grotesk (warm uses italic purple) */
+body.neon .d2-acc-ph, body.neon .d2-star-ph, body.neon .f2-hint, body.neon .c2-hint-ph,
+body.neon .c2-native-ph, body.neon .intro-ph, body.neon .home-greet-ph, body.neon .d2-inset-ph {
+  color: #22d3ee !important; font-style: normal !important;
+  font-family: 'Space Grotesk', sans-serif !important;
+  text-shadow: 0 0 16px rgba(34,211,238,0.35);
+}
+
+/* glass panels — heavy solid borders are banned */
+body.neon .d2-card, body.neon .c2-qcard, body.neon .home-focus, body.neon .d2-item,
+body.neon .d2-inset, body.neon .c2-panel, body.neon .c2-textbox, body.neon .coach-connect,
+body.neon .home-stats, body.neon .d2-star-row, body.neon .journey-row, body.neon .home-card {
+  background: rgba(255,255,255,0.04) !important;
+  border-color: rgba(255,255,255,0.08) !important;
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  box-shadow: none;
+}
+
+/* HUD micro-labels */
+body.neon .d2-label, body.neon .j2-sec-label, body.neon .home-path-label,
+body.neon .c2-qlabel, body.neon .home-focus-label, body.neon .c2-weave-label {
+  font-family: 'Space Grotesk', sans-serif !important;
+  letter-spacing: .18em !important; text-transform: uppercase;
+  color: #8b93a3;
+}
+
+/* every accent glows */
+body.neon .c2-title, body.neon .d2-title {
+  color: #ffffff; text-shadow: 0 0 18px rgba(34,211,238,0.35);
+  font-family: 'Space Grotesk', sans-serif;
+  font-style: normal;
+}
+body.neon .home-streak {
+  color: #00ff87; border-color: rgba(0,255,135,0.35);
+  text-shadow: 0 0 14px rgba(0,255,135,0.5);
+}
+body.neon .home-streak-dot { background: #00ff87; box-shadow: 0 0 10px #00ff87; }
+
+/* primary CTA — the 3a gradient start button */
+body.neon .home-cta {
+  background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899) !important;
+  border: none !important; border-radius: 16px !important;
+  box-shadow: 0 0 44px -10px rgba(168,85,247,0.7);
+}
+body.neon .home-cta-title, body.neon .home-cta-sub, body.neon .home-cta-chev { color: #fff !important; }
+
+/* pills & buttons: glass + neon hairline */
+body.neon .d2-pill-gold, body.neon .c2-compare {
+  background: rgba(34,211,238,0.1) !important; border: 1px solid rgba(34,211,238,0.45) !important;
+  color: #22d3ee !important; box-shadow: 0 0 24px -8px rgba(34,211,238,0.7);
+}
+body.neon .d2-pill-green { box-shadow: 0 0 24px -8px rgba(52,211,153,0.8); }
+body.neon .d2-pill-teal { box-shadow: 0 0 24px -8px rgba(45,212,191,0.8); }
+body.neon .d2-tab.on {
+  border-color: rgba(34,211,238,0.5) !important; color: #22d3ee !important;
+  box-shadow: 0 0 18px -6px rgba(34,211,238,0.6);
+}
+
+/* recessed grooves — ALL progress bars (README System B) */
+body.neon .m2-bar, body.neon .prog-track, body.neon #prog {
+  background: rgba(0,0,0,0.55) !important;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.95), inset 0 -1px 0 rgba(255,255,255,0.05);
+  border-radius: 4px;
+}
+body.neon .m2-bar i { box-shadow: 0 0 12px rgba(34,211,238,0.6); }
+
+/* ── 3c — the orb IS the mic ── */
+body.neon .c2-orb-mic {
+  width: 180px; height: 180px; border-radius: 50%;
+  background: transparent; border: none; cursor: pointer; padding: 0;
+  animation: breathe 5s ease-in-out infinite;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto;
+}
+body.neon .c2-orb-mic tariga-orb { width: 100%; height: 100%; display: block; }
+body.neon .c2-mic-note {
+  font-family: 'Space Grotesk', sans-serif; letter-spacing: .1em; color: #eef2f8;
+}
+@keyframes breathe { 0%,100%{transform:scale(1)} 50%{transform:scale(1.045)} }
+
+/* ── 3d + 6e — listening: orb in a countersunk chamber + aura rings ── */
+body.neon .c2-voice-orb {
+  position: relative;
+  width: 310px; height: 310px; max-width: 82vw; max-height: 82vw;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: inset 0 14px 40px rgba(0,0,0,0.95), inset 0 -2px 0 rgba(255,255,255,0.05), 0 2px 0 rgba(255,255,255,0.04);
+  border: 1px solid rgba(167,139,250,0.3);
+}
+body.neon .c2-voice-orb tariga-orb { width: 74%; height: 74%; animation: breathe 5s ease-in-out infinite; }
+body.neon .c2-voice-orb::before, body.neon .c2-voice-orb::after {
+  content: ''; position: absolute; left: 50%; top: 50%;
+  width: 60%; height: 60%; border-radius: 50%; pointer-events: none;
+  transform: translate(-50%,-50%);
+}
+body.neon .c2-voice-orb::before { border: 1px solid rgba(45,212,191,0.5); animation: aura 2.6s ease-out infinite; }
+body.neon .c2-voice-orb::after { border: 1px solid rgba(167,139,250,0.5); animation: aura 2.6s ease-out infinite 1.3s; }
+@keyframes aura { 0%{transform:translate(-50%,-50%) scale(.72); opacity:.55} 100%{transform:translate(-50%,-50%) scale(1.55); opacity:0} }
+
+body.neon .c2-listening-label {
+  font-family: ui-monospace, 'SF Mono', monospace; letter-spacing: .32em;
+  color: #2dd4bf; text-transform: uppercase;
+  animation: glowPulse 1.8s ease-in-out infinite;
+  text-shadow: 0 0 16px rgba(45,212,191,0.6);
+}
+/* the control pod — one glass pill */
+body.neon .c2-voice-bar {
+  background: rgba(0,0,0,0.4); backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(255,255,255,0.08); border-radius: 100px; padding: 8px 10px;
+}
+body.neon .c2-voice-stop {
+  color: #fb7185 !important; border-color: rgba(251,113,133,0.4) !important;
+  text-shadow: 0 0 12px rgba(251,113,133,0.6);
+}
+body.neon .c2-voice-done {
+  background: #8b5cf6 !important; border: none !important; color: #fff !important;
+  box-shadow: 0 0 28px -6px rgba(139,92,246,0.9);
+  animation: glowPulse 2.6s ease-in-out infinite;
+}
+
+/* ── 5b — flashcards on glass ── */
+body.neon .f2-face {
+  background: rgba(255,255,255,0.04) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+}
+body.neon .f2-counter, body.neon .f2-dir { font-family: 'Space Grotesk', sans-serif; letter-spacing: .14em; }
+body.neon .f2-p-check { box-shadow: 0 0 24px -8px rgba(52,211,153,0.8); }
+
+/* verdict buttons (4a): emerald gradient "Got it" */
+body.neon .f2-mark-row .d2-pill-green {
+  background: linear-gradient(135deg, #059669, #34d399) !important;
+  border: none !important; color: #06090f !important; font-weight: 700;
+}
+body.neon .f2-mark-row .d2-pill-red {
+  background: rgba(251,191,36,0.08) !important; border: 1px solid rgba(251,191,36,0.4) !important;
+  color: #fbbf24 !important;
+}
+
+/* sidebar + tab bar = floating glass dock */
+body.neon .sidebar { background: rgba(7,11,20,0.85); border-color: rgba(255,255,255,0.06); }
+body.neon .tab-bar {
+  background: rgba(0,0,0,0.4) !important; backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(255,255,255,0.08); border-radius: 100px;
+}
+body.neon .tab-btn.on { color: #22d3ee; text-shadow: 0 0 14px rgba(34,211,238,0.7); }
+
+/* gradient hairline borders (6a cards) */
+body.neon .fui-hairline {
+  border: 1px solid transparent;
+  background-image: linear-gradient(#0a0f1c, #0a0f1c), linear-gradient(120deg, rgba(34,211,238,0.7), rgba(167,139,250,0.7));
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  border-radius: 20px;
+}
+
+/* HUD headers: 14px w700 .18em + colored // SYS_TAG suffix */
+.fui-hud {
+  font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 700;
+  letter-spacing: .18em; text-transform: uppercase; color: #eef2f8;
+}
+.fui-hud .sys { color: #22d3ee; text-shadow: 0 0 14px rgba(34,211,238,0.6); }
+.fui-mono { font-family: ui-monospace, 'SF Mono', monospace; font-size: 11px; line-height: 2; color: #8b93a3; }
+.fui-groove {
+  height: 8px; border-radius: 4px; background: rgba(0,0,0,0.6); overflow: hidden; display: block;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.95), inset 0 -1px 0 rgba(255,255,255,0.05);
+}
+@keyframes blinkCursor { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+.fui-cursor { animation: blinkCursor 1s step-end infinite; }
+
+/* neon intro + demo badge tint */
+body.neon #admin-badge { border-color: rgba(34,211,238,0.4); color: #22d3ee; }
+body.neon .intro-overlay { background: rgba(7,11,20,0.97); }
+
+/* reduced motion still wins over every neon animation */
+@media (prefers-reduced-motion: reduce) {
+  body.neon *, body.neon *::before, body.neon *::after {
+    animation-duration: .01ms !important; transition-duration: .01ms !important;
+  }
+}

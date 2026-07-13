@@ -71,6 +71,18 @@ function renderAbout() {
       <div class="d2-card" style="padding:16px;margin-top:16px">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
           <div>
+            <div style="font-size:14px;font-weight:600;color:var(--text)">✨ Look &amp; feel</div>
+            <div class="d2-item-note" style="margin-top:3px">two complete design systems from the design handoff — warm "candlelit" (the app's own language) or neon "ink-navy glass"</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0">
+            <button class="${!neonOn() ? 'd2-pill-gold' : 'c2-ghost-pill'}" onclick="themeSet('warm')">Warm</button>
+            <button class="${neonOn() ? 'd2-pill-teal' : 'c2-ghost-pill'}" onclick="themeSet('neon')">Neon</button>
+          </div>
+        </div>
+      </div>
+      <div class="d2-card" style="padding:16px;margin-top:10px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <div>
             <div style="font-size:14px;font-weight:600;color:var(--text)">Aa · Larger text</div>
             <div class="d2-item-note" style="margin-top:3px">bigger type everywhere — for elders and anyone who wants it. Animations also calm down automatically when your device asks for reduced motion.</div>
           </div>

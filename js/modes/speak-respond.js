@@ -116,9 +116,14 @@ function coachPromptHTML() {
 
       ${mode === 'voice' ? `
         <div class="c2-voicefirst">
+          ${typeof neonOn === 'function' && neonOn() ? `
+          <button class="c2-orb-mic" onclick="coachVoiceBegin()" ${configured ? '' : 'disabled title="Connect the coach below first"'} title="Tap orb to speak"><tariga-orb mode="idle"></tariga-orb></button>
+          <div class="c2-mic-note">Tap orb to speak</div>
+          <button class="c2-linklike" onclick="coachUseText()" style="letter-spacing:.18em;text-transform:uppercase;font-size:10px">or type instead</button>
+          ` : `
           <button class="c2-mic-big" onclick="coachVoiceBegin()" ${configured ? '' : 'disabled title="Connect the coach below first"'}>🎙</button>
           <div class="c2-mic-note">Tap and say it out loud</div>
-          <button class="c2-linklike" onclick="coachUseText()">or type it instead</button>
+          <button class="c2-linklike" onclick="coachUseText()">or type it instead</button>`}
         </div>
       ` : `
         <div class="c2-textbox">
