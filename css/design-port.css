@@ -55,13 +55,16 @@
 
 .home-cta {
   width: 100%; display: flex; align-items: center; gap: 16px; text-align: left;
-  padding: 16px 18px; border-radius: 18px; cursor: pointer;
-  background: linear-gradient(120deg, rgba(167,139,250,.10), rgba(79,216,196,.07) 60%, var(--surface));
-  border: 1px solid rgba(167,139,250,.25); color: var(--text);
+  padding: 16px 18px; border-radius: 100px; cursor: pointer;
+  /* README System A: buttons are gold ghost — tinted gold, gold hairline, light-gold text */
+  background: rgba(201,169,110,.11);
+  border: 1px solid rgba(201,169,110,.45); color: #e8c99a;
   font-family: var(--sans);
   transition: all .2s var(--ease);
-  box-shadow: 0 10px 34px -18px rgba(0,0,0,.8);
+  box-shadow: 0 0 30px -12px rgba(201,169,110,.55), 0 10px 34px -18px rgba(0,0,0,.8);
 }
+.home-cta:hover { background: rgba(201,169,110,.16); }
+.home-cta .home-cta-title { color: #e8c99a; }
 .home-cta:hover { transform: translateY(-2px); border-color: rgba(167,139,250,.45); box-shadow: 0 0 30px rgba(167,139,250,.15); }
 .home-cta-orbwrap {
   width: 54px; height: 54px; flex: 0 0 54px; border-radius: 50%;

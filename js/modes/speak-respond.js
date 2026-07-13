@@ -121,7 +121,7 @@ function coachPromptHTML() {
           <div class="c2-mic-note">Tap orb to speak</div>
           <button class="c2-linklike" onclick="coachUseText()" style="letter-spacing:.18em;text-transform:uppercase;font-size:10px">or type instead</button>
           ` : `
-          <button class="c2-mic-big" onclick="coachVoiceBegin()" ${configured ? '' : 'disabled title="Connect the coach below first"'}>🎙</button>
+          <button class="c2-mic-big" onclick="coachVoiceBegin()" ${configured ? '' : 'disabled title="Connect the coach below first"'}>${UI_MIC}</button>
           <div class="c2-mic-note">Tap and say it out loud</div>
           <button class="c2-linklike" onclick="coachUseText()">or type it instead</button>`}
         </div>
@@ -130,7 +130,7 @@ function coachPromptHTML() {
           <textarea id="coach-input" dir="auto" rows="3"
             placeholder="اكتب ردك هنا… or type it in Arabizi (saraha, 3ashan…) — both count"></textarea>
           <div class="c2-textbox-row">
-            ${coachMicSupported() ? `<button class="c2-mic-small" onclick="coachVoiceBegin()" title="Say it out loud instead">🎙</button>` : ''}
+            ${coachMicSupported() ? `<button class="c2-mic-small" onclick="coachVoiceBegin()" title="Say it out loud instead">${UI_MIC}</button>` : ''}
             <span style="flex:1"></span>
             <button class="c2-compare" onclick="coachSubmit()" ${configured ? '' : 'disabled title="Connect the coach below first"'}>Compare →</button>
           </div>

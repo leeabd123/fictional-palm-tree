@@ -120,12 +120,12 @@ function _wsPopBody() {
     <div class="ws-word" dir="rtl">${escAttr(wsCtx.w)}</div>
     ${wsCtx.loading ? '<div class="ws-def">asking the coach…</div>'
       : (wsCtx.ph || wsCtx.en)
-        ? `<div class="ws-def">${escAttr(wsCtx.ph)}${wsCtx.ph && wsCtx.en ? ' · ' : ''}${escAttr(wsCtx.en)}${wsCtx.discovered ? ' <span class="ws-disc">✨ discovered</span>' : ''}</div>`
+        ? `<div class="ws-def">${escAttr(wsCtx.ph)}${wsCtx.ph && wsCtx.en ? ' · ' : ''}${escAttr(wsCtx.en)}${wsCtx.discovered ? ' <span class="ws-disc">✧ discovered</span>' : ''}</div>`
         : `<div class="ws-def">not in the library yet${apiConfigured() ? '' : ' — connect the coach to look it up'}</div>`}
     <div class="ws-btns">
       <button onclick="wsStarWord()" class="${wStar ? 'on' : ''}">${wStar ? '★ word saved' : '☆ star word'}</button>
       <button onclick="wsStarSent()" class="${sStar ? 'on' : ''}">${sStar ? '★ sentence saved' : '☆ star sentence'}</button>
-      <button onclick="sayAr('${encodeURIComponent(wsCtx.w)}')">🔊</button>
+      <button onclick="sayAr('${encodeURIComponent(wsCtx.w)}')">${UI_SPK}</button>
       <button onclick="wsClose()">✕</button>
     </div>`;
 }

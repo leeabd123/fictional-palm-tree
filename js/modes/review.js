@@ -221,7 +221,7 @@ function renderReview() {
 
       ${reviewTab === 'audit' ? reviewAuditHTML() : !item ? `
       <div class="d2-card" style="text-align:center">
-        <div style="font-size:34px">🤍</div>
+        <div style="font-size:34px">♡</div>
         <div class="c2-title" style="font-size:19px;margin:10px 0 6px">Queue is clear</div>
         <div class="d2-note" style="margin:0 auto;max-width:360px">Every pending submission has been reviewed. New ones land here as the community contributes.</div>
       </div>` : `
@@ -243,7 +243,7 @@ function renderReview() {
             <span>Optional: record yourself saying it — I'm okay with my recording being used to teach learners pronunciation later.</span>
           </label>
           ${reviewConsent ? `
-          <button class="c2-ghost-pill" style="margin-top:8px;${reviewRec ? 'border-color:rgba(217,107,90,.5);color:#e08a7a' : ''}" onclick="reviewRecToggle(${item.ts})">${reviewRec ? '⏹ stop recording' : '🎤 record it (max 8s)'}</button>` : ''}`}
+          <button class="c2-ghost-pill" style="margin-top:8px;${reviewRec ? 'border-color:rgba(217,107,90,.5);color:#e08a7a' : ''}" onclick="reviewRecToggle(${item.ts})">${reviewRec ? '■ stop recording' : '${UI_MIC} record it (max 8s)'}</button>` : ''}`}
         </div>
 
         ${reviewEditOpen ? `
@@ -257,7 +257,7 @@ function renderReview() {
         <div class="d2-tab-row" id="review-flag-reasons">
           ${['wrong register', 'not natural', 'other dialect', 'misspelled'].map(rr =>
             `<button class="d2-tab" onclick="reviewPickReason(this,'${rr}')">${rr}</button>`).join('')}
-          <button class="d2-tab" style="color:#e08a7a" onclick="reviewPickReason(this,'inappropriate')">🚫 inappropriate/spam</button>
+          <button class="d2-tab" style="color:#e08a7a" onclick="reviewPickReason(this,'inappropriate')"> inappropriate/spam</button>
         </div>
         <textarea id="review-flag-note" dir="auto" rows="2" placeholder="a sentence for the contributor — what would make it work?"
           style="width:100%;margin-top:10px;border:1px solid rgba(217,107,90,.3);border-radius:14px;background:rgba(255,255,255,0.03);color:#f0ede8;font-family:var(--sans),'Noto Naskh Arabic';font-size:13.5px;line-height:1.6;padding:10px 14px;resize:none;outline:none"></textarea>
@@ -276,7 +276,7 @@ function renderReview() {
       <div class="j2-sec-label" style="margin-top:24px">The vouch fast-track</div>
       <div class="d2-card" style="padding:18px">
         ${r.vouched ? `
-          <div class="d2-prompt" style="font-size:14px">🌟 You were vouched in as a <b style="color:var(--accent2)">Community Elder</b> — your single approval takes a phrase live. Your ear is the credential.</div>
+          <div class="d2-prompt" style="font-size:14px">★ You were vouched in as a <b style="color:var(--accent2)">Community Elder</b> — your single approval takes a phrase live. Your ear is the credential.</div>
         ` : `
           <div class="d2-note" style="margin-bottom:8px">Were you vouched in by a trusted member? Elders shouldn't grind points — identity does that work.</div>
           <div style="display:flex;gap:8px">
@@ -318,7 +318,7 @@ function reviewAuditHTML() {
   const g = reviewAuditPick();
   if (!g) return `
       <div class="d2-card" style="text-align:center">
-        <div style="font-size:34px">🤍</div>
+        <div style="font-size:34px">♡</div>
         <div class="c2-title" style="font-size:19px;margin:10px 0 6px">Audit queue is clear</div>
         <div class="d2-note" style="margin:0 auto;max-width:360px">Everything live has been re-confirmed or flagged for a fix. It resurfaces again over time — verification is never "permanently done".</div>
       </div>`;

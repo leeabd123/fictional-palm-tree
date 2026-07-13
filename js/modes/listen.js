@@ -87,7 +87,7 @@ function renderListen() {
       <div class="d2-tab-row">
         <button class="d2-tab ${listenKind === 'meaning' ? 'on' : ''}" onclick="listenSetKind('meaning')">Meaning</button>
         <button class="d2-tab ${listenKind === 'next' ? 'on' : ''}" onclick="listenSetKind('next')">What comes next?</button>
-        <button class="d2-tab ${listenKind === 'dicto' ? 'on' : ''}" onclick="listenSetKind('dicto')">Reconstruct 🔊</button>
+        <button class="d2-tab ${listenKind === 'dicto' ? 'on' : ''}" onclick="listenSetKind('dicto')">Reconstruct ${UI_SPK}</button>
         <span style="flex:1"></span>
         <button class="d2-tab ${listenLayers.ar ? 'on' : ''}" onclick="listenToggle('ar')">عربي</button>
         <button class="d2-tab ${listenLayers.ph ? 'on' : ''}" onclick="listenToggle('ph')">phonetic</button>
@@ -180,12 +180,12 @@ function renderDicto(ca) {
       <div class="d2-tab-row">
         <button class="d2-tab" onclick="listenSetKind('meaning')">Meaning</button>
         <button class="d2-tab" onclick="listenSetKind('next')">What comes next?</button>
-        <button class="d2-tab on" onclick="void 0">Reconstruct 🔊</button>
+        <button class="d2-tab on" onclick="void 0">Reconstruct ${UI_SPK}</button>
       </div>
 
       <div class="d2-card" style="text-align:center;margin-bottom:14px">
         <div class="d2-label lav">Listen — then rebuild it</div>
-        <button class="c2-mic-big" style="margin:8px auto" onclick="sayAr('${encodeURIComponent(line.ar)}')" title="play the line">🔊</button>
+        <button class="c2-mic-big" style="margin:8px auto" onclick="sayAr('${encodeURIComponent(line.ar)}')" title="play the line">${UI_SPK}</button>
         <div class="d2-note" style="margin:8px 0 0">tap to hear it (again as often as you like) · browser voice for now — real audio comes with community recordings</div>
         ${dictoRevealed ? `
           <div class="d2-gold-box" style="text-align:right">

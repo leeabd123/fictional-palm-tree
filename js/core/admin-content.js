@@ -330,7 +330,7 @@ function cmRowsHTML() {
     return CALL_SEQUENCES.map(cs => `
       <div class="d2-item" style="margin-bottom:6px;cursor:pointer" onclick="if(event.target.tagName!=='TEXTAREA'&&event.target.tagName!=='BUTTON')cmToggle('${cs.id}')">
         <div style="display:flex;gap:8px;align-items:center">
-          <span style="flex:1;font-size:13.5px;color:var(--text)">📞 ${escAttr(cs.title)}</span>
+          <span style="flex:1;font-size:13.5px;color:var(--text)">◉ ${escAttr(cs.title)}</span>
           <span class="d2-badge">${escAttr(cs.domain)}</span>
           <span class="d2-badge">${cs.turns.length} turns</span>
         </div>
@@ -359,8 +359,8 @@ function cmRowsHTML() {
           <span class="d2-badge">${r.approved || 0} approved</span>
         </div>
         <div class="d2-pill-row" style="margin-top:10px">
-          ${r.vouched ? '<span class="d2-item-note" style="align-self:center">🌟 vouched Community Elder</span>'
-            : '<button class="d2-pill-gold" onclick="adminSetReviewer(\'elder\')">Vouch as Community Elder 🌟</button>'}
+          ${r.vouched ? '<span class="d2-item-note" style="align-self:center">★ vouched Community Elder</span>'
+            : '<button class="d2-pill-gold" onclick="adminSetReviewer(\'elder\')">Vouch as Community Elder ★</button>'}
         </div>
       </div>
       <div class="j2-sec-label" style="margin-top:14px">Vouch codes</div>
@@ -456,8 +456,8 @@ function renderAdminContentHTML() {
     </div>` : ''}
 
     <div class="d2-pill-row" style="margin-top:16px">
-      <button class="c2-ghost-pill" onclick="cmExportJSON()">⬇ Export everything (JSON)</button>
-      <button class="c2-ghost-pill" onclick="cmExportCSV()">⬇ Scenarios (CSV)</button>
+      <button class="c2-ghost-pill" onclick="cmExportJSON()">↓ Export everything (JSON)</button>
+      <button class="c2-ghost-pill" onclick="cmExportCSV()">↓ Scenarios (CSV)</button>
     </div>
     <div class="d2-note" style="margin-top:10px">Edits live in this browser as overrides on the shipped content — export JSON to hand the edited database back to development.</div>`;
 }

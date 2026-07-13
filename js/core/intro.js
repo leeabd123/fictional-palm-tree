@@ -73,7 +73,7 @@ function renderIntroOverlay() {
         <div class="c2-textbox intro-box">
           <textarea id="intro-input" dir="auto" rows="1" placeholder="السلام عليكم … or salam alaykum"></textarea>
           <div class="c2-textbox-row">
-            ${typeof coachMicSupported === 'function' && coachMicSupported() ? `<button class="c2-mic-small" id="intro-mic" onclick="introMic()">🎙</button>` : ''}
+            ${typeof coachMicSupported === 'function' && coachMicSupported() ? `<button class="c2-mic-small" id="intro-mic" onclick="introMic()">${UI_MIC}</button>` : ''}
             <span style="flex:1"></span>
             <button class="c2-compare" onclick="introNext()">Say it →</button>
           </div>
@@ -88,7 +88,7 @@ function renderIntroOverlay() {
         <div class="intro-ar">وعليكم السلام ورحمة الله</div>
         <div class="intro-ph">wa 3alaykum as-salam wa rahmatu llah</div>
         <div class="intro-en">And peace be upon you, and God's mercy</div>
-        <button class="c2-linklike" onclick="sayAr('${encodeURIComponent('وعليكم السلام ورحمة الله')}')">🔊 hear it</button>
+        <button class="c2-linklike" onclick="sayAr('${encodeURIComponent('وعليكم السلام ورحمة الله')}')">${UI_SPK} hear it</button>
         <div class="intro-try">Say it back. Twice is even better — that's your first exchange done.</div>
         <div class="d2-pill-row"><button class="c2-compare" onclick="introNext()">Continue →</button></div>
       </div>`;
