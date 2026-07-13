@@ -39,6 +39,51 @@ function renderHome() {
   const dm = DOMAINS.find(d => d.id === focusDomain()) || DOMAINS[0];
   const focus = nextFocus(focusDomain());
 
+  // System B — the 3a daily gate: single-viewport first-open screen
+  if (typeof neonOn === 'function' && neonOn()) {
+    ca.innerHTML = `
+    <div class="home-wrap" style="display:flex;flex-direction:column;min-height:calc(100vh - 120px);position:relative;z-index:1">
+      <div style="position:absolute;top:-120px;left:50%;transform:translateX(-50%);width:480px;height:380px;border-radius:50%;background:radial-gradient(circle, rgba(139,92,246,0.14), transparent 65%);filter:blur(46px);pointer-events:none"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;position:relative">
+        <div>
+          <div style="font-family:'IBM Plex Sans Arabic',sans-serif;font-size:22px;color:#eef2f8">طريقة</div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:9px;letter-spacing:.28em;color:#5b6272;margin-top:2px">SUDANESE ARABIC TRAINER</div>
+        </div>
+        ${streak ? `<div style="display:flex;align-items:center;gap:7px;font-family:'Space Grotesk',sans-serif;font-size:11px;color:#00ff87;border:1px solid rgba(0,255,135,0.3);padding:6px 13px;border-radius:100px;text-shadow:0 0 14px rgba(0,255,135,0.5)"><span style="width:7px;height:7px;border-radius:50%;background:#00ff87;box-shadow:0 0 10px #00ff87"></span>${streak}-day streak</div>` : ''}
+      </div>
+
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;text-align:center;position:relative;padding:40px 0">
+        <div dir="rtl" style="font-family:'IBM Plex Sans Arabic',sans-serif;font-size:clamp(38px,11vw,50px);font-weight:600;color:#fff;line-height:1.5">${g.ar}</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:13px;color:#a78bfa;margin-top:10px;text-shadow:0 0 16px rgba(167,139,250,0.5)">${g.ph}</div>
+        <div style="font-size:12.5px;color:#8b93a3;margin-top:8px">${profile.name ? escAttr(profile.name) + ' — ' : ''}${g.en}</div>
+      </div>
+
+      ${typeof warmupAvailable === 'function' && warmupAvailable() ? `
+      <button onclick="warmupStart()" style="width:100%;text-align:left;margin-bottom:12px;padding:14px 18px;border-radius:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(45,212,191,0.35);backdrop-filter:blur(16px);cursor:pointer;color:#eef2f8;font-family:inherit">
+        <span style="display:block;font-family:'Space Grotesk',sans-serif;font-size:10px;letter-spacing:.2em;color:#2dd4bf">WELCOME BACK — EASE IN FIRST</span>
+        <span style="display:block;font-size:14px;font-weight:600;margin-top:5px">A ${warmupBuildSteps().length}-phrase warm-up from your own history ›</span>
+      </button>` : ''}
+
+      <div style="padding:20px;border-radius:24px;background:rgba(255,255,255,0.045);border:1px solid rgba(255,255,255,0.09);backdrop-filter:blur(20px);position:relative">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:10px;letter-spacing:.22em;color:#818cf8">TODAY'S FOCUS · ${escAttr(dm.label.toUpperCase())}</div>
+        <div style="font-size:24px;font-weight:700;color:#fff;margin-top:8px;line-height:1.3">${escAttr(focus.title)}</div>
+        <div style="font-size:12px;color:#8b93a3;margin-top:5px">${escAttr(focus.sub)}</div>
+        <div style="height:1px;background:rgba(255,255,255,0.07);margin:16px 0"></div>
+        <button onclick="homeStart()" style="display:flex;align-items:center;gap:14px;width:100%;padding:13px 18px;border:none;border-radius:16px;background:linear-gradient(90deg,#6366f1,#a855f7,#ec4899);box-shadow:0 0 44px -10px rgba(168,85,247,0.7);cursor:pointer;color:#fff;font-family:'Space Grotesk',sans-serif">
+          <span style="flex:1;text-align:left">
+            <span style="display:block;font-size:15px;font-weight:700">Start</span>
+            <span style="display:block;font-size:11px;opacity:.85;margin-top:2px">يلا نتكلم — let's talk</span>
+          </span>
+          <span style="width:38px;height:38px;border-radius:50%;overflow:hidden;flex-shrink:0;display:block"><tariga-orb mode="idle" style="width:100%;height:100%;display:block"></tariga-orb></span>
+        </button>
+      </div>
+      <div style="text-align:center;margin-top:14px">
+        <button class="c2-linklike" onclick="setMode('tree')" style="color:#5b6272">Explore the domain map instead →</button>
+      </div>
+    </div>`;
+    return;
+  }
+
   ca.innerHTML = `
     <div class="home-wrap">
       <div class="home-head">
@@ -97,6 +142,77 @@ function homeExploreHTML() {
   const pct = Math.min(100, Math.round((coached / totalScenarios) * 100));
   const ringC = 2 * Math.PI * 52;
   const srcInfo = SRC_LABELS[src] || SRC_LABELS.v1;
+
+  // System B — the 3b unified stats widget + 2×2 path grid
+  if (typeof neonOn === 'function' && neonOn()) {
+    const ring326 = 326;
+    const pathCard = (m, icon, title, sub, active) => `
+      <button onclick="setMode('${m}')" style="text-align:left;padding:16px;border-radius:20px;cursor:pointer;font-family:'Space Grotesk',sans-serif;
+        background:${active ? 'rgba(255,255,255,0.05)' : 'rgba(11,15,25,0.6)'};
+        border:1px solid ${active ? 'rgba(34,211,238,0.5)' : 'transparent'};
+        ${active ? 'box-shadow:0 0 44px -12px rgba(34,211,238,0.7);' : ''}color:${active ? '#fff' : '#8b93a3'}">
+        <span style="display:block;font-size:17px">${icon}</span>
+        <span style="display:block;font-size:14px;font-weight:600;margin-top:8px;color:${active ? '#fff' : '#c6ccd8'}">${title}</span>
+        <span style="display:block;font-size:10.5px;margin-top:3px;color:${active ? '#22d3ee' : '#5b6272'}">${sub}</span>
+      </button>`;
+    return `
+      <div style="margin-top:26px;padding:18px;border-radius:24px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);backdrop-filter:blur(20px);display:flex;gap:18px;align-items:center">
+        <div style="position:relative;width:112px;height:112px;flex-shrink:0">
+          <svg viewBox="0 0 120 120" style="width:112px;height:112px">
+            <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="8"/>
+            <circle cx="60" cy="60" r="52" fill="none" stroke="#2dd4bf" stroke-width="8" stroke-linecap="round"
+              stroke-dasharray="${ring326}" stroke-dashoffset="${ring326 * (1 - pct / 100)}"
+              transform="rotate(-90 60 60)" style="filter:drop-shadow(0 0 8px rgba(45,212,191,.8));animation:ringDraw 1.6s cubic-bezier(.3,.8,.3,1) both"/>
+          </svg>
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif">
+            <span style="font-size:22px;font-weight:700;color:#fff">${pct}%</span>
+            <span style="font-size:8.5px;letter-spacing:.2em;color:#5b6272">COACHED</span>
+          </div>
+        </div>
+        <div style="flex:1;font-family:'Space Grotesk',sans-serif">
+          ${[['Guided practiced', gDone, '#34d399'], ['Coach attempts', attempts, '#fbbf24'], ['Starred to review', starredN, '#22d3ee']].map(([label, n, col]) => `
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+            <span style="font-size:11px;letter-spacing:.08em;color:#8b93a3">${label}</span>
+            <span style="font-size:19px;font-weight:700;color:${col};text-shadow:0 0 16px ${col}66">${n}</span>
+          </div>`).join('')}
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px">
+        ${pathCard('flash', '🃏', 'Flashcards', deck.length + ' in deck', false)}
+        ${pathCard('speak', '◉', 'Your coach', 'scenario ' + (Math.min(coached + 1, totalScenarios)) + ' waiting →', true)}
+        ${pathCard('listen', '≣', 'Tune your ear', 'podcast lines', false)}
+        ${pathCard('journey', '✦', 'Your journey', 'then → now', false)}
+      </div>
+
+      <div class="home-path-label" style="margin-top:22px">FULL PRACTICE LIBRARY</div>
+      <div class="home-grid">
+        ${homeCard('guided', '🤲', 'Guided', GUIDED_SCENARIOS.length + ' scenarios · 5 domains', true)}
+        ${homeCard('freeform', comfortUnlocked(focusDomain()) ? '✨' : '🔒', 'Free-form', comfortUnlocked(focusDomain()) ? 'no scaffolding — just you' : 'unlocks at Comfortable tier')}
+        ${homeCard('livecall', comfortUnlocked('family') ? '📞' : '🔒', 'Live call', comfortUnlocked('family') ? 'habooba answers for real' : 'unlocks with Family comfort')}
+        ${homeCard('convo', '🎧', 'Conversation', 'the real podcast')}
+        ${homeCard('contribute', '🫶', 'Contribute', 'preserve it · one prompt')}
+        ${homeCard('deep', '📚', 'Deep cards', 'synonyms & context')}
+      </div>
+
+      <button class="home-src" onclick="homeCycleSrc()">
+        <span class="home-src-dot"></span>
+        <span class="home-src-body">
+          <span class="home-src-title">${srcInfo[0]}</span>
+          <span class="home-src-sub">${srcInfo[1]}</span>
+        </span>
+        <span class="home-src-switch">switch ›</span>
+      </button>
+
+      <button class="home-map-card" onclick="setMode('map')">
+        <span class="home-map-wrap"><sudan-map highlight="khartoum"></sudan-map></span>
+        <span class="home-map-overlay">
+          <span class="home-map-title">Word origins — map of Sudan</span>
+          <span class="home-map-sub">tap to explore regions ›</span>
+        </span>
+      </button>`;
+  }
+
   return `
       <div class="home-path-label" style="margin-top:26px">EXPLORE OTHER DOMAINS</div>
       <div class="home-domains">

@@ -94,12 +94,20 @@ function renderListen() {
       </div>
 
       <div style="padding:22px;border-radius:22px;background:rgba(255,250,242,0.035);border:1px solid rgba(255,255,255,0.08);backdrop-filter:blur(18px);margin-bottom:16px">
+        ${(() => {
+          const NE = typeof neonOn === 'function' && neonOn();
+          const playGrad = NE ? 'linear-gradient(140deg,#0891b2,#22d3ee)' : 'linear-gradient(140deg,#c9a96e,#e8c99a)';
+          const playGlow = NE ? 'rgba(34,211,238,0.7)' : 'rgba(201,169,110,0.7)';
+          const barCol = NE ? '#22d3ee' : '#e8c99a';
+          const barGlow = NE ? 'box-shadow:0 0 8px rgba(34,211,238,0.7);' : '';
+          return `
         <div style="display:flex;align-items:center;gap:14px">
-          <span onclick="sayAr('${encodeURIComponent(line.ar)}')" title="hear it" style="width:50px;height:50px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(140deg,#c9a96e,#e8c99a);box-shadow:0 10px 26px -8px rgba(201,169,110,0.7);cursor:pointer"><span style="display:block;width:0;height:0;border-top:8px solid transparent;border-bottom:8px solid transparent;border-left:13px solid #14110c;margin-left:4px"></span></span>
+          <span onclick="sayAr('${encodeURIComponent(line.ar)}')" title="hear it" style="width:50px;height:50px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:${playGrad};box-shadow:0 10px 26px -8px ${playGlow};cursor:pointer"><span style="display:block;width:0;height:0;border-top:8px solid transparent;border-bottom:8px solid transparent;border-left:13px solid #14110c;margin-left:4px"></span></span>
           <span style="flex:1;display:flex;align-items:center;gap:3px;height:40px">${[10, 24, 36, 18, 30, 12, 28, 16, 34, 8, 22, 14].map((h, bi) =>
-            `<span style="display:block;flex:1;height:${h}px;border-radius:2px;background:${bi < 5 ? '#e8c99a' : 'rgba(255,255,255,0.14)'}"></span>`).join('')}</span>
+            `<span style="display:block;flex:1;height:${h}px;border-radius:2px;background:${bi < 5 ? barCol : 'rgba(255,255,255,0.14)'};${bi < 5 ? barGlow : ''}"></span>`).join('')}</span>
           <span style="font-size:10px;color:#7a756e">${escAttr(speakerLabel(line))}</span>
-        </div>
+        </div>`;
+        })()}
         <div dir="rtl" style="font-family:'Noto Naskh Arabic',var(--serif),serif;font-size:21px;color:#f6f1e8;line-height:2;margin-top:18px;${listenLayers.ar ? '' : 'display:none'}">${escAttr(line.ar)}</div>
         <div style="font-size:11px;font-style:italic;color:#a78bfa;margin-top:6px;${listenLayers.ph ? '' : 'display:none'}">${escAttr(line.ph)}</div>
         ${listenKind === 'next' ? `<div class="d2-when-body" style="margin-top:12px">…and ${line.speaker === 'host' ? 'Solja' : 'Wansa'} replies. <b style="color:var(--text)">What's the natural reply?</b></div>` : ''}

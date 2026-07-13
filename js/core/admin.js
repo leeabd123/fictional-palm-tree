@@ -151,7 +151,13 @@ function renderAdmin() {
         </div>
       </div>
 
-      <div class="j2-sec-label">Simulate a state</div>
+      <div class="j2-sec-label">Design system</div>
+      <div class="d2-tab-row">
+        <button class="d2-tab ${!neonOn() ? 'on' : ''}" onclick="themeSet('warm')">🕯 Warm candlelit</button>
+        <button class="d2-tab ${neonOn() ? 'on' : ''}" onclick="themeSet('neon')">⚡ Neon ink-navy</button>
+      </div>
+
+      <div class="j2-sec-label" style="margin-top:18px">Simulate a state</div>
       <div class="d2-tab-row">
         <button class="d2-tab" onclick="adminMarkPracticed('family')">Family basics done</button>
         <button class="d2-tab" onclick="adminMarkPracticed(null)">ALL scenarios practiced</button>
