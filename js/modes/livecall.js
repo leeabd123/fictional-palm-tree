@@ -27,7 +27,7 @@ function renderLivecall() {
       <div class="coach-wrap">
         <button class="d2-back" onclick="setMode('home')">← home</button>
         <div class="d2-card" style="text-align:center">
-          <div style="font-size:34px">🔒</div>
+          <div style="font-size:34px">◌</div>
           <div class="c2-title" style="margin:10px 0 6px">Habooba's line opens with comfort</div>
           <div class="d2-note" style="margin:0 auto;max-width:380px">A live call is the deep end — finish the Family basics in Guided practice first, then habooba picks up.</div>
           <div class="d2-pill-row" style="margin-top:16px">
@@ -46,7 +46,7 @@ function renderLivecall() {
       <button class="d2-back" onclick="setMode('home')">← home</button>
       <div class="c2-head">
         <div>
-          <div class="c2-title">📞 Live call · حبوبة</div>
+          <div class="c2-title">◉ Live call · حبوبة</div>
           <div class="c2-sub">she answers for real this time — grounded on the verified calls, never invented</div>
         </div>
       </div>
@@ -57,7 +57,7 @@ function renderLivecall() {
         <div class="c2-title" style="font-size:19px;margin:14px 0 6px">Call habooba</div>
         <div class="d2-note" style="margin:0 auto 4px;max-width:380px">A real back-and-forth — she asks, you answer, the call goes where you take it. Gentle coaching whispers appear under your turns; habooba herself never corrects you.</div>
         <div class="d2-pill-row" style="margin-top:14px">
-          <button class="c2-compare" onclick="lcStart()" ${configured ? '' : 'disabled title="Connect the coach first (in Your coach)"'}>📞 Call now</button>
+          <button class="c2-compare" onclick="lcStart()" ${configured ? '' : 'disabled title="Connect the coach first (in Your coach)"'}>◉ Call now</button>
         </div>
         ${configured ? '' : '<div class="d2-note" style="margin-top:8px">connect the coach in <b>Your coach</b> first</div>'}
       </div>` : `
@@ -71,7 +71,7 @@ function renderLivecall() {
               ${h.en ? `<div class="d2-bubble-en">${escAttr(h.en)}</div>` : ''}
               ${h.who === 'family' && h.ar ? `<div style="text-align:left;margin-top:6px">${speakerSVG('#a09e9a', encodeURIComponent(h.ar))}</div>` : ''}
             </div>
-            ${h.whisper ? `<div class="lc-whisper">🤫 ${escAttr(h.whisper)}</div>` : ''}
+            ${h.whisper ? `<div class="lc-whisper"> ${escAttr(h.whisper)}</div>` : ''}
           </div>`).join('')}
         ${lcBusy ? `
           <div class="d2-msg host">
@@ -82,18 +82,18 @@ function renderLivecall() {
 
       ${lcDone ? `
         <div class="d2-gold-box" style="text-align:center">
-          <div class="c2-title" style="font-size:19px">She hung up smiling. 🤍</div>
+          <div class="c2-title" style="font-size:19px">She hung up smiling. ♡</div>
           <div class="d2-when-body" style="margin-top:8px">${lcTurnCount()} turns of real conversation — that's the whole point of everything else in this app.</div>
         </div>
         <div class="d2-pill-row">
-          <button class="c2-ghost-pill" onclick="lcStart()">📞 Call again</button>
+          <button class="c2-ghost-pill" onclick="lcStart()">◉ Call again</button>
           <button class="d2-pill-gold" onclick="setMode('home')">Done →</button>
         </div>
       ` : !lcBusy ? `
         <div class="c2-textbox" style="margin-top:14px">
           <textarea id="lc-input" dir="auto" rows="2" placeholder="answer her — Arabic, Arabizi, or even English (she'll stay in Sudanese)"></textarea>
           <div class="c2-textbox-row">
-            ${coachMicSupported() ? `<button class="c2-mic-small" id="lc-mic" onclick="lcMic()">🎙</button>` : ''}
+            ${coachMicSupported() ? `<button class="c2-mic-small" id="lc-mic" onclick="lcMic()">${UI_MIC}</button>` : ''}
             <span style="flex:1"></span>
             <button class="c2-compare" onclick="lcSend()">Say it →</button>
           </div>

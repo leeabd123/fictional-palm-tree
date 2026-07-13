@@ -22,7 +22,7 @@ function renderFreeform() {
       <div class="coach-wrap">
         <button class="d2-back" onclick="setMode('home')">← home</button>
         <div class="d2-card" style="text-align:center">
-          <div style="font-size:34px">🔒</div>
+          <div style="font-size:34px">◌</div>
           <div class="c2-title" style="margin:10px 0 6px">Free-form unlocks with comfort</div>
           <div class="d2-note" style="margin:0 auto;max-width:380px">Finish the ${dm.label} basics in Guided practice first — free-form is where you fly without the scaffolding, and the basics are the wings.</div>
           <div class="d2-pill-row" style="margin-top:16px">
@@ -70,7 +70,7 @@ function renderFreeform() {
             <div class="c2-native-col">
               <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px">
                 <span class="c2-col-label native" style="margin-bottom:0">Your words, upgraded</span>
-                <button class="c2-speak-btn" onclick="sayAr('${encodeURIComponent(fb.suggestion.ar)}')" title="Hear it">🔊</button>
+                <button class="c2-speak-btn" onclick="sayAr('${encodeURIComponent(fb.suggestion.ar)}')" title="Hear it">${UI_SPK}</button>
               </div>
               <div class="c2-native-ar">${escAttr(fb.suggestion.ar)}</div>
               <div class="c2-native-ph">${escAttr(fb.suggestion.ph)}</div>
@@ -112,7 +112,7 @@ function renderFreeform() {
       <div class="c2-textbox">
         <textarea id="ff-input" dir="auto" rows="3" placeholder="اكتب أو اتكلم… anything, in your Sudanese — Arabizi counts"></textarea>
         <div class="c2-textbox-row">
-          ${coachMicSupported() ? `<button class="c2-mic-small" id="ff-mic" onclick="ffMic()">🎙</button>` : ''}
+          ${coachMicSupported() ? `<button class="c2-mic-small" id="ff-mic" onclick="ffMic()">${UI_MIC}</button>` : ''}
           <span style="flex:1"></span>
           <button class="c2-compare" onclick="ffSubmit()" ${configured ? '' : 'disabled title="Connect the coach first (in Your coach)"'}>Coach me →</button>
         </div>

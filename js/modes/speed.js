@@ -54,13 +54,13 @@ function renderSpeed() {
       <div class="coach-wrap">
         <button class="d2-back" onclick="clearInterval(spTimer);setMode('guided')">← guided practice</button>
         <div class="d2-card" style="text-align:center">
-          <div style="font-size:34px">⚡</div>
+          <div style="font-size:34px">≫</div>
           <div class="c2-title" style="margin:10px 0 6px">${spItems.length ? spScore + ' in ' + TARIGA_CONFIG.speed.seconds + ' seconds' : 'Speed round · ' + dm.label}</div>
           <div class="d2-note" style="margin:0 auto;max-width:380px">${spItems.length
             ? (spScore >= 4 ? 'That speed is real fluency forming — no freezing there.' : 'Speed comes with reps — the phrases you hesitated on are the ones to revisit.')
             : 'Phrases you have already practiced, against the clock — fluency is speed, not just accuracy.'}</div>
           <div class="d2-pill-row" style="margin-top:16px">
-            <button class="c2-compare" onclick="speedStart()">${spItems.length ? '⚡ Again' : '⚡ Start'} — ${TARIGA_CONFIG.speed.seconds}s</button>
+            <button class="c2-compare" onclick="speedStart()">${spItems.length ? '≫ Again' : '≫ Start'} — ${TARIGA_CONFIG.speed.seconds}s</button>
           </div>
         </div>
       </div>`;
@@ -72,7 +72,7 @@ function renderSpeed() {
     <div class="coach-wrap">
       <div class="c2-head">
         <div>
-          <div class="c2-title">⚡ Speed round</div>
+          <div class="c2-title">≫ Speed round</div>
           <div class="c2-sub">${dm.label} · say it FAST — close counts</div>
         </div>
         <span class="d2-badge" style="font-size:14px;font-variant-numeric:tabular-nums"><span id="sp-left">${Math.max(0, Math.ceil((spEndsAt - Date.now()) / 1000))}s</span> · ${spScore} ✓</span>

@@ -58,7 +58,7 @@ function renderGuided() {
           </div>
         </div>
         <div class="d2-card" style="text-align:center">
-          <div style="font-size:34px">🔒</div>
+          <div style="font-size:34px">◌</div>
           <div class="c2-title" style="font-size:19px;margin:10px 0 6px">${escAttr(it.title)}</div>
           <div class="d2-note" style="margin:0 auto;max-width:380px">This one unlocks at Comfortable tier — finish the ${guidedDomain().label} basics first and it opens on its own.</div>
           <div class="d2-pill-row" style="margin-top:16px">
@@ -119,7 +119,7 @@ function renderGuided() {
           <textarea id="guided-input" dir="auto" rows="2"
             placeholder="اكتب هنا… or Arabizi (as-salamu…, ma3lash…) — both count"></textarea>
           <div class="c2-textbox-row">
-            ${coachMicSupported() ? `<button class="c2-mic-small" id="guided-mic" onclick="guidedMic()" title="say it out loud">🎙</button>` : ''}
+            ${coachMicSupported() ? `<button class="c2-mic-small" id="guided-mic" onclick="guidedMic()" title="say it out loud">${UI_MIC}</button>` : ''}
             <span style="flex:1"></span>
             <button class="c2-compare" onclick="guidedCheck()">Compare →</button>
           </div>
@@ -156,8 +156,8 @@ function renderGuided() {
 
       ${comfortUnlocked(focusDomain()) ? `
       <div class="d2-pill-row" style="margin-top:22px">
-        <button class="d2-pill-teal" onclick="setMode('freeform')">✨ Free-form unlocked →</button>
-        ${typeof speedAvailable === 'function' && speedAvailable() ? `<button class="d2-pill-gold" onclick="speedStart()">⚡ Speed round</button>` : ''}
+        <button class="d2-pill-teal" onclick="setMode('freeform')">✧ Free-form unlocked →</button>
+        ${typeof speedAvailable === 'function' && speedAvailable() ? `<button class="d2-pill-gold" onclick="speedStart()">≫ Speed round</button>` : ''}
       </div>` : ''}
 
       ${CALL_SEQUENCES.some(c => c.domain === focusDomain()) ? `
@@ -250,7 +250,7 @@ function guidedBrowseHTML() {
         const locked = guidedLocked(g);
         return `
         <button class="d2-acc-head" style="border-top:1px solid rgba(255,255,255,.05)" onclick="${locked ? 'void 0' : `guidedIdx=${i};guidedChecked=false;guidedInput='';guidedBrowse=false;renderGuided()`}">
-          <span class="d2-acc-num">${locked ? '🔒' : done[g.id] ? '✓' : '·'}</span>
+          <span class="d2-acc-num">${locked ? '◌' : done[g.id] ? '✓' : '·'}</span>
           <span class="d2-acc-en" style="${locked ? 'opacity:.5' : ''}">${escAttr(g.title)}</span>
           <span class="d2-badge" style="${g.verification_status === 'native-corrected' ? 'color:var(--mint);border-color:rgba(86,201,143,.35)' : ''}">${g.tier}${g.verification_status === 'pending-review' ? ' · pending' : ''}</span>
         </button>`;
@@ -311,7 +311,7 @@ function renderCall() {
 
       ${doneAll ? `
         <div class="d2-gold-box" style="text-align:center">
-          <div class="c2-title" style="font-size:19px">That's the whole call. 🤍</div>
+          <div class="c2-title" style="font-size:19px">That's the whole call. ♡</div>
           <div class="d2-when-body" style="margin-top:8px">${escAttr(seq.note)}</div>
         </div>
         <div class="d2-pill-row">
@@ -326,7 +326,7 @@ function renderCall() {
             <div class="c2-textbox" style="margin-top:12px;margin-bottom:0">
               <textarea id="call-input" dir="auto" rows="2" placeholder="say it — Arabic script or Arabizi"></textarea>
               <div class="c2-textbox-row">
-                ${coachMicSupported() ? `<button class="c2-mic-small" id="call-mic" onclick="callMic()">🎙</button>` : ''}
+                ${coachMicSupported() ? `<button class="c2-mic-small" id="call-mic" onclick="callMic()">${UI_MIC}</button>` : ''}
                 <span style="flex:1"></span>
                 <button class="c2-compare" onclick="callCheck()">Say it →</button>
               </div>

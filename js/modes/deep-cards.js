@@ -26,7 +26,7 @@ function renderDeepCards(){
           <div class="d2-star-ph" style="font-size:13px">${escAttr(it.p)}</div>
           <span class="f2-tag">${escAttr(it.cat)} · ${escAttr(it.type)}</span>
           <span style="margin-left:auto;display:inline-flex;gap:4px;align-items:center">
-            <button class="d2-icon-btn" onclick="sayAr('${encodeURIComponent(it.a)}')" title="hear it">🔊</button>
+            <button class="d2-icon-btn" onclick="sayAr('${encodeURIComponent(it.a)}')" title="hear it">${UI_SPK}</button>
             ${starBtnHTML(it.a)}
           </span>
         </div>

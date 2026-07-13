@@ -7,15 +7,15 @@
 // ══════════════════════════════════════════════
 
 const DOMAINS = [
-  { id: 'family', label: 'Family', ar: 'الأهل', icon: '🏠', live: true,
+  { id: 'family', label: 'Family', ar: 'الأهل', icon: '◆', live: true,
     desc: 'greeting elders, phone calls, being offered food, visiting relatives' },
-  { id: 'friends', label: 'Friends', ar: 'الأصحاب', icon: '🤝', live: true,
+  { id: 'friends', label: 'Friends', ar: 'الأصحاب', icon: '●', live: true,
     desc: 'making plans, joking, agreeing/disagreeing, storytelling' },
-  { id: 'community', label: 'Community', ar: 'المجتمع', icon: '🕌', live: true,
+  { id: 'community', label: 'Community', ar: 'المجتمع', icon: '▲', live: true,
     desc: 'mosque, shopping, transportation, restaurants' },
-  { id: 'identity', label: 'Identity', ar: 'الهوية', icon: '🇸🇩', live: true,
+  { id: 'identity', label: 'Identity', ar: 'الهوية', icon: '■', live: true,
     desc: 'talking about Sudan, explaining your background' },
-  { id: 'culture', label: 'Culture', ar: 'الثقافة', icon: '🎙️', live: true,
+  { id: 'culture', label: 'Culture', ar: 'الثقافة', icon: '✦', live: true,
     desc: 'the podcasts — real speech from real speakers' },
 ];
 
@@ -362,7 +362,7 @@ GUIDED_SCENARIOS.push(
 const CALL_SEQUENCES = [
   {
     id: 'call-habooba', domain: 'family', tier: 'Beginning',
-    title: 'Habooba checks in', caller: 'حبوبة', icon: '📞', tone: 'warm',
+    title: 'Habooba checks in', caller: 'حبوبة', icon: '◉', tone: 'warm',
     note: 'Written in plural "you all" (نحن / ـكم) throughout — addressing the whole household collectively, an authentic detail worth keeping.',
     turns: [
       { who: 'family', ar: 'إزيكم!', ph: 'izzayakum!', en: 'How are you all!' },
@@ -374,7 +374,7 @@ const CALL_SEQUENCES = [
   },
   {
     id: 'call-eid', domain: 'family', tier: 'Beginning',
-    title: 'Eid call across time zones', caller: 'الأهل في السودان', icon: '🌙', tone: 'celebratory',
+    title: 'Eid call across time zones', caller: 'الأهل في السودان', icon: '✦', tone: 'celebratory',
     note: 'The time-zone gap is a specific, real, emotionally resonant detail of diaspora life — celebrating Eid hours apart from family back home.',
     turns: [
       { who: 'you', ar: 'السلام عليكم، كل سنة وإنتو طيبين، عيد مبارك', ph: 'as-salamu alaykum, kull sana wa intu tayybeen, eid mubarak', en: 'Peace be upon you, may you be well every year, blessed Eid' },
@@ -388,7 +388,7 @@ const CALL_SEQUENCES = [
   },
   {
     id: 'call-condolence', domain: 'family', tier: 'Beginning',
-    title: 'A condolence visit', caller: 'بيت العزاء', icon: '🕊️', tone: 'gentle',
+    title: 'A condolence visit', caller: 'بيت العزاء', icon: '❖', tone: 'gentle',
     note: 'This exchange follows a specific, expected structure in Sudanese mourning etiquette — the phrases function as fixed ritual formulas. Getting the exact phrasing right matters more here than almost anywhere else; deviating from the expected script in a moment of grief can feel jarring rather than comforting.',
     turns: [
       { who: 'you', ar: 'السلام عليكم، إن شاء الله بركة فيكم، وأحسن الله عزاكم', ph: 'as-salamu alaykum, inshallah baraka feekum, wa ahsan allah 3azakum', en: "Peace be upon you, may there be blessing among you, and may God's condolence comfort you" },

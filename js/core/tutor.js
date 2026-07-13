@@ -89,7 +89,7 @@ function tutorPanelHTML() {
     <div class="d2-card" style="padding:18px;margin-top:18px">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
         <div>
-          <div style="font-size:14.5px;font-weight:600;color:var(--text)">🎓 Your tutor's read</div>
+          <div style="font-size:14.5px;font-weight:600;color:var(--text)">✦ Your tutor's read</div>
           <div class="d2-item-note" style="margin-top:3px">looks across your whole history for the pattern a progress bar can't see · memory lives in this browser for now</div>
         </div>
         <button class="c2-ghost-pill" onclick="tutorAsk()" ${tutorBusy ? 'disabled' : ''}>${tutorBusy ? 'reading your history…' : tutorResult ? 'read it again ↻' : 'ask the tutor →'}</button>

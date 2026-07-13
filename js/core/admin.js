@@ -24,7 +24,7 @@ function adminBadge() {
   if (el) return;
   el = document.createElement('button');
   el.id = 'admin-badge';
-  el.textContent = '🔓 DEMO — all unlocked';
+  el.textContent = 'DEMO — all unlocked';
   el.title = 'Founder tools — everything gated is open. Tap to manage.';
   el.onclick = () => setMode('admin');
   document.body.appendChild(el);
@@ -88,8 +88,8 @@ function adminWipeAll() {
 
 // ── the panel ──
 const ADMIN_JUMPS = [
-  ['home', 'Home'], ['tree', '🗺️ Domain map'], ['guided', 'Guided'], ['speak', 'Your coach'], ['freeform', 'Free-form'],
-  ['livecall', '📞 Live call'], ['speed', '⚡ Speed round'], ['warmup', 'Warm-up'],
+  ['home', 'Home'], ['tree', '◈ Domain map'], ['guided', 'Guided'], ['speak', 'Your coach'], ['freeform', 'Free-form'],
+  ['livecall', '◉ Live call'], ['speed', '≫ Speed round'], ['warmup', 'Warm-up'],
   ['flash', 'Flashcards'], ['deep', 'Deep cards'], ['listen', 'Tune your ear'], ['convo', 'Conversation'],
   ['journey', 'Journey'], ['map', 'Map'], ['contribute', 'Contribute'], ['review', 'Reviewer mode'],
   ['about', 'How it works'], ['starred', 'Starred'], ['shadow', 'Shadowing'], ['build', 'Builder'],
@@ -130,14 +130,14 @@ function renderAdmin() {
       <button class="d2-back" onclick="setMode('home')">← back to the app</button>
       <div class="c2-head">
         <div>
-          <div class="c2-title" style="color:var(--accent2)">🔓 Founder tools</div>
+          <div class="c2-title" style="color:var(--accent2)">Founder tools</div>
           <div class="c2-sub">two jobs, two tabs — demos on the left, the content database on the right</div>
         </div>
       </div>
 
       <div class="d2-tab-row" style="margin-bottom:14px">
-        <button class="d2-tab ${adminTab === 'demo' ? 'on' : ''}" onclick="adminSetTab('demo')">🔓 Demo & simulate</button>
-        <button class="d2-tab ${adminTab === 'content' ? 'on' : ''}" onclick="adminSetTab('content')">🗂 Content manager</button>
+        <button class="d2-tab ${adminTab === 'demo' ? 'on' : ''}" onclick="adminSetTab('demo')">Demo &amp; simulate</button>
+        <button class="d2-tab ${adminTab === 'content' ? 'on' : ''}" onclick="adminSetTab('content')">Content manager</button>
       </div>
 
       ${adminTab === 'content' ? renderAdminContentHTML() : `
@@ -145,7 +145,7 @@ function renderAdmin() {
         <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
           <div>
             <div style="font-size:14.5px;font-weight:600;color:var(--text)">Demo unlock</div>
-            <div class="d2-item-note" style="margin-top:3px">opens every gate: Comfortable scenarios, Free-form, 📞 Live call, ⚡ speed rounds — with a visible DEMO badge</div>
+            <div class="d2-item-note" style="margin-top:3px">opens every gate: Comfortable scenarios, Free-form, Live call, speed rounds — with a visible DEMO badge</div>
           </div>
           <button class="${on ? 'd2-pill-green' : 'c2-ghost-pill'}" onclick="adminSet(${on ? 'false' : 'true'});renderAdmin()">${on ? 'ON ✓' : 'OFF'}</button>
         </div>
@@ -153,8 +153,8 @@ function renderAdmin() {
 
       <div class="j2-sec-label">Design system</div>
       <div class="d2-tab-row">
-        <button class="d2-tab ${!neonOn() ? 'on' : ''}" onclick="themeSet('warm')">🕯 Warm candlelit</button>
-        <button class="d2-tab ${neonOn() ? 'on' : ''}" onclick="themeSet('neon')">⚡ Neon ink-navy</button>
+        <button class="d2-tab ${!neonOn() ? 'on' : ''}" onclick="themeSet('warm')">Warm candlelit</button>
+        <button class="d2-tab ${neonOn() ? 'on' : ''}" onclick="themeSet('neon')">Neon ink-navy</button>
       </div>
 
       <div class="j2-sec-label" style="margin-top:18px">Simulate a state</div>
@@ -171,7 +171,7 @@ function renderAdmin() {
       <div class="d2-tab-row">
         <button class="d2-tab" onclick="adminSetReviewer('new')">New reviewer ×1</button>
         <button class="d2-tab" onclick="adminSetReviewer('trusted')">Trusted ×3</button>
-        <button class="d2-tab" onclick="adminSetReviewer('elder')">Community Elder 🌟</button>
+        <button class="d2-tab" onclick="adminSetReviewer('elder')">Community Elder ★</button>
       </div>
 
       <div class="j2-sec-label" style="margin-top:18px">Jump anywhere</div>

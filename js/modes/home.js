@@ -252,20 +252,20 @@ function renderHomeDashboard() {
       </div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px">
-        ${pathCard('flash', '🃏', 'Flashcards', deck.length + ' in deck', false)}
-        ${pathCard('speak', '🎙️', 'Your coach', 'scenario ' + Math.min(coached + 1, SPEAK_QA.length) + ' waiting →', true)}
-        ${pathCard('listen', '👂', 'Tune your ear', 'podcast lines', false)}
+        ${pathCard('flash', '❏', 'Flashcards', deck.length + ' in deck', false)}
+        ${pathCard('speak', '◉', 'Your coach', 'scenario ' + Math.min(coached + 1, SPEAK_QA.length) + ' waiting →', true)}
+        ${pathCard('listen', '≣', 'Tune your ear', 'podcast lines', false)}
         ${pathCard('journey', '✦', 'Your journey', 'then → now', false)}
       </div>
 
       <div class="home-path-label" style="margin-top:22px">FULL PRACTICE LIBRARY</div>
       <div class="home-grid">
-        ${homeCard('guided', '🤲', 'Guided', GUIDED_SCENARIOS.length + ' scenarios · 5 domains', true)}
-        ${homeCard('freeform', comfortUnlocked(focusDomain()) ? '✨' : '🔒', 'Free-form', comfortUnlocked(focusDomain()) ? 'no scaffolding — just you' : 'unlocks at Comfortable tier')}
-        ${homeCard('livecall', comfortUnlocked('family') ? '📞' : '🔒', 'Live call', comfortUnlocked('family') ? 'habooba answers for real' : 'unlocks with Family comfort')}
-        ${homeCard('tree', '🗺️', 'Domain map', 'your whole journey, one tree')}
-        ${homeCard('convo', '🎧', 'Conversation', 'the real podcast')}
-        ${homeCard('contribute', '🫶', 'Contribute', 'preserve it · one prompt')}
+        ${homeCard('guided', '◆', 'Guided', GUIDED_SCENARIOS.length + ' scenarios · 5 domains', true)}
+        ${homeCard('freeform', comfortUnlocked(focusDomain()) ? '✧' : '◌', 'Free-form', comfortUnlocked(focusDomain()) ? 'no scaffolding — just you' : 'unlocks at Comfortable tier')}
+        ${homeCard('livecall', comfortUnlocked('family') ? '◉' : '◌', 'Live call', comfortUnlocked('family') ? 'habooba answers for real' : 'unlocks with Family comfort')}
+        ${homeCard('tree', '◈', 'Domain map', 'your whole journey, one tree')}
+        ${homeCard('convo', '≋', 'Conversation', 'the real podcast')}
+        ${homeCard('contribute', '♡', 'Contribute', 'preserve it · one prompt')}
       </div>
 
       <button class="home-src" onclick="homeCycleSrc()">
@@ -331,7 +331,7 @@ function homeExploreHTML() {
       </div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px">
-        ${pathCard('flash', '🃏', 'Flashcards', deck.length + ' in deck', false)}
+        ${pathCard('flash', '❏', 'Flashcards', deck.length + ' in deck', false)}
         ${pathCard('speak', '◉', 'Your coach', 'scenario ' + (Math.min(coached + 1, totalScenarios)) + ' waiting →', true)}
         ${pathCard('listen', '≣', 'Tune your ear', 'podcast lines', false)}
         ${pathCard('journey', '✦', 'Your journey', 'then → now', false)}
@@ -339,12 +339,12 @@ function homeExploreHTML() {
 
       <div class="home-path-label" style="margin-top:22px">FULL PRACTICE LIBRARY</div>
       <div class="home-grid">
-        ${homeCard('guided', '🤲', 'Guided', GUIDED_SCENARIOS.length + ' scenarios · 5 domains', true)}
-        ${homeCard('freeform', comfortUnlocked(focusDomain()) ? '✨' : '🔒', 'Free-form', comfortUnlocked(focusDomain()) ? 'no scaffolding — just you' : 'unlocks at Comfortable tier')}
-        ${homeCard('livecall', comfortUnlocked('family') ? '📞' : '🔒', 'Live call', comfortUnlocked('family') ? 'habooba answers for real' : 'unlocks with Family comfort')}
-        ${homeCard('convo', '🎧', 'Conversation', 'the real podcast')}
-        ${homeCard('contribute', '🫶', 'Contribute', 'preserve it · one prompt')}
-        ${homeCard('deep', '📚', 'Deep cards', 'synonyms & context')}
+        ${homeCard('guided', '◆', 'Guided', GUIDED_SCENARIOS.length + ' scenarios · 5 domains', true)}
+        ${homeCard('freeform', comfortUnlocked(focusDomain()) ? '✧' : '◌', 'Free-form', comfortUnlocked(focusDomain()) ? 'no scaffolding — just you' : 'unlocks at Comfortable tier')}
+        ${homeCard('livecall', comfortUnlocked('family') ? '◉' : '◌', 'Live call', comfortUnlocked('family') ? 'habooba answers for real' : 'unlocks with Family comfort')}
+        ${homeCard('convo', '≋', 'Conversation', 'the real podcast')}
+        ${homeCard('contribute', '♡', 'Contribute', 'preserve it · one prompt')}
+        ${homeCard('deep', '≡', 'Deep cards', 'synonyms & context')}
       </div>
 
       <button class="home-src" onclick="homeCycleSrc()">
@@ -406,16 +406,16 @@ function homeExploreHTML() {
 
       <div class="home-path-label">PRACTICE LIBRARY</div>
       <div class="home-grid">
-        ${homeCard('guided', '🤲', 'Guided', GUIDED_SCENARIOS.length + ' scenarios · 5 domains', true)}
-        ${homeCard('speak', '🎙️', 'Your coach', 'Free scenarios · AI coaching')}
-        ${homeCard('freeform', comfortUnlocked(focusDomain()) ? '✨' : '🔒', 'Free-form', comfortUnlocked(focusDomain()) ? 'no scaffolding — just you' : 'unlocks at Comfortable tier')}
-        ${homeCard('livecall', comfortUnlocked('family') ? '📞' : '🔒', 'Live call', comfortUnlocked('family') ? 'habooba answers for real' : 'unlocks with Family comfort')}
-        ${homeCard('flash', '🃏', 'Flashcards', deck.length + ' in deck')}
-        ${homeCard('listen', '👂', 'Tune your ear', 'podcast lines')}
+        ${homeCard('guided', '◆', 'Guided', GUIDED_SCENARIOS.length + ' scenarios · 5 domains', true)}
+        ${homeCard('speak', '◉', 'Your coach', 'Free scenarios · AI coaching')}
+        ${homeCard('freeform', comfortUnlocked(focusDomain()) ? '✧' : '◌', 'Free-form', comfortUnlocked(focusDomain()) ? 'no scaffolding — just you' : 'unlocks at Comfortable tier')}
+        ${homeCard('livecall', comfortUnlocked('family') ? '◉' : '◌', 'Live call', comfortUnlocked('family') ? 'habooba answers for real' : 'unlocks with Family comfort')}
+        ${homeCard('flash', '❏', 'Flashcards', deck.length + ' in deck')}
+        ${homeCard('listen', '≣', 'Tune your ear', 'podcast lines')}
         ${homeCard('journey', '✦', 'Your journey', 'then → now')}
-        ${homeCard('convo', '🎧', 'Conversation', 'the real podcast')}
-        ${homeCard('contribute', '🫶', 'Contribute', 'preserve it · one prompt')}
-        ${homeCard('deep', '📚', 'Deep cards', 'synonyms & context')}
+        ${homeCard('convo', '≋', 'Conversation', 'the real podcast')}
+        ${homeCard('contribute', '♡', 'Contribute', 'preserve it · one prompt')}
+        ${homeCard('deep', '≡', 'Deep cards', 'synonyms & context')}
       </div>
 
       <button class="home-map-card" onclick="setMode('map')">
@@ -427,10 +427,18 @@ function homeExploreHTML() {
       </button>`;
 }
 
+// each mode's glyph carries its design-system accent (no emoji — the
+// handoff's geometric glyph language, colored per the token sheet)
+const HOME_CARD_COLORS = {
+  guided: '#e8c99a', speak: '#e8c99a', freeform: '#4fd8c4', livecall: '#4fd8c4',
+  flash: '#e8c99a', listen: '#a78bfa', tree: '#e8c99a', journey: '#e8c99a',
+  convo: '#e08a7a', contribute: '#56c98f', deep: '#a78bfa', map: '#4fd8c4',
+};
 function homeCard(mode, icon, title, sub, glow) {
+  const col = HOME_CARD_COLORS[mode] || '#e8c99a';
   return `
     <button class="home-card ${glow ? 'home-card-glow' : ''}" onclick="${mode === 'guided' ? 'setMode(\'guided\')' : `setMode('${mode}')`}">
-      <span class="home-card-icon">${icon}</span>
+      <span class="home-card-icon" style="color:${col};text-shadow:0 0 14px ${col}55">${icon}</span>
       <span class="home-card-title">${title}</span>
       <span class="home-card-sub">${sub}</span>
     </button>`;

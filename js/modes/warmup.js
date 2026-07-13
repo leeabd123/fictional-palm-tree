@@ -74,7 +74,7 @@ function renderWarmup() {
 
       ${doneAll ? `
         <div class="d2-gold-box" style="text-align:center">
-          <div class="c2-title" style="font-size:20px">Warmed up. 🤍</div>
+          <div class="c2-title" style="font-size:20px">Warmed up. ♡</div>
           <div class="d2-when-body" style="margin-top:8px">That's the rust gone — ${warmupHits} phrase${warmupHits === 1 ? '' : 's'} came right back. Now the real practice.</div>
         </div>
         <div class="d2-pill-row">
@@ -89,7 +89,7 @@ function renderWarmup() {
           <div class="c2-textbox">
             <textarea id="warmup-input" dir="auto" rows="2" placeholder="say it — Arabic script or Arabizi"></textarea>
             <div class="c2-textbox-row">
-              ${coachMicSupported() ? `<button class="c2-mic-small" id="warmup-mic" onclick="warmupMic()">🎙</button>` : ''}
+              ${coachMicSupported() ? `<button class="c2-mic-small" id="warmup-mic" onclick="warmupMic()">${UI_MIC}</button>` : ''}
               <span style="flex:1"></span>
               <button class="c2-compare" onclick="warmupCheck()">Check →</button>
             </div>

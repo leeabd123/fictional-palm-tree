@@ -46,9 +46,37 @@ function renderMapNeonBoot(ca) {
   }, 3200);
 }
 
+// warm boot — the globe really does find Sudan first (the point-cloud
+// component), then the dotted map takes over; once per session
+function renderMapWarmBoot(ca) {
+  ca.innerHTML = `
+    <div class="coach-wrap">
+      <button class="d2-back" onclick="setMode('home')">← home</button>
+      <div class="m2-head">
+        <div class="d2-title" style="margin-bottom:0">Word origins</div>
+        <div class="m2-head-ar">وين اللهجة عايشة؟</div>
+      </div>
+      <div class="d2-note" style="margin-bottom:16px">Watch the globe find Sudan…</div>
+      <div class="m2-mapcard">
+        <div class="m2-mapbox" style="position:relative;overflow:hidden">
+          <tariga-globe style="position:absolute;inset:0"></tariga-globe>
+          <span style="position:absolute;left:50%;bottom:14px;transform:translateX(-50%);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent2);text-shadow:0 0 14px rgba(232,201,154,.5)">finding Sudan</span>
+        </div>
+      </div>
+    </div>`;
+  setTimeout(() => {
+    mapBooted = true;
+    if (mode === 'map') renderMap();
+  }, 2600);
+}
+
 function renderMap() {
   const ca = document.getElementById('content-area');
-  if (typeof neonOn === 'function' && neonOn() && !mapBooted) { renderMapNeonBoot(ca); return; }
+  if (!mapBooted) {
+    if (typeof neonOn === 'function' && neonOn()) renderMapNeonBoot(ca);
+    else renderMapWarmBoot(ca);
+    return;
+  }
   if (typeof neonOn === 'function' && neonOn()) { renderMapNeon(ca); return; }
   const live = typeof communityRegionCounts === 'function' ? communityRegionCounts() : {};
   const REGION_BAR_ID = { 'Khartoum': 'khartoum', 'Red Sea': 'red_sea', 'Darfur': 'darfur', 'Northern': 'northern' };
@@ -69,7 +97,7 @@ function renderMap() {
         return `
       <div class="m2-mapcard">
         <div class="m2-mapbox"><sudan-map highlight="${hl}"></sudan-map></div>
-        ${myRegion ? `<div class="d2-item-note" style="text-align:center;margin-top:8px">glowing: <b style="color:var(--accent2)">${escAttr(myRegion)}</b> — where your family's from 🤍</div>` : ''}
+        ${myRegion ? `<div class="d2-item-note" style="text-align:center;margin-top:8px">glowing: <b style="color:var(--accent2)">${escAttr(myRegion)}</b> — where your family's from ♡</div>` : ''}
       </div>`;
       })()}
 

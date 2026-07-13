@@ -67,7 +67,7 @@ function renderContribute() {
       <div class="coach-wrap">
         <button class="d2-back" onclick="setMode('home')">← all modes</button>
         <div class="d2-card" style="text-align:center">
-          <div style="font-size:40px">🫶</div>
+          <div style="font-size:40px">♡</div>
           <div class="d2-title" style="margin:10px 0 6px">شكراً — one more phrase preserved</div>
           <div class="d2-note" style="margin:0 auto;max-width:400px">Your phrasing joins the review queue. It goes live once <b style="color:var(--text)">2–3 independent native speakers</b> confirm it sounds natural — no single person's judgment, ever. <i>(In this prototype the queue lives on your device.)</i></div>
           <div class="d2-pill-row" style="margin-top:18px">
@@ -114,7 +114,7 @@ function renderContribute() {
 
         ${apiConfigured() ? `
         <div style="text-align:right;margin-top:8px">
-          <button class="c2-linklike" id="contrib-suggest-btn" onclick="contribSuggestTags()">✨ suggest tags (AI proposes, you confirm)</button>
+          <button class="c2-linklike" id="contrib-suggest-btn" onclick="contribSuggestTags()">✧ suggest tags (AI proposes, you confirm)</button>
           <span id="contrib-suggest-out" class="d2-item-note" style="display:block;text-align:left;margin-top:6px"></span>
         </div>` : ''}
         <div class="d2-note" style="margin:14px 0 8px">Region</div>
@@ -339,5 +339,5 @@ async function contribSuggestTags() {
   } catch (e) {
     if (out) out.textContent = 'could not reach the tagger — pick tags by hand.';
   }
-  if (btn) btn.textContent = '✨ suggest tags (AI proposes, you confirm)';
+  if (btn) btn.textContent = '✧ suggest tags (AI proposes, you confirm)';
 }
