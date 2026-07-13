@@ -14,6 +14,11 @@ let coachInputMode = null;       // 'voice' | 'text' — resolved lazily so mic 
 let coachSettingsOpen = false;
 let coachModelsRevealed = false;
 
+// event-logging state (§9): when this scenario's prompt first appeared
+// (→ time-spent), and whether the mic was used for this attempt
+let coachPromptAt = null;
+let coachUsedVoice = false;
+
 // Rough phonetics for the most common weave chips (chips fall back to
 // Arabic-only when a phrase isn't in this map).
 const COACH_CHIP_PH = {
@@ -38,6 +43,7 @@ function coachMode() {
 
 // ── Entry point ──
 function renderSpeak() {
+  if (coachPhase === 'prompt' && !coachPromptAt) coachPromptAt = Date.now();
   const ca = document.getElementById('content-area');
   if (coachPhase === 'voice') { ca.innerHTML = coachVoiceHTML(); return; }
   if (coachPhase === 'thinking') { ca.innerHTML = coachThinkingHTML(); return; }
@@ -199,6 +205,7 @@ let coachVoicePrevText = '';
 
 function coachVoiceBegin() {
   if (!coachMicSupported()) { coachInputMode = 'text'; renderSpeak(); return; }
+  coachUsedVoice = true;
   coachVoicePrevText = coachText;
   coachVoiceInterim = '';
   coachPhase = 'voice';
@@ -372,6 +379,7 @@ function coachNav(dir) {
   coachIdx = n;
   coachPhase = 'prompt'; coachText = ''; coachFeedback = null; coachError = null;
   coachModelsRevealed = false; coachHintOpen = false; coachInputMode = null;
+  coachPromptAt = null; coachUsedVoice = false;
   renderSpeak();
 }
 
@@ -395,12 +403,23 @@ async function coachSubmit() {
     coachFeedback = fb;
     addAttempt(it, text, fb);
     recordActivity();
-    if (typeof logEvent === 'function') logEvent('coach_eval', { scenario: coachIdx, words: text.split(/\s+/).length });
+    // §9 event: scenario id, time spent on the prompt, voice vs text,
+    // retry count, completion — no PII, never the learner's words
+    if (typeof logEvent === 'function') logEvent('coach_eval', {
+      mode: 'speak', id: 'speak-' + coachIdx,
+      ms: coachPromptAt ? Date.now() - coachPromptAt : 0,
+      extra: { input: coachUsedVoice ? 'voice' : 'text', retry: attempts.length, words: text.split(/\s+/).length, done: true },
+    });
+    coachPromptAt = null; coachUsedVoice = false;
     coachPhase = 'feedback';
   } catch (e) {
     coachPhase = 'prompt';
     coachInputMode = 'text'; // keep the transcript visible & editable after an error
     const msg = String(e.message || e);
+    // completion=false event — which failure kind, never the learner's words
+    if (typeof logEvent === 'function') logEvent('coach_error', {
+      mode: 'speak', id: 'speak-' + coachIdx, extra: { kind: msg.slice(0, 40), done: false },
+    });
     coachError =
       msg === 'bad_key' ? 'That API key was rejected — check it and try again.' :
       msg === 'rate_limited' ? 'The coach is getting too many requests — wait a minute and try again.' :
