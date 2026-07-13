@@ -6,7 +6,7 @@ compatibility_date = "2026-06-01"
 # Comma-separated list of allowed browser origins. Empty = allow any (dev only).
 # Set this to your GitHub Pages origin before sharing with users, e.g.:
 # ALLOWED_ORIGINS = "https://YOURUSERNAME.github.io"
-ALLOWED_ORIGINS = "https://leeabd123.github.io"
+ALLOWED_ORIGINS = "https://leeabd123.github.io/fictional-palm-tree/"
 
 # Model used for coaching feedback. claude-opus-4-8 gives the best judgment on
 # a low-resource dialect; switch to "claude-sonnet-5" if cost becomes a factor.
