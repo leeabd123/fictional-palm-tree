@@ -6,7 +6,7 @@ compatibility_date = "2026-06-01"
 # Comma-separated list of allowed browser origins. Empty = allow any (dev only).
 # Set this to your GitHub Pages origin before sharing with users, e.g.:
 # ALLOWED_ORIGINS = "https://YOURUSERNAME.github.io"
-ALLOWED_ORIGINS = ""
+ALLOWED_ORIGINS = "https://leeabd123.github.io"
 
 # Model used for coaching feedback. claude-opus-4-8 gives the best judgment on
 # a low-resource dialect; switch to "claude-sonnet-5" if cost becomes a factor.
@@ -14,3 +14,9 @@ MODEL = "claude-opus-4-8"
 
 # The API key is a SECRET, never a var. Set it with:
 #   npx wrangler secret put ANTHROPIC_API_KEY
+
+
+[[d1_databases]]
+binding = "tariga"
+database_name = "tariga"
+database_id = "cad3a565-0387-4a67-82cf-0eef2c03029a"
