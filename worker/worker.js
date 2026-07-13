@@ -28,9 +28,21 @@ function rateLimited(ip) {
   return rec.n > MAX_PER_WINDOW;
 }
 
+function allowedOrigins(env) {
+  return (env.ALLOWED_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
+}
+
+// Hard origin check, not just CORS: CORS headers only stop BROWSERS from
+// reading responses — they don't stop curl or scripts from burning the API
+// key. When ALLOWED_ORIGINS is set, requests from anywhere else get a 403.
+// (Empty ALLOWED_ORIGINS = dev mode, accept anything.)
+function originForbidden(env, origin) {
+  const allowed = allowedOrigins(env);
+  return allowed.length > 0 && !allowed.includes(origin);
+}
+
 function corsHeaders(env, origin) {
-  const allowed = (env.ALLOWED_ORIGINS || '')
-    .split(',').map(s => s.trim()).filter(Boolean);
+  const allowed = allowedOrigins(env);
   const ok = allowed.length === 0 || allowed.includes(origin);
   return {
     'Access-Control-Allow-Origin': ok ? (origin || '*') : allowed[0] || '',
@@ -54,7 +66,11 @@ export default {
 
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
 
+    // hard origin gate for every non-preflight request (see originForbidden)
+    if (originForbidden(env, origin)) return json({ error: 'origin_forbidden' }, 403, cors);
+
     const url = new URL(request.url);
+    const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
 
     // ── anonymized event logging (learning-design doc §9) ──
     // POST /api/events {events:[{t, mode, id?, ms?, extra?}]}. No PII, no
@@ -62,6 +78,7 @@ export default {
     // (wrangler d1 create tariga && add binding), silently accepted otherwise
     // so the client never has to care.
     if (url.pathname === '/api/events' && request.method === 'POST') {
+      if (rateLimited('ev:' + ip)) return new Response(null, { status: 429, headers: cors });
       let evBody;
       try {
         const raw = await request.text();
@@ -112,7 +129,6 @@ export default {
       return json({ error: 'server_not_configured', detail: 'ANTHROPIC_API_KEY secret missing' }, 500, cors);
     }
 
-    const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
     if (rateLimited(ip)) return json({ error: 'rate_limited' }, 429, cors);
 
     let body;
@@ -128,6 +144,8 @@ export default {
     if (typeof system !== 'string' || !Array.isArray(messages) || typeof output_schema !== 'object') {
       return json({ error: 'bad_request', detail: 'expected {system, messages, output_schema}' }, 400, cors);
     }
+    // shape caps: a coaching exchange is short; anything bigger is abuse
+    if (messages.length > 24) return json({ error: 'too_many_messages' }, 400, cors);
 
     const anthropicReq = {
       model: env.MODEL || 'claude-opus-4-8',
