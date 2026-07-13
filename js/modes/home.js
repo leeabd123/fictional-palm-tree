@@ -75,11 +75,9 @@ function renderHome() {
         </button>
       </div>
 
-      <button class="home-focus" style="width:100%;text-align:left;cursor:pointer;margin-top:14px" onclick="setMode('tree')">
-        <div class="home-focus-label" style="color:var(--accent2)">Want to look around instead?</div>
-        <div class="home-focus-title" style="font-size:18px">🗺️ The domain map — your whole journey</div>
-        <div class="home-focus-sub">every domain, every scenario, the full practice library ›</div>
-      </button>
+      <div style="text-align:center;margin-top:16px">
+        <button class="c2-linklike" onclick="setMode('tree')">Explore the domain map instead →</button>
+      </div>
 
       <div class="d2-item-note" style="text-align:center;margin:18px 0 8px">tip: press &amp; hold any Arabic word, anywhere in the app, to look it up and star it</div>
       <div style="text-align:center;margin:4px 0 14px">

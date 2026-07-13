@@ -93,12 +93,17 @@ function renderListen() {
         <button class="d2-tab ${listenLayers.ph ? 'on' : ''}" onclick="listenToggle('ph')">phonetic</button>
       </div>
 
-      <div class="d2-card" style="margin-bottom:16px">
-        <div class="d2-label lav">${speakerLabel(line)} · Wansa episode</div>
-        <div class="d2-acc-ar" style="font-size:20px;color:#f6f1e8;margin-top:0;${listenLayers.ar ? '' : 'display:none'}">${escAttr(line.ar)}</div>
-        <div class="d2-acc-ph" style="font-size:12px;${listenLayers.ph ? '' : 'display:none'}">${escAttr(line.ph)}</div>
+      <div style="padding:22px;border-radius:22px;background:rgba(255,250,242,0.035);border:1px solid rgba(255,255,255,0.08);backdrop-filter:blur(18px);margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:14px">
+          <span onclick="sayAr('${encodeURIComponent(line.ar)}')" title="hear it" style="width:50px;height:50px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(140deg,#c9a96e,#e8c99a);box-shadow:0 10px 26px -8px rgba(201,169,110,0.7);cursor:pointer"><span style="display:block;width:0;height:0;border-top:8px solid transparent;border-bottom:8px solid transparent;border-left:13px solid #14110c;margin-left:4px"></span></span>
+          <span style="flex:1;display:flex;align-items:center;gap:3px;height:40px">${[10, 24, 36, 18, 30, 12, 28, 16, 34, 8, 22, 14].map((h, bi) =>
+            `<span style="display:block;flex:1;height:${h}px;border-radius:2px;background:${bi < 5 ? '#e8c99a' : 'rgba(255,255,255,0.14)'}"></span>`).join('')}</span>
+          <span style="font-size:10px;color:#7a756e">${escAttr(speakerLabel(line))}</span>
+        </div>
+        <div dir="rtl" style="font-family:'Noto Naskh Arabic',var(--serif),serif;font-size:21px;color:#f6f1e8;line-height:2;margin-top:18px;${listenLayers.ar ? '' : 'display:none'}">${escAttr(line.ar)}</div>
+        <div style="font-size:11px;font-style:italic;color:#a78bfa;margin-top:6px;${listenLayers.ph ? '' : 'display:none'}">${escAttr(line.ph)}</div>
         ${listenKind === 'next' ? `<div class="d2-when-body" style="margin-top:12px">…and ${line.speaker === 'host' ? 'Solja' : 'Wansa'} replies. <b style="color:var(--text)">What's the natural reply?</b></div>` : ''}
-        ${!listenLayers.ar && !listenLayers.ph ? '<div class="d2-note" style="font-style:italic;margin:0">Turn on at least one layer to read the line.</div>' : ''}
+        ${!listenLayers.ar && !listenLayers.ph ? '<div class="d2-note" style="font-style:italic;margin:8px 0 0">Turn on at least one layer to read the line.</div>' : ''}
       </div>
 
       <div class="d2-note" style="text-align:center">${listenKind === 'meaning' ? 'What is he saying? Guess before you\'re sure — the guess is the exercise.' : 'Predict the reply before you tap.'}</div>
@@ -121,9 +126,9 @@ function renderListen() {
           <div class="d2-acc-ar" style="margin-top:0;color:#f6f1e8">${escAttr(item.answer.ar)}</div>
           <div class="d2-acc-ph">${escAttr(item.answer.ph)}</div>
         </div>` : ''}
-        <div class="d2-inset" style="margin-top:14px">
-          <b style="color:var(--text)">${listenPicked === correctIdx ? 'Your ear knows.' : 'Close — hear it again:'}</b>
-          <span class="d2-when-body">${escAttr(answer.note || '')}</span>
+        <div style="margin-top:14px;padding:14px 18px;border-radius:16px;background:rgba(79,216,196,0.05);border:1px solid rgba(79,216,196,0.2)">
+          <div style="font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:#4fd8c4">Why it matters</div>
+          <div style="font-size:12px;color:#a09e9a;line-height:1.6;margin-top:6px"><b style="color:var(--text)">${listenPicked === correctIdx ? 'Your ear knows.' : 'Close — hear it again:'}</b> ${escAttr(answer.note || '')}</div>
           ${answer.vocab && answer.vocab.length ? `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${answer.vocab.map(v => `<span class="d2-weave-chip">${escAttr(v)}</span>`).join('')}</div>` : ''}
         </div>
         <div class="d2-pill-row"><button class="d2-pill-gold" onclick="listenNext()">Next →</button></div>` : ''}
