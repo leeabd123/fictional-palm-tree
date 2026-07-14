@@ -12,9 +12,9 @@ const CONTENT_KEY = 'tariga_content_v1';
 
 function _content() {
   try {
-    return { scenarios: {}, vocab: {}, deletedScenarios: [], deletedVocab: [], custom: [], calls: {}, ...JSON.parse(localStorage.getItem(CONTENT_KEY) || '{}') };
+    return { scenarios: {}, vocab: {}, deletedScenarios: [], deletedVocab: [], custom: [], calls: {}, hiddenModes: [], hiddenScenarios: [], hiddenVocab: [], hiddenSpeak: [], ...JSON.parse(localStorage.getItem(CONTENT_KEY) || '{}') };
   } catch (e) {
-    return { scenarios: {}, vocab: {}, deletedScenarios: [], deletedVocab: [], custom: [], calls: {} };
+    return { scenarios: {}, vocab: {}, deletedScenarios: [], deletedVocab: [], custom: [], calls: {}, hiddenModes: [], hiddenScenarios: [], hiddenVocab: [], hiddenSpeak: [] };
   }
 }
 function _saveContent(c) {
@@ -51,6 +51,75 @@ function contentApplyOverrides() {
 }
 contentApplyOverrides();
 
+// ── VISIBILITY LAYER — hide/show without deleting ──
+// Pristine masters are captured once, after the overrides above, so hidden
+// items can always come back. The live arrays every screen reads are then
+// rebuilt IN PLACE (same array objects — references everywhere stay valid).
+const _MASTERS = {
+  scen: [...GUIDED_SCENARIOS],
+  vocab: [[V1, [...V1]], [V2, [...V2]], [P2, [...P2]], [EXTRA, [...EXTRA]]],
+  speak: (typeof SPEAK_QA !== 'undefined') ? [...SPEAK_QA] : [],
+};
+function _masterVocab() { return _MASTERS.vocab.flatMap(([, m]) => m); }
+
+function modeHidden(m) { return _content().hiddenModes.includes(m); }
+function scenarioHidden(id) { return _content().hiddenScenarios.includes(id); }
+function vocabHidden(a) { return _content().hiddenVocab.includes(a); }
+function speakHidden(qen) { return _content().hiddenSpeak.includes(qen); }
+
+function contentApplyVisibility() {
+  const c = _content();
+  GUIDED_SCENARIOS.length = 0;
+  _MASTERS.scen.forEach(g => { if (!c.hiddenScenarios.includes(g.id)) GUIDED_SCENARIOS.push(g); });
+  _MASTERS.vocab.forEach(([live, master]) => {
+    live.length = 0;
+    master.forEach(v => { if (!c.hiddenVocab.includes(v.a)) live.push(v); });
+  });
+  if (typeof SPEAK_QA !== 'undefined') {
+    SPEAK_QA.length = 0;
+    _MASTERS.speak.forEach(q => { if (!c.hiddenSpeak.includes(q.qen)) SPEAK_QA.push(q); });
+  }
+}
+contentApplyVisibility();
+
+// learner-facing modes that can be hidden from the app entirely
+const VIS_MODES = [
+  ['guided', 'Guided practice'], ['speak', 'Speak & respond (coach)'], ['flash', 'Flashcards'],
+  ['deep', 'Deep cards + synonyms'], ['build', 'Sentence builder'], ['shadow', 'Shadowing'],
+  ['listen', 'Tune your ear'], ['convo', 'Conversation'], ['journey', 'Your journey'],
+  ['tree', 'Domain map'], ['map', 'Word origins map'], ['starred', 'Starred items'],
+  ['freeform', 'Free-form'], ['livecall', 'Live call'], ['speed', 'Speed round'],
+  ['contribute', 'Contribute'], ['review', 'Reviewer mode'],
+  ['mc', 'Quiz'], ['deepquiz', 'Deep quiz'], ['flow', 'Flow translation'],
+  ['trans', 'Transitions guide'], ['vocab', 'Vocab lists'], ['ref', 'Full reference'],
+];
+
+// hide/show the static nav entry points (sidebar + mobile tab bar)
+function visApplyModes() {
+  const c = _content();
+  VIS_MODES.forEach(([m]) => {
+    const off = c.hiddenModes.includes(m);
+    const nav = document.getElementById('nav-' + m);
+    if (nav) nav.style.display = off ? 'none' : '';
+    const tab = document.querySelector('.tab-btn[data-tab="' + m + '"]');
+    if (tab) tab.style.display = off ? 'none' : '';
+  });
+}
+
+function _visToggle(listKey, val) {
+  const c = _content();
+  const i = c[listKey].indexOf(val);
+  if (i >= 0) c[listKey].splice(i, 1); else c[listKey].push(val);
+  _saveContent(c);
+  contentApplyVisibility();
+  visApplyModes();
+  renderAdmin();
+}
+function visToggleMode(m) { _visToggle('hiddenModes', m); }
+function visToggleScenario(id) { _visToggle('hiddenScenarios', id); }
+function visToggleVocab(encA) { _visToggle('hiddenVocab', decodeURIComponent(encA)); }
+function visToggleSpeak(encQ) { _visToggle('hiddenSpeak', decodeURIComponent(encQ)); }
+
 // ── content-manager UI state ──
 let cmTable = 'scenarios';
 let cmQuery = '';
@@ -74,7 +143,7 @@ function _cmMatch(hay) {
 }
 
 function cmScenarioList() {
-  return GUIDED_SCENARIOS.filter(g =>
+  return _MASTERS.scen.filter(g =>
     (!cmFilter.domain || g.domain === cmFilter.domain) &&
     (!cmFilter.tier || g.tier === cmFilter.tier) &&
     (!cmFilter.status || (g.verification_status || '') === cmFilter.status) &&
@@ -82,12 +151,12 @@ function cmScenarioList() {
 }
 
 function cmVocabList() {
-  return [...V1, ...V2, ...P2, ...EXTRA].filter(v => _cmMatch([v.a, v.p, v.e].join(' ')));
+  return _masterVocab().filter(v => _cmMatch([v.a, v.p, v.e].join(' ')));
 }
 
 // ── scenario editing ──
 function cmSaveScenario(id) {
-  const g = GUIDED_SCENARIOS.find(x => x.id === id);
+  const g = _MASTERS.scen.find(x => x.id === id);
   if (!g) return;
   const f = (fid) => document.getElementById('cm-' + fid)?.value ?? '';
   const patch = {
@@ -121,8 +190,10 @@ function cmDeleteScenario(id) {
   if (c.custom.some(s => s.id === id)) c.custom = c.custom.filter(s => s.id !== id);
   else if (!c.deletedScenarios.includes(id)) c.deletedScenarios.push(id);
   _saveContent(c);
-  const i = GUIDED_SCENARIOS.findIndex(x => x.id === id);
-  if (i >= 0) GUIDED_SCENARIOS.splice(i, 1);
+  [GUIDED_SCENARIOS, _MASTERS.scen].forEach(arr => {
+    const i = arr.findIndex(x => x.id === id);
+    if (i >= 0) arr.splice(i, 1);
+  });
   cmOpen = null;
   renderAdmin();
 }
@@ -130,7 +201,7 @@ function cmDeleteScenario(id) {
 // ── vocab editing ──
 function cmSaveVocab(encA) {
   const origA = decodeURIComponent(encA);
-  const v = [...V1, ...V2, ...P2, ...EXTRA].find(x => x.a === origA);
+  const v = _masterVocab().find(x => x.a === origA);
   if (!v) return;
   const patch = {
     a: document.getElementById('cm-va')?.value.trim() || v.a,
@@ -151,7 +222,7 @@ function cmDeleteVocab(encA) {
   const c = _content();
   if (!c.deletedVocab.includes(a)) c.deletedVocab.push(a);
   _saveContent(c);
-  [V1, V2, P2, EXTRA].forEach(arr => {
+  [V1, V2, P2, EXTRA, ..._MASTERS.vocab.map(([, m]) => m)].forEach(arr => {
     const i = arr.findIndex(x => x.a === a);
     if (i >= 0) arr.splice(i, 1);
   });
@@ -193,6 +264,7 @@ function cmQuickAdd() {
     source: 'founder-seeded', verification_status: 'pending-review',
   };
   GUIDED_SCENARIOS.push(s);
+  _MASTERS.scen.push(s);
   const c = _content();
   c.custom.push(s);
   _saveContent(c);
@@ -259,15 +331,16 @@ function cmRowsHTML() {
       <div class="d2-inset" style="border-color:rgba(217,107,90,.35);margin-bottom:10px">
         <div class="d2-label" style="color:#e08a7a;margin-bottom:6px">Flagged in the community audit queue — needs your look</div>
         ${flags.map(f => {
-          const g = GUIDED_SCENARIOS.find(x => x.id === f.id);
+          const g = _MASTERS.scen.find(x => x.id === f.id);
           return `<div class="d2-when-body" style="margin-bottom:4px">• ${escAttr(g ? g.title : f.id)}${f.note ? ' — "' + escAttr(f.note) + '"' : ''} <button class="c2-linklike" onclick="cmToggle('${f.id}')">edit →</button></div>`;
         }).join('')}
       </div>` : ''}
-      <div class="d2-item-note" style="margin:4px 0 8px">${list.length} of ${GUIDED_SCENARIOS.length} scenarios</div>
+      <div class="d2-item-note" style="margin:4px 0 8px">${list.length} of ${_MASTERS.scen.length} scenarios${_content().hiddenScenarios.length ? ' · ' + _content().hiddenScenarios.length + ' hidden from learners' : ''}</div>
       ${list.map(g => `
-      <div class="d2-item" style="margin-bottom:6px;cursor:pointer" onclick="if(event.target.tagName!=='INPUT'&&event.target.tagName!=='TEXTAREA'&&event.target.tagName!=='SELECT'&&event.target.tagName!=='BUTTON')cmToggle('${g.id}')">
+      <div class="d2-item" style="margin-bottom:6px;cursor:pointer;${scenarioHidden(g.id) ? 'opacity:.55' : ''}" onclick="if(event.target.tagName!=='INPUT'&&event.target.tagName!=='TEXTAREA'&&event.target.tagName!=='SELECT'&&event.target.tagName!=='BUTTON')cmToggle('${g.id}')">
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
           <span style="flex:1;min-width:160px;font-size:13.5px;color:var(--text)">${escAttr(g.title)}</span>
+          ${scenarioHidden(g.id) ? '<span class="d2-badge" style="color:#e08a7a;border-color:rgba(217,107,90,.4)">hidden</span>' : ''}
           <span class="d2-badge">${escAttr(g.domain)}</span>
           <span class="d2-badge">${escAttr(g.tier)}</span>
           <span class="d2-badge" style="${g.verification_status === 'native-corrected' ? 'color:var(--mint);border-color:rgba(86,201,143,.4)' : 'color:var(--accent2)'}">${escAttr(g.verification_status || '—')}</span>
@@ -290,6 +363,7 @@ function cmRowsHTML() {
           ${lbl('coach note')}<textarea id="cm-note" rows="2" style="${fieldStyle};resize:none">${escAttr(g.note || '')}</textarea>
           <div class="d2-pill-row" style="margin-top:10px">
             <button class="d2-pill-red" onclick="cmDeleteScenario('${g.id}')">Delete</button>
+            <button class="c2-ghost-pill" onclick="visToggleScenario('${g.id}')">${scenarioHidden(g.id) ? 'Show to learners' : 'Hide from learners'}</button>
             <button class="c2-ghost-pill" onclick="cmToggle('${g.id}')">cancel</button>
             <button class="d2-pill-green" onclick="cmSaveScenario('${g.id}')">Save ✓</button>
           </div>
@@ -305,10 +379,11 @@ function cmRowsHTML() {
       ${list.map(v => {
         const enc = encodeURIComponent(v.a);
         return `
-      <div class="d2-item" style="margin-bottom:6px;cursor:pointer" onclick="if(event.target.tagName!=='INPUT'&&event.target.tagName!=='BUTTON')cmToggle('v:${escAttr(enc)}')">
+      <div class="d2-item" style="margin-bottom:6px;cursor:pointer;${vocabHidden(v.a) ? 'opacity:.55' : ''}" onclick="if(event.target.tagName!=='INPUT'&&event.target.tagName!=='BUTTON')cmToggle('v:${escAttr(enc)}')">
         <div style="display:flex;gap:10px;align-items:center">
           <span dir="rtl" style="font-size:15px;color:var(--text)">${escAttr(v.a)}</span>
           <span class="d2-item-note" style="flex:1">${escAttr(v.p)} · ${escAttr(v.e)}</span>
+          ${vocabHidden(v.a) ? '<span class="d2-badge" style="color:#e08a7a;border-color:rgba(217,107,90,.4)">hidden</span>' : ''}
           <span class="d2-badge">${v.src === 'v1' ? 'Solja' : v.src === 'v2' ? 'Ala' : 'glossary'}</span>
         </div>
         ${cmOpen === 'v:' + enc ? `
@@ -318,6 +393,7 @@ function cmRowsHTML() {
           <input id="cm-ve" style="${fieldStyle}" value="${escAttr(v.e)}">
           <div class="d2-pill-row" style="margin-top:10px">
             <button class="d2-pill-red" onclick="cmDeleteVocab('${escAttr(enc)}')">Delete</button>
+            <button class="c2-ghost-pill" onclick="visToggleVocab('${escAttr(enc)}')">${vocabHidden(v.a) ? 'Show to learners' : 'Hide from learners'}</button>
             <button class="c2-ghost-pill" onclick="cmToggle('v:${escAttr(enc)}')">cancel</button>
             <button class="d2-pill-green" onclick="cmSaveVocab('${escAttr(enc)}')">Save ✓</button>
           </div>
@@ -344,6 +420,55 @@ function cmRowsHTML() {
           </div>
         </div>` : ''}
       </div>`).join('');
+  }
+
+  if (cmTable === 'visibility') {
+    const c = _content();
+    const hidScen = c.hiddenScenarios.map(id => _MASTERS.scen.find(g => g.id === id)).filter(Boolean);
+    return `
+      <div class="d2-item-note" style="margin:4px 0 12px">Hide anything from learners without deleting it — hidden things vanish from
+      the menus, home, decks and the domain map, and come back with one tap. Whole modes are toggled here; individual
+      guided scenarios and vocabulary items also have a <b>Hide from learners</b> button inside their rows in the
+      Scenarios and Vocabulary tables.</div>
+
+      <div class="j2-sec-label">Modes — whole screens</div>
+      <div class="d2-tab-row">
+        ${VIS_MODES.map(([m, label]) => {
+          const off = c.hiddenModes.includes(m);
+          return `<button class="d2-tab ${off ? '' : 'on'}" style="${off ? 'opacity:.55;text-decoration:line-through' : ''}" onclick="visToggleMode('${m}')">${off ? '◌' : '✓'} ${label}</button>`;
+        }).join('')}
+      </div>
+      <div class="d2-item-note" style="margin:6px 0 0">✓ = visible to learners · ◌ = hidden. Hidden modes disappear from the sidebar, tab bar and home cards; anyone landing on one is sent home (demo mode still lets you preview them via Jump anywhere).</div>
+
+      <div class="j2-sec-label" style="margin-top:20px">Coach scenarios — Speak &amp; respond</div>
+      ${_MASTERS.speak.map(q => {
+        const hid = c.hiddenSpeak.includes(q.qen);
+        const enc = encodeURIComponent(q.qen);
+        return `
+        <div class="d2-item" style="margin-bottom:6px;${hid ? 'opacity:.55' : ''}">
+          <div style="display:flex;gap:8px;align-items:center">
+            <span style="flex:1;font-size:13px;color:var(--text)">${escAttr(q.qen)}</span>
+            ${hid ? '<span class="d2-badge" style="color:#e08a7a;border-color:rgba(217,107,90,.4)">hidden</span>' : ''}
+            <button class="c2-ghost-pill" style="padding:5px 12px;font-size:11px" onclick="visToggleSpeak('${escAttr(enc)}')">${hid ? 'Show' : 'Hide'}</button>
+          </div>
+        </div>`;
+      }).join('')}
+
+      <div class="j2-sec-label" style="margin-top:20px">Everything hidden right now</div>
+      ${(hidScen.length || c.hiddenVocab.length || c.hiddenModes.length || c.hiddenSpeak.length) ? `
+        ${hidScen.map(g => `
+        <div class="d2-star-row" style="align-items:center">
+          <span style="font-size:13px;color:var(--text)">${escAttr(g.title)}</span>
+          <span class="d2-item-note" style="flex:1">guided scenario</span>
+          <button class="c2-ghost-pill" style="padding:5px 12px;font-size:11px" onclick="visToggleScenario('${g.id}')">Show</button>
+        </div>`).join('')}
+        ${c.hiddenVocab.map(a => `
+        <div class="d2-star-row" style="align-items:center">
+          <span dir="rtl" style="font-size:14px;color:var(--text)">${escAttr(a)}</span>
+          <span class="d2-item-note" style="flex:1">vocabulary item</span>
+          <button class="c2-ghost-pill" style="padding:5px 12px;font-size:11px" onclick="visToggleVocab('${escAttr(encodeURIComponent(a))}')">Show</button>
+        </div>`).join('')}
+      ` : '<div class="d2-item-note">nothing is hidden — learners see everything</div>'}`;
   }
 
   if (cmTable === 'people') {
@@ -417,7 +542,7 @@ function cmRowsHTML() {
 function renderAdminContentHTML() {
   const TABLES = [
     ['scenarios', 'Scenarios'], ['vocab', 'Vocabulary'], ['calls', 'Call sequences'],
-    ['people', 'Contributors'], ['queue', 'Pending queue'], ['analytics', 'Analytics'],
+    ['visibility', 'Show / hide'], ['people', 'Contributors'], ['queue', 'Pending queue'], ['analytics', 'Analytics'],
   ];
   const showSearch = cmTable === 'scenarios' || cmTable === 'vocab';
   return `
