@@ -163,7 +163,7 @@ function renderHomeDashboard() {
   const coached = Object.keys(JSON.parse(localStorage.getItem('tariga_attempts_v1') || '{}')).length;
   const attempts = totalAttemptCount();
   const starredN = (typeof starredDeckCount === 'function') ? starredDeckCount() : starredItems.size;
-  const pct = Math.min(100, Math.round((coached / SPEAK_QA.length) * 100));
+  const pct = SPEAK_QA.length ? Math.min(100, Math.round((coached / SPEAK_QA.length) * 100)) : 0;
 
   if (typeof neonOn === 'function' && neonOn()) {
     // 3b — cosmic header, greeting, unified stats widget, 2×2 path grid
@@ -191,7 +191,7 @@ function renderHomeDashboard() {
 
   // warm dashboard — the 3b structure in System A language
   const ringC = 2 * Math.PI * 52;
-  const pathCard = (m, icon, title, sub, active) => `
+  const pathCard = (m, icon, title, sub, active) => (typeof modeHidden === 'function' && modeHidden(m)) ? '' : `
     <button onclick="setMode('${m}')" style="text-align:left;padding:16px;border-radius:20px;cursor:pointer;font-family:inherit;
       background:${active ? 'rgba(201,169,110,0.08)' : 'rgba(255,250,242,0.03)'};
       border:1px solid ${active ? 'rgba(201,169,110,0.45)' : 'rgba(255,255,255,0.07)'};
@@ -291,14 +291,14 @@ function homeExploreHTML() {
   const attempts = totalAttemptCount();
   const starredN = (typeof starredDeckCount === 'function') ? starredDeckCount() : starredItems.size;
   const totalScenarios = SPEAK_QA.length;
-  const pct = Math.min(100, Math.round((coached / totalScenarios) * 100));
+  const pct = totalScenarios ? Math.min(100, Math.round((coached / totalScenarios) * 100)) : 0;
   const ringC = 2 * Math.PI * 52;
   const srcInfo = SRC_LABELS[src] || SRC_LABELS.v1;
 
   // System B — the 3b unified stats widget + 2×2 path grid
   if (typeof neonOn === 'function' && neonOn()) {
     const ring326 = 326;
-    const pathCard = (m, icon, title, sub, active) => `
+    const pathCard = (m, icon, title, sub, active) => (typeof modeHidden === 'function' && modeHidden(m)) ? '' : `
       <button onclick="setMode('${m}')" style="text-align:left;padding:16px;border-radius:20px;cursor:pointer;font-family:'Space Grotesk',sans-serif;
         background:${active ? 'rgba(255,255,255,0.05)' : 'rgba(11,15,25,0.6)'};
         border:1px solid ${active ? 'rgba(34,211,238,0.5)' : 'transparent'};
@@ -435,6 +435,7 @@ const HOME_CARD_COLORS = {
   convo: '#e08a7a', contribute: '#56c98f', deep: '#a78bfa', map: '#4fd8c4',
 };
 function homeCard(mode, icon, title, sub, glow) {
+  if (typeof modeHidden === 'function' && modeHidden(mode)) return '';
   const col = HOME_CARD_COLORS[mode] || '#e8c99a';
   return `
     <button class="home-card ${glow ? 'home-card-glow' : ''}" onclick="${mode === 'guided' ? 'setMode(\'guided\')' : `setMode('${mode}')`}">

@@ -27,6 +27,9 @@ const SELF_HEADED_MODES = ['home', 'speak', 'journey', 'listen', 'contribute', '
 
 const _originalSetMode = setMode;
 setMode = function(m){
+  // founder visibility controls: a hidden mode sends learners home
+  // (demo mode still gets in, so the founder can preview hidden screens)
+  if (typeof modeHidden === 'function' && modeHidden(m) && !(typeof adminOn === 'function' && adminOn())) m = 'home';
   // retrigger the page-enter transition so mode switches feel like navigation
   const ca = document.getElementById('content-area');
   if(ca){ ca.classList.remove('page-enter'); void ca.offsetWidth; ca.classList.add('page-enter'); }
@@ -50,6 +53,7 @@ function syncTabBar(m){
 // ── Init ──
 deck = getSrc();
 updStats();
+if (typeof visApplyModes === 'function') visApplyModes();
 setMode('home');
 maybeShowIntro();
 adminBootCheck();

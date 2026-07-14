@@ -34,7 +34,10 @@ const COACH_CHIP_PH = {
 
 function esc(s) { return escAttr(String(s == null ? '' : s)); }
 
-function coachScenario() { return SPEAK_QA[coachIdx]; }
+function coachScenario() {
+  if (coachIdx >= SPEAK_QA.length) coachIdx = 0;
+  return SPEAK_QA[coachIdx];
+}
 
 function coachMode() {
   if (coachInputMode === null) coachInputMode = coachMicSupported() ? 'voice' : 'text';
@@ -43,6 +46,11 @@ function coachMode() {
 
 // ── Entry point ──
 function renderSpeak() {
+  const ca0 = document.getElementById('content-area');
+  if (!SPEAK_QA.length) {
+    ca0.innerHTML = '<div class="coach-wrap"><div class="d2-note" style="text-align:center;margin-top:48px">Every coach scenario is currently hidden.<br>Founder tools → Content manager → Show / hide brings them back.</div></div>';
+    return;
+  }
   if (coachPhase === 'prompt' && !coachPromptAt) coachPromptAt = Date.now();
   const ca = document.getElementById('content-area');
   if (coachPhase === 'voice') { ca.innerHTML = coachVoiceHTML(); return; }
@@ -103,6 +111,12 @@ function coachPromptHTML() {
           ✦ You've answered this ${attempts.length === 1 ? 'once' : attempts.length + ' times'} — see your journey
         </button>` : ''}
 
+      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:6px 14px;margin:0 0 12px;font-size:11px;color:var(--text3);letter-spacing:.04em">
+        <span><b style="color:var(--accent2)">1</b> read the scene</span>
+        <span><b style="color:var(--accent2)">2</b> answer like you would with family — voice or text</span>
+        <span><b style="color:var(--accent2)">3</b> the coach compares, it never grades</span>
+      </div>
+
       <div class="c2-qcard">
         <div class="c2-qlabel">Say it in Sudanese Arabic</div>
         <div class="c2-qtext">${esc(it.qen)}</div>
@@ -115,10 +129,17 @@ function coachPromptHTML() {
       </div>
 
       <div class="c2-weave">
-        <span class="c2-weave-label">try using —</span>
+        <span class="c2-weave-label">weave these in — the coach listens for them:</span>
         ${it.required.map(v => coachChipHTML(v, false)).join('')}
         ${it.bonus.map(v => coachChipHTML(v, true)).join('')}
       </div>
+
+      ${coachStarters(it).length ? `
+      <div class="c2-weave" style="margin-top:4px">
+        <span class="c2-weave-label">stuck? borrow an opener (tap to drop it in):</span>
+        ${coachStarters(it).map((s, i) =>
+          `<button class="c2-chip" style="font:inherit;cursor:pointer" onclick="coachStarterTap(${i})" dir="auto">${esc(s.ar)}${s.ph ? `<span class="ph">${esc(s.ph)}</span>` : ''}</button>`).join('')}
+      </div>` : ''}
 
       ${mode === 'voice' ? `
         <div class="c2-voicefirst">
@@ -159,6 +180,29 @@ function coachPromptHTML() {
       ` : coachConnectHTML()}
     </div>
   `;
+}
+
+// Sentence starters lifted from this scenario's real model answers — the
+// first couple of words of each, deduplicated. A tap drops one into the
+// answer box, so a blank-page freeze always has a way in.
+function coachStarters(it) {
+  const seen = new Set(), out = [];
+  (it.model || []).forEach(m => {
+    const ar = String(m.ar || '').split(/\s+/).slice(0, 2).join(' ');
+    const ph = String(m.ph || '').split(/\s+/).slice(0, 2).join(' ');
+    if (ar && !seen.has(ar)) { seen.add(ar); out.push({ ar, ph }); }
+  });
+  return out.slice(0, 3);
+}
+
+function coachStarterTap(i) {
+  const s = coachStarters(coachScenario())[i];
+  if (!s) return;
+  coachInputMode = 'text';
+  coachText = coachText.trim() ? coachText.trimEnd() + ' ' + s.ar : s.ar;
+  renderSpeak();
+  const ta = document.getElementById('coach-input');
+  if (ta) { ta.focus(); ta.selectionStart = ta.selectionEnd = ta.value.length; }
 }
 
 function coachChipHTML(v, bonus) {

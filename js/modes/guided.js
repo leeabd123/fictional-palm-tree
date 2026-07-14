@@ -98,15 +98,20 @@ function renderGuided() {
       <div class="c2-qcard">
         <div class="c2-qlabel">${escAttr(it.title)} ${done[it.id] ? '· ✓ practiced' : ''}</div>
         ${it.verification_status === 'pending-review' ? '<div class="d2-badge" style="margin-bottom:10px">founder-seeded · pending native review</div>' : ''}
+        <div class="d2-label" style="margin:12px 0 4px">The scene</div>
         <div class="c2-sub" style="margin-top:0;margin-bottom:12px">${escAttr(it.setup)}</div>
         ${prompt ? `
-          <div class="d2-inset" style="text-align:right">
+          <div class="d2-label" style="margin:0 0 6px">They say to you —</div>
+          <div class="d2-inset" style="text-align:right;margin-top:0">
             <div class="d2-inset-ar" style="font-size:19px">${escAttr(prompt.ar)}</div>
             <div class="d2-inset-ph">${escAttr(prompt.ph)}</div>
             <div class="d2-inset-en" style="text-align:left">${escAttr(prompt.en)}
               ${typeof speakerSVG === 'function' ? speakerSVG('#a09e9a', encodeURIComponent(prompt.ar)) : ''}</div>
           </div>` : ''}
-        <div class="c2-qtext" style="font-size:18px;margin-top:14px">${escAttr(it.say_en)}</div>
+        <div class="d2-yourturn" style="margin-top:16px">
+          <div class="d2-yourturn-label">Your turn — say this in Sudanese Arabic</div>
+          <div class="d2-yourturn-body" style="text-align:left;font-size:18px">${escAttr(it.say_en)}</div>
+        </div>
         ${hasGenderVariants ? `
         <div class="d2-tab-row" style="justify-content:center;margin:12px 0 0">
           <button class="d2-tab ${guidedGender === 'f' ? 'on' : ''}" onclick="guidedSetGender('f')">speaking as her</button>
