@@ -34,6 +34,7 @@
 
 - Structured JSON feedback: overall, strengths, MSA→Sudanese swaps, English-shaped phrasing, code-switching (framed kindly), **missed transition words** (يعني، صراحة…), **missed formulaic chunks** (إن شاء الله as one unit), **register calibration** ("correct Arabic, but a bit too casual for an elder"), closest model answer, an upgraded version of *your own* answer with speak-aloud, encouragement.
 - Feedback hierarchy (§0): upgraded-own-answer is primary; model answers + specific flags are collapsed secondary.
+- **Guided practice is deliberately minimal:** one small context line, then two big steps — THEY SAY (large Arabic + transliteration + English, speak-aloud) and YOU SAY — IN ARABIC (large English task). After comparing, every word chip carries its **transliteration** (chunk-aware pairing: الحمد لله pairs with *al-hamdulillah* as one chip), and a **missed chip is tappable — "the mic misheard me, I did say this" — and counts immediately** (browser speech recognition is demo-grade on Sudanese; the learner is the authority on what they said).
 - Journey "the numbers": Sudanese phrases · English mixed in · transition words · formulaic chunks, then → now, per scenario.
 
 ## 5. Learning modes (the full library)

@@ -9,6 +9,7 @@
 let guidedIdx = 0;
 let guidedInput = '';
 let guidedChecked = false;
+let guidedSelfFix = new Set();  // word indexes the learner marked "I did say this" (mic mishears)
 let guidedTargetIdx = 0;      // which model target the learner is compared against
 let guidedGender = (getProfile().gender === 'm') ? 'm' : 'f';
 let guidedBrowse = false;
@@ -35,8 +36,71 @@ function guidedOpen(id) {
   const g = GUIDED_SCENARIOS.find(s => s.id === id);
   if (g) setFocusDomain(g.domain);
   const i = guidedList().findIndex(s => s.id === id);
-  if (i >= 0) { guidedIdx = i; guidedInput = ''; guidedChecked = false; guidedTargetIdx = 0; }
+  if (i >= 0) { guidedIdx = i; guidedInput = ''; guidedChecked = false; guidedTargetIdx = 0; guidedSelfFix = new Set(); }
   setMode('guided');
+}
+
+// ── word chips with transliteration + "the mic missed me" self-fix ──
+// Arabic words paired with their phonetics. Counts don't always match
+// (الحمد لله → one "al-hamdulillah" token), so when they differ the extra
+// Arabic words are grouped onto the LONGEST translit tokens — merged chunks
+// have long transliterations — producing chunk chips instead of wrong pairs.
+function guidedPairs(target) {
+  const arToks = String(target.ar).split(/\s+/).filter(w => prodClean(w).length > 1);
+  const phToks = String(target.ph || '').split(/\s+/).filter(w => prodClean(w).length > 1);
+  if (!phToks.length) return arToks.map(w => ({ ar: w, ph: '' }));
+  if (arToks.length === phToks.length) return arToks.map((w, i) => ({ ar: w, ph: phToks[i] }));
+
+  const grouped = (units, anchors) => {
+    // distribute `units` over `anchors` in order; anchors get 1 each, the
+    // extras go to the longest anchors first
+    const counts = anchors.map(() => 1);
+    let extra = units.length - anchors.length;
+    const order = anchors.map((a, i) => [a.length, i]).sort((x, y) => y[0] - x[0]);
+    for (let k = 0; extra > 0; k = (k + 1) % order.length) { counts[order[k][1]]++; extra--; }
+    const out = []; let pos = 0;
+    anchors.forEach((a, i) => { out.push(units.slice(pos, pos + counts[i]).join(' ')); pos += counts[i]; });
+    return out;
+  };
+
+  if (arToks.length > phToks.length) {
+    const arGroups = grouped(arToks, phToks);
+    return phToks.map((p, i) => ({ ar: arGroups[i], ph: p }));
+  }
+  const phGroups = grouped(phToks, arToks);
+  return arToks.map((w, i) => ({ ar: w, ph: phGroups[i] }));
+}
+
+function guidedChipData(input, target) {
+  const norm = prodClean(input);
+  const said = (s) => {
+    const ws = String(s).split(/\s+/).map(prodClean).filter(w => w.length > 1);
+    return ws.length > 0 && ws.every(w => norm.includes(w));
+  };
+  return guidedPairs(target).map((p, i) => ({
+    ...p, i,
+    hit: said(p.ar) || said(p.ph) || guidedSelfFix.has(i),
+  }));
+}
+
+function guidedSelfFixAdd(i) { guidedSelfFix.add(i); renderGuided(); }
+
+function guidedChipsHTML(input, target) {
+  const chips = guidedChipData(input, target);
+  const got = chips.filter(c => c.hit).length;
+  const all = got === chips.length;
+  return `
+    <div style="text-align:center;margin-top:14px">
+      <div style="font-size:12.5px;color:var(--text2);margin-bottom:9px">
+        <b style="color:${all ? 'var(--mint)' : 'var(--accent2)'};font-size:14px">${got} of ${chips.length}</b> words${all ? ' — the whole thing ✓' : ''}
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">
+        ${chips.map(c => c.hit
+          ? `<span class="f2-p-chip hit"><span dir="rtl">${escAttr(c.ar)}</span>${c.ph ? ` <span style="opacity:.8;font-size:11px">${escAttr(c.ph)}</span>` : ''}</span>`
+          : `<button class="f2-p-chip" style="font:inherit;cursor:pointer" onclick="guidedSelfFixAdd(${c.i})" title="tap if you actually said this"><span dir="rtl">${escAttr(c.ar)}</span>${c.ph ? ` <span style="opacity:.8;font-size:11px">${escAttr(c.ph)}</span>` : ''}</button>`).join('')}
+      </div>
+      ${all ? '' : '<div class="d2-item-note" style="margin-top:9px">dim = missed · if the mic misheard you, tap the word you actually said and it counts</div>'}
+    </div>`;
 }
 
 function renderGuided() {
@@ -74,7 +138,6 @@ function renderGuided() {
   const prompt = it.prompt && it.prompt.gender && guidedGender === 'm' && it.prompt.variants && it.prompt.variants.m
     ? { ...it.prompt, ...it.prompt.variants.m } : it.prompt;
   const done = getGuidedProgress();
-  const m = guidedChecked ? prodMatch(guidedInput, target.ar, target.ph) : null;
 
   ca.innerHTML = `
     <div class="coach-wrap">
@@ -82,7 +145,7 @@ function renderGuided() {
       <div class="c2-head">
         <div>
           <div class="c2-title">Guided · ${guidedDomain().label}</div>
-          <div class="c2-sub">${guidedIdx + 1} of ${guidedList().length} · ${escAttr(it.tier)} tier · domain: ${domainTier(focusDomain())}${domainTier(focusDomain()) !== 'Beginning' ? ' ✓' : ''}</div>
+          <div class="c2-sub">${guidedIdx + 1} of ${guidedList().length}${done[it.id] ? ' · ✓ practiced' : ''}${it.verification_status === 'pending-review' ? ' · pending native review' : ''}</div>
         </div>
         <div class="speak-q-nav" style="margin:0">
           <button class="arrow-btn" onclick="guidedNav(-1)" ${guidedIdx === 0 ? 'disabled' : ''}>←</button>
@@ -90,30 +153,19 @@ function renderGuided() {
         </div>
       </div>
 
-      <div style="text-align:center;margin-bottom:12px">
-        <button class="c2-linklike" onclick="guidedBrowse=!guidedBrowse;renderGuided()">${guidedBrowse ? 'hide the list' : 'browse all ' + guidedDomain().label.toLowerCase() + ' scenarios'}</button>
-      </div>
-      ${guidedBrowse ? guidedBrowseHTML() : ''}
-
-      <div class="c2-qcard">
-        <div class="c2-qlabel">${escAttr(it.title)} ${done[it.id] ? '· ✓ practiced' : ''}</div>
-        ${it.verification_status === 'pending-review' ? '<div class="d2-badge" style="margin-bottom:10px">founder-seeded · pending native review</div>' : ''}
-        <div class="d2-label" style="margin:12px 0 4px">The scene</div>
-        <div class="c2-sub" style="margin-top:0;margin-bottom:12px">${escAttr(it.setup)}</div>
+      <div class="c2-qcard" style="text-align:center">
+        <div class="d2-item-note" style="margin-bottom:${prompt ? '18px' : '12px'}">${escAttr(it.setup)}</div>
         ${prompt ? `
-          <div class="d2-label" style="margin:0 0 6px">They say to you —</div>
-          <div class="d2-inset" style="text-align:right;margin-top:0">
-            <div class="d2-inset-ar" style="font-size:19px">${escAttr(prompt.ar)}</div>
-            <div class="d2-inset-ph">${escAttr(prompt.ph)}</div>
-            <div class="d2-inset-en" style="text-align:left">${escAttr(prompt.en)}
-              ${typeof speakerSVG === 'function' ? speakerSVG('#a09e9a', encodeURIComponent(prompt.ar)) : ''}</div>
-          </div>` : ''}
-        <div class="d2-yourturn" style="margin-top:16px">
-          <div class="d2-yourturn-label">Your turn — say this in Sudanese Arabic</div>
-          <div class="d2-yourturn-body" style="text-align:left;font-size:18px">${escAttr(it.say_en)}</div>
-        </div>
+          <div style="font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--text3)">They say</div>
+          <div dir="rtl" style="font-size:clamp(27px,7.5vw,38px);line-height:1.7;color:var(--text);margin-top:10px">${escAttr(prompt.ar)}
+            ${typeof speakerSVG === 'function' ? speakerSVG('#a09e9a', encodeURIComponent(prompt.ar)) : ''}</div>
+          <div class="d2-inset-ph" style="font-size:14.5px;margin-top:6px">${escAttr(prompt.ph)}</div>
+          <div style="font-size:12.5px;color:var(--text3);margin-top:4px">${escAttr(prompt.en)}</div>
+          <div style="height:1px;background:rgba(255,255,255,.08);margin:20px auto;max-width:200px"></div>` : ''}
+        <div style="font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent2)">You say — in Arabic</div>
+        <div style="font-size:clamp(20px,5.5vw,27px);font-weight:600;line-height:1.45;color:var(--text);margin:10px auto 0;max-width:420px">${escAttr(it.say_en)}</div>
         ${hasGenderVariants ? `
-        <div class="d2-tab-row" style="justify-content:center;margin:12px 0 0">
+        <div class="d2-tab-row" style="justify-content:center;margin:14px 0 0">
           <button class="d2-tab ${guidedGender === 'f' ? 'on' : ''}" onclick="guidedSetGender('f')">speaking as her</button>
           <button class="d2-tab ${guidedGender === 'm' ? 'on' : ''}" onclick="guidedSetGender('m')">speaking as him</button>
         </div>` : ''}
@@ -129,10 +181,10 @@ function renderGuided() {
             <button class="c2-compare" onclick="guidedCheck()">Compare →</button>
           </div>
         </div>
-        <div class="c2-footnote">Struggle first — that's the exercise. The verified answer appears after you try.</div>
+        <div class="c2-footnote">The family's answer appears after you try.</div>
       ` : `
         ${prodCompareGridHTML(guidedInput, target.ar, target.ph, 'How family says it')}
-        <div class="f2-p-chips">${prodChipsHTML(m)}</div>
+        ${guidedChipsHTML(guidedInput, target)}
         ${targets.length > 1 ? `
         <div class="d2-note" style="text-align:center;margin:12px 0 0">
           another natural way:
@@ -150,14 +202,16 @@ function renderGuided() {
           <span class="d2-when-body">${escAttr(it.note)}</span>
         </div>
         <div class="c2-encourage">Now say it out loud. Twice. That's the whole trick.</div>
-        <div class="d2-note" style="text-align:center;margin:2px 0 0">
-          <button class="c2-linklike" onclick="setMode('listen')">hear phrases like this in the real podcast →</button>
-        </div>
         <div class="d2-pill-row">
           <button class="c2-ghost-pill" onclick="guidedTryAgain()">↻ Try again</button>
           <button class="d2-pill-gold" onclick="guidedNext()">${guidedIdx >= guidedList().length - 1 ? 'The calls →' : 'Next →'}</button>
         </div>
       `}
+
+      <div style="text-align:center;margin:20px 0 0">
+        <button class="c2-linklike" onclick="guidedBrowse=!guidedBrowse;renderGuided()">${guidedBrowse ? 'hide the list' : 'browse all ' + guidedDomain().label.toLowerCase() + ' scenarios'}</button>
+      </div>
+      ${guidedBrowse ? guidedBrowseHTML() : ''}
 
       ${comfortUnlocked(focusDomain()) ? `
       <div class="d2-pill-row" style="margin-top:22px">
@@ -201,6 +255,7 @@ function guidedCheck() {
   guidedInput = (ta ? ta.value : guidedInput).trim();
   if (!guidedInput) { if (ta) ta.focus(); return; }
   guidedChecked = true;
+  guidedSelfFix = new Set();
   const it = guidedItem();
   const targets = guidedTargets(it);
   // compare against whichever variant the learner got closest to
@@ -217,8 +272,8 @@ function guidedCheck() {
   if (typeof logEvent === 'function') logEvent('guided_check', { id: it.id, hits: mm.hits.length, total: mm.words.length });
   renderGuided();
 }
-function guidedSwapTarget(i) { guidedTargetIdx = i; renderGuided(); }
-function guidedTryAgain() { guidedChecked = false; renderGuided(); }
+function guidedSwapTarget(i) { guidedTargetIdx = i; guidedSelfFix = new Set(); renderGuided(); }
+function guidedTryAgain() { guidedChecked = false; guidedSelfFix = new Set(); renderGuided(); }
 function guidedNext() {
   if (guidedIdx >= guidedList().length - 1) {
     const c = CALL_SEQUENCES.find(x => x.domain === focusDomain());
@@ -230,7 +285,7 @@ function guidedNext() {
 function guidedNav(dir) {
   const n = guidedIdx + dir;
   if (n < 0 || n >= guidedList().length) return;
-  guidedIdx = n; guidedInput = ''; guidedChecked = false; guidedTargetIdx = 0;
+  guidedIdx = n; guidedInput = ''; guidedChecked = false; guidedTargetIdx = 0; guidedSelfFix = new Set();
   renderGuided();
 }
 
