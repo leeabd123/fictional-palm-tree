@@ -379,15 +379,25 @@ function coachConnectHTML() {
 
 function coachSettingsHTML() {
   const cfg = getApiConfig() || {};
-  const desc = cfg.mode === 'worker'
+  const desc = cfg.isDefault
+    ? `Using Tariga's built-in worker: <code>${esc(cfg.workerUrl)}</code> — nothing to set up.`
+    : cfg.mode === 'worker'
     ? `Using worker: <code>${esc(cfg.workerUrl)}</code>`
     : `Using a personal API key stored in this browser (dev mode).`;
   return `
     <div class="coach-connect" style="margin-top:8px">
       <div class="coach-connect-body">${desc}</div>
+      ${cfg.isDefault ? `
+      <div class="coach-connect-option" style="margin-top:10px">
+        <div class="coach-connect-opt-label">Point this browser at a different worker (optional)</div>
+        <div class="coach-connect-row">
+          <input type="url" id="coach-worker-url" class="coach-connect-input" placeholder="https://your-worker.workers.dev">
+          <button class="btn btn-accent" onclick="coachSaveWorker()">Save</button>
+        </div>
+      </div>` : `
       <div class="coach-actions" style="margin-top:10px">
-        <button class="starred-clear-btn" onclick="coachDisconnect()">Disconnect</button>
-      </div>
+        <button class="starred-clear-btn" onclick="coachDisconnect()">Reset to the built-in worker</button>
+      </div>`}
     </div>
   `;
 }

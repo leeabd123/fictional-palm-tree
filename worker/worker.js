@@ -46,7 +46,7 @@ function corsHeaders(env, origin) {
   const ok = allowed.length === 0 || allowed.includes(origin);
   return {
     'Access-Control-Allow-Origin': ok ? (origin || '*') : allowed[0] || '',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Max-Age': '86400',
   };
@@ -99,6 +99,50 @@ export default {
         } catch (e) { /* logging must never break the app */ }
       }
       return new Response(null, { status: 204, headers: cors });
+    }
+
+    // ── published content overrides ──
+    // The founder's content-manager edits (scenario/vocab edits, quick-adds,
+    // deletions, hide/show lists) live in their browser as an overrides blob.
+    // POST /api/content {key, overrides} — guarded by the STATS_KEY secret —
+    // stores that blob in D1; GET /api/content hands it to every visitor at
+    // load, so curation applies to everyone, not just the founder's browser.
+    if (url.pathname === '/api/content' && request.method === 'GET') {
+      if (!env.DB) return json({ overrides: null }, 200, cors);
+      try {
+        const row = await env.DB.prepare('SELECT json, ts FROM content_overrides WHERE id = 1').all();
+        const r = row.results && row.results[0];
+        return json(r ? { overrides: JSON.parse(r.json), ts: r.ts } : { overrides: null }, 200, cors);
+      } catch (e) {
+        // table doesn't exist yet (nothing published) — that's a clean null
+        return json({ overrides: null }, 200, cors);
+      }
+    }
+    if (url.pathname === '/api/content' && request.method === 'POST') {
+      if (rateLimited('ct:' + ip)) return json({ error: 'rate_limited' }, 429, cors);
+      if (!env.STATS_KEY) return json({ error: 'server_not_configured', detail: 'STATS_KEY secret missing — publishing needs it' }, 500, cors);
+      if (!env.DB) return json({ error: 'no_database', detail: 'bind a D1 database as DB' }, 501, cors);
+      let cBody;
+      try {
+        const raw = await request.text();
+        if (raw.length > 256_000) return json({ error: 'payload_too_large' }, 413, cors);
+        cBody = JSON.parse(raw);
+      } catch { return json({ error: 'bad_json' }, 400, cors); }
+      if (!cBody || cBody.key !== env.STATS_KEY) return json({ error: 'forbidden' }, 403, cors);
+      if (typeof cBody.overrides !== 'object' || cBody.overrides === null) {
+        return json({ error: 'bad_request', detail: 'expected {key, overrides}' }, 400, cors);
+      }
+      try {
+        await env.DB.prepare(
+          'CREATE TABLE IF NOT EXISTS content_overrides (id INTEGER PRIMARY KEY, json TEXT, ts INTEGER)'
+        ).run();
+        await env.DB.prepare(
+          'INSERT OR REPLACE INTO content_overrides (id, json, ts) VALUES (1, ?, ?)'
+        ).bind(JSON.stringify(cBody.overrides), Date.now()).run();
+        return json({ ok: true }, 200, cors);
+      } catch (e) {
+        return json({ error: 'write_failed', detail: String(e) }, 500, cors);
+      }
     }
 
     // ── scrappy internal stats (§9): GET /api/stats?key=... reads the D1
