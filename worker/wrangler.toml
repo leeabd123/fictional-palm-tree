@@ -17,6 +17,6 @@ MODEL = "claude-opus-4-8"
 
 
 [[d1_databases]]
-binding = "tariga"
+binding = "DB"
 database_name = "tariga"
 database_id = "cad3a565-0387-4a67-82cf-0eef2c03029a"
