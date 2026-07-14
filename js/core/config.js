@@ -6,6 +6,11 @@
 
 const TARIGA_CONFIG = {
   variant: 'default',
+  // The deployed backend (worker/README.md). Baked in so visitors never
+  // configure anything: the coach, event logging and published content all
+  // work out of the box. This is just a URL — the API key lives ONLY as a
+  // secret on Cloudflare, never here. Coach settings can still override it.
+  workerUrl: 'https://tariga-coach.leeabd123.workers.dev',
   home: {
     ctaTitle: 'Start',
     ctaSub: 'يلا نتكلم (yalla nitkallam) — let\'s talk',

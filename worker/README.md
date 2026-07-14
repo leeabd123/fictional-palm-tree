@@ -14,6 +14,8 @@ What the Worker does:
 | `POST /api/coach` | Receives the coaching request the frontend already builds (`{system, messages, output_schema}` — the learner's answer, the scenario context, and the verified model answers travel inside `messages`; see `js/core/coach-prompt.js`), attaches the **secret** Anthropic key server-side, enforces the model + a 3000-token cap + a 24-message cap, and returns Claude's structured-JSON comparison to the browser. |
 | `POST /api/events` | Anonymized event log → D1. The app batches events (`mode_enter`, `coach_eval` with time-spent / voice-vs-text / retry count / completion, `coach_error`, `speed_round`, …). No PII, no user ids, never the learner's words. |
 | `GET /api/stats?key=…` | Founder-only aggregates from D1, guarded by a second secret. `stats.html` in the repo root is a tiny dashboard for it. |
+| `GET /api/content` | Hands every visitor the founder's **published content overrides** (scenario/vocab edits, quick-adds, deletions, hide/show lists) from D1. The app pulls this automatically at load. |
+| `POST /api/content` | Publishes those overrides. Guarded by the **STATS_KEY** secret — the app's Founder tools → Content manager → "Publish to everyone" button asks for it each time and never stores it. |
 
 Protection on every request: **hard origin allowlist** (403, not just CORS
 headers), per-IP rate limit (20 coach calls + 20 event posts per minute per
@@ -132,7 +134,16 @@ curl -s -o /dev/null -w "%{http_code}\n" \
   -X POST -H 'Origin: https://evil.example' -d '{}'
 ```
 
-### 8 · See your usage stats
+### 8 · Publish your content edits to everyone
+
+Anything you change in **Founder tools → Content manager** (edits, quick-adds,
+deletions, hide/show) starts as a draft in your own browser. To make it live
+for every visitor: Content manager → scroll to **Publish to everyone** → type
+your STATS_KEY → **Publish ↑**. Visitors pick it up on their next page load.
+Publish from your real site (the origin in ALLOWED_ORIGINS), not from a local
+file — the worker's origin gate applies here too.
+
+### 9 · See your usage stats
 
 Open `stats.html` from the repo (opening the file locally is fine), paste
 the Worker URL and your STATS_KEY. You get mode popularity, events per day,

@@ -57,3 +57,6 @@ if (typeof visApplyModes === 'function') visApplyModes();
 setMode('home');
 maybeShowIntro();
 adminBootCheck();
+// pull the founder's published content (edits + hide/show) from the Worker —
+// async and fail-safe, the shipped content already rendered
+if (typeof contentSyncFromWorker === 'function') contentSyncFromWorker();

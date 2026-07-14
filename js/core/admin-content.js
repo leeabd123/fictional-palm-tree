@@ -62,25 +62,130 @@ const _MASTERS = {
 };
 function _masterVocab() { return _MASTERS.vocab.flatMap(([, m]) => m); }
 
-function modeHidden(m) { return _content().hiddenModes.includes(m); }
-function scenarioHidden(id) { return _content().hiddenScenarios.includes(id); }
-function vocabHidden(a) { return _content().hiddenVocab.includes(a); }
-function speakHidden(qen) { return _content().hiddenSpeak.includes(qen); }
+// Published overrides fetched from the Worker (see contentSyncFromWorker).
+// Hidden = hidden in THIS browser OR in the published set, so the founder's
+// published curation applies to every visitor.
+let _remoteContent = null;
+let _remoteContentTs = null;
+
+function _hiddenUnion(key) {
+  const loc = _content()[key] || [];
+  const rem = (_remoteContent && Array.isArray(_remoteContent[key])) ? _remoteContent[key] : [];
+  return new Set([...loc, ...rem]);
+}
+
+function modeHidden(m) { return _hiddenUnion('hiddenModes').has(m); }
+function scenarioHidden(id) { return _hiddenUnion('hiddenScenarios').has(id); }
+function vocabHidden(a) { return _hiddenUnion('hiddenVocab').has(a); }
+function speakHidden(qen) { return _hiddenUnion('hiddenSpeak').has(qen); }
 
 function contentApplyVisibility() {
-  const c = _content();
+  const hidScen = _hiddenUnion('hiddenScenarios');
+  const hidVocab = _hiddenUnion('hiddenVocab');
+  const hidSpeak = _hiddenUnion('hiddenSpeak');
   GUIDED_SCENARIOS.length = 0;
-  _MASTERS.scen.forEach(g => { if (!c.hiddenScenarios.includes(g.id)) GUIDED_SCENARIOS.push(g); });
+  _MASTERS.scen.forEach(g => { if (!hidScen.has(g.id)) GUIDED_SCENARIOS.push(g); });
   _MASTERS.vocab.forEach(([live, master]) => {
     live.length = 0;
-    master.forEach(v => { if (!c.hiddenVocab.includes(v.a)) live.push(v); });
+    master.forEach(v => { if (!hidVocab.has(v.a)) live.push(v); });
   });
   if (typeof SPEAK_QA !== 'undefined') {
     SPEAK_QA.length = 0;
-    _MASTERS.speak.forEach(q => { if (!c.hiddenSpeak.includes(q.qen)) SPEAK_QA.push(q); });
+    _MASTERS.speak.forEach(q => { if (!hidSpeak.has(q.qen)) SPEAK_QA.push(q); });
   }
 }
 contentApplyVisibility();
+
+// apply an overrides object (remote or local) onto the pristine masters —
+// same shapes as contentApplyOverrides, but master-aware so it can run
+// after load without wiping anything
+function _applyContentToMasters(c) {
+  (c.custom || []).forEach(s => { if (!_MASTERS.scen.some(g => g.id === s.id)) _MASTERS.scen.push(s); });
+  Object.entries(c.scenarios || {}).forEach(([id, patch]) => {
+    const g = _MASTERS.scen.find(x => x.id === id);
+    if (g) Object.assign(g, patch);
+  });
+  (c.deletedScenarios || []).forEach(id => {
+    const i = _MASTERS.scen.findIndex(x => x.id === id);
+    if (i >= 0) _MASTERS.scen.splice(i, 1);
+  });
+  Object.entries(c.calls || {}).forEach(([id, turns]) => {
+    const cs = CALL_SEQUENCES.find(x => x.id === id);
+    if (cs && Array.isArray(turns)) cs.turns = turns;
+  });
+  const vocabAll = _masterVocab();
+  Object.entries(c.vocab || {}).forEach(([origA, patch]) => {
+    const v = vocabAll.find(x => x.a === origA);
+    if (v) Object.assign(v, patch);
+  });
+  _MASTERS.vocab.forEach(([, m]) => {
+    (c.deletedVocab || []).forEach(a => {
+      const i = m.findIndex(x => x.a === a);
+      if (i >= 0) m.splice(i, 1);
+    });
+  });
+}
+
+// what the app talks to: this browser's explicit choice, else the baked-in
+// worker from TARIGA_CONFIG
+function _contentWorkerUrl() {
+  const cfg = (typeof getApiConfig === 'function') ? getApiConfig() : null;
+  if (cfg && cfg.mode === 'worker' && cfg.workerUrl) return cfg.workerUrl.replace(/\/$/, '');
+  return (typeof TARIGA_CONFIG !== 'undefined' && TARIGA_CONFIG.workerUrl) ? TARIGA_CONFIG.workerUrl.replace(/\/$/, '') : '';
+}
+
+// boot-time pull of the published content (fire-and-forget; offline is fine —
+// the shipped content already rendered, this only layers curation on top).
+// Precedence: shipped data → published overrides → this browser's own edits.
+async function contentSyncFromWorker() {
+  try {
+    const url = _contentWorkerUrl();
+    if (!url) return;
+    const res = await fetch(url + '/api/content');
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!data || !data.overrides || typeof data.overrides !== 'object') return;
+    _remoteContent = data.overrides;
+    _remoteContentTs = data.ts || null;
+    _applyContentToMasters(_remoteContent);
+    _applyContentToMasters(_content());   // local (unpublished) edits win on top
+    contentApplyVisibility();
+    visApplyModes();
+    // refresh what's on screen — except the daily gate (re-rendering home
+    // would swap it for the dashboard mid-look, since the gate marks itself
+    // seen the moment it renders)
+    const gateShowing = (typeof mode !== 'undefined' && mode === 'home') && !document.querySelector('.home-grid');
+    if (typeof render === 'function' && !gateShowing) render();
+  } catch (e) { /* never let content sync break the app */ }
+}
+
+// founder: push this browser's overrides blob up so every visitor gets it
+async function cmPublish() {
+  const status = (msg, ok) => {
+    const el = document.getElementById('cm-pub-status');
+    if (el) { el.textContent = msg; el.style.color = ok ? 'var(--mint)' : '#e08a7a'; }
+  };
+  const key = (document.getElementById('cm-pub-key')?.value || '').trim();
+  if (!key) { status('enter your founder key — the STATS_KEY you created when deploying the worker', false); return; }
+  const url = _contentWorkerUrl();
+  if (!url) { status('no worker connected', false); return; }
+  status('publishing…', true);
+  try {
+    const res = await fetch(url + '/api/content', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, overrides: _content() }),
+    });
+    if (res.status === 403) { status('that key was rejected — it must match the STATS_KEY secret on the worker', false); return; }
+    if (!res.ok) {
+      let d = ''; try { d = (await res.json()).detail || ''; } catch (e) {}
+      status('publish failed (' + res.status + (d ? ' — ' + d : '') + ')', false); return;
+    }
+    _remoteContent = _content();
+    _remoteContentTs = Date.now();
+    status('published ✓ — every visitor now loads this exact content', true);
+  } catch (e) { status('network problem reaching the worker — try again', false); }
+}
 
 // learner-facing modes that can be hidden from the app entirely
 const VIS_MODES = [
@@ -94,22 +199,34 @@ const VIS_MODES = [
   ['trans', 'Transitions guide'], ['vocab', 'Vocab lists'], ['ref', 'Full reference'],
 ];
 
-// hide/show the static nav entry points (sidebar + mobile tab bar)
+// hide/show the static nav entry points (sidebar + mobile tab bar) —
+// hidden in this browser OR in the published set counts as hidden
 function visApplyModes() {
-  const c = _content();
+  const off = _hiddenUnion('hiddenModes');
   VIS_MODES.forEach(([m]) => {
-    const off = c.hiddenModes.includes(m);
     const nav = document.getElementById('nav-' + m);
-    if (nav) nav.style.display = off ? 'none' : '';
+    if (nav) nav.style.display = off.has(m) ? 'none' : '';
     const tab = document.querySelector('.tab-btn[data-tab="' + m + '"]');
-    if (tab) tab.style.display = off ? 'none' : '';
+    if (tab) tab.style.display = off.has(m) ? 'none' : '';
   });
 }
 
+// toggle against the EFFECTIVE (union) state: unhiding something that's
+// hidden in the published set clears it from both the local draft and the
+// in-memory published copy, so the change shows immediately — Publish
+// makes it real for everyone
 function _visToggle(listKey, val) {
   const c = _content();
-  const i = c[listKey].indexOf(val);
-  if (i >= 0) c[listKey].splice(i, 1); else c[listKey].push(val);
+  if (_hiddenUnion(listKey).has(val)) {
+    const i = c[listKey].indexOf(val);
+    if (i >= 0) c[listKey].splice(i, 1);
+    if (_remoteContent && Array.isArray(_remoteContent[listKey])) {
+      const j = _remoteContent[listKey].indexOf(val);
+      if (j >= 0) _remoteContent[listKey].splice(j, 1);
+    }
+  } else {
+    c[listKey].push(val);
+  }
   _saveContent(c);
   contentApplyVisibility();
   visApplyModes();
@@ -424,7 +541,9 @@ function cmRowsHTML() {
 
   if (cmTable === 'visibility') {
     const c = _content();
-    const hidScen = c.hiddenScenarios.map(id => _MASTERS.scen.find(g => g.id === id)).filter(Boolean);
+    const hidScenIds = [..._hiddenUnion('hiddenScenarios')];
+    const hidVocabList = [..._hiddenUnion('hiddenVocab')];
+    const hidScen = hidScenIds.map(id => _MASTERS.scen.find(g => g.id === id)).filter(Boolean);
     return `
       <div class="d2-item-note" style="margin:4px 0 12px">Hide anything from learners without deleting it — hidden things vanish from
       the menus, home, decks and the domain map, and come back with one tap. Whole modes are toggled here; individual
@@ -434,7 +553,7 @@ function cmRowsHTML() {
       <div class="j2-sec-label">Modes — whole screens</div>
       <div class="d2-tab-row">
         ${VIS_MODES.map(([m, label]) => {
-          const off = c.hiddenModes.includes(m);
+          const off = modeHidden(m);
           return `<button class="d2-tab ${off ? '' : 'on'}" style="${off ? 'opacity:.55;text-decoration:line-through' : ''}" onclick="visToggleMode('${m}')">${off ? '◌' : '✓'} ${label}</button>`;
         }).join('')}
       </div>
@@ -442,7 +561,7 @@ function cmRowsHTML() {
 
       <div class="j2-sec-label" style="margin-top:20px">Coach scenarios — Speak &amp; respond</div>
       ${_MASTERS.speak.map(q => {
-        const hid = c.hiddenSpeak.includes(q.qen);
+        const hid = speakHidden(q.qen);
         const enc = encodeURIComponent(q.qen);
         return `
         <div class="d2-item" style="margin-bottom:6px;${hid ? 'opacity:.55' : ''}">
@@ -455,20 +574,21 @@ function cmRowsHTML() {
       }).join('')}
 
       <div class="j2-sec-label" style="margin-top:20px">Everything hidden right now</div>
-      ${(hidScen.length || c.hiddenVocab.length || c.hiddenModes.length || c.hiddenSpeak.length) ? `
+      ${(hidScen.length || hidVocabList.length || _hiddenUnion('hiddenModes').size || _hiddenUnion('hiddenSpeak').size) ? `
         ${hidScen.map(g => `
         <div class="d2-star-row" style="align-items:center">
           <span style="font-size:13px;color:var(--text)">${escAttr(g.title)}</span>
           <span class="d2-item-note" style="flex:1">guided scenario</span>
           <button class="c2-ghost-pill" style="padding:5px 12px;font-size:11px" onclick="visToggleScenario('${g.id}')">Show</button>
         </div>`).join('')}
-        ${c.hiddenVocab.map(a => `
+        ${hidVocabList.map(a => `
         <div class="d2-star-row" style="align-items:center">
           <span dir="rtl" style="font-size:14px;color:var(--text)">${escAttr(a)}</span>
           <span class="d2-item-note" style="flex:1">vocabulary item</span>
           <button class="c2-ghost-pill" style="padding:5px 12px;font-size:11px" onclick="visToggleVocab('${escAttr(encodeURIComponent(a))}')">Show</button>
         </div>`).join('')}
-      ` : '<div class="d2-item-note">nothing is hidden — learners see everything</div>'}`;
+      ` : '<div class="d2-item-note">nothing is hidden — learners see everything</div>'}
+      <div class="d2-note" style="margin-top:12px">Hide/show changes start as a draft in this browser — use <b>Publish to everyone</b> below to make them live for all visitors.</div>`;
   }
 
   if (cmTable === 'people') {
@@ -580,9 +700,25 @@ function renderAdminContentHTML() {
       <div class="d2-item-note" style="margin-top:6px">lands as pending-review so it still gets a native ear before being treated as verified</div>
     </div>` : ''}
 
+    <div class="j2-sec-label" style="margin-top:20px">Publish to everyone</div>
+    <div class="d2-item">
+      <div class="d2-item-note" style="margin-bottom:8px">
+        Your edits, quick-adds, deletions and hide/show choices live in this browser until you publish.
+        Publishing stores them on your Worker (D1), and every visitor's app loads them automatically.
+        ${_remoteContentTs ? `Last published: <b>${new Date(_remoteContentTs).toLocaleString()}</b>.` : _remoteContent ? 'A published set is live.' : 'Nothing published yet — visitors currently see the shipped content only.'}
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <input type="password" id="cm-pub-key" placeholder="founder key (your STATS_KEY)" autocomplete="off"
+          style="flex:1;min-width:180px;border:1px solid rgba(255,255,255,0.12);border-radius:100px;background:rgba(255,255,255,0.04);color:#f0ede8;font-size:13px;padding:9px 14px;outline:none">
+        <button class="d2-pill-gold" onclick="cmPublish()">Publish ↑</button>
+      </div>
+      <div class="d2-item-note" id="cm-pub-status" style="margin-top:8px"></div>
+      <div class="d2-item-note" style="margin-top:4px">The key is never stored — you type it each time. It must match the STATS_KEY secret on the worker, and publishing only works from your allowed site origin.</div>
+    </div>
+
     <div class="d2-pill-row" style="margin-top:16px">
       <button class="c2-ghost-pill" onclick="cmExportJSON()">↓ Export everything (JSON)</button>
       <button class="c2-ghost-pill" onclick="cmExportCSV()">↓ Scenarios (CSV)</button>
     </div>
-    <div class="d2-note" style="margin-top:10px">Edits live in this browser as overrides on the shipped content — export JSON to hand the edited database back to development.</div>`;
+    <div class="d2-note" style="margin-top:10px">Export JSON is your backup — download one before big publishing sessions.</div>`;
 }

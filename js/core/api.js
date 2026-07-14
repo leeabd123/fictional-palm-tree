@@ -10,7 +10,14 @@ const API_CFG_KEY = 'tariga_api_config_v1';
 const DIRECT_MODEL = 'claude-opus-4-8';
 
 function getApiConfig() {
-  try { return JSON.parse(localStorage.getItem(API_CFG_KEY) || 'null'); } catch (e) { return null; }
+  try {
+    const c = JSON.parse(localStorage.getItem(API_CFG_KEY) || 'null');
+    if (c) return c;
+  } catch (e) {}
+  // nothing chosen in this browser → fall back to the baked-in worker, so
+  // fresh visitors get a working coach with zero setup
+  const def = (typeof TARIGA_CONFIG !== 'undefined' && TARIGA_CONFIG.workerUrl) ? TARIGA_CONFIG.workerUrl : '';
+  return def ? { mode: 'worker', workerUrl: def, isDefault: true } : null;
 }
 
 function saveApiConfig(cfg) {
