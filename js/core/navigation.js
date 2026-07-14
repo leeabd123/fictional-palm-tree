@@ -22,6 +22,7 @@ function setMode(m){
   deck=getSrc();idx=0;flipped=false;mcAns=false;revShown=false;
   deepDeck=[];deepIdx=0;
   knowSet.clear();learnSet.clear();streak=[];usedVocabChips=new Set();shadowArHidden=true;buildArHidden=true;
+  if(typeof flashView!=='undefined')flashView='browse';   // flashcards always open on browsing
   updStats();tipIdx++;
   // Show intro screen first time for each mode
   if(!introShown[m]){ renderIntro(m); return; }
