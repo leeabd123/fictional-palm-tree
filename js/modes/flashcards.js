@@ -1,9 +1,14 @@
 // Flashcards — the design's floating 3D card, ported to the live deck.
 // Tap to flip, swipe (or arrows) to browse with a slide animation,
 // direction pills for recognition (عربي → EN) vs production (EN → عربي),
-// speak-aloud buttons, progress dots, and the Word/Sentence practice panel
-// that works in both directions.
+// speak-aloud buttons and progress dots.
+//
+// Two sub-modes, so browsing and producing never compete on one screen:
+//   'browse'   — just the cards (flip / swipe / mark), plus an invitation
+//   'practice' — the Word/Sentence produce-and-compare panel, full screen,
+//                with the card kept hidden until you've tried
 
+let flashView = 'browse';       // 'browse' | 'practice'
 let flashPractice = 'word';     // 'word' | 'sentence'
 let flashCompared = false;
 let flashInput = '';
@@ -28,6 +33,7 @@ function sayAr(enc) {
 }
 
 function renderFlash() {
+  if (flashView === 'practice') { renderFlashPractice(); return; }
   const ca = document.getElementById('content-area');
   if (idx >= deck.length) { renderResult(); return; }
   const it = deck[idx];
@@ -58,12 +64,52 @@ function renderFlash() {
 
       ${flashRowHTML()}
 
-      ${flashPracticeHTML(it)}
+      <div style="text-align:center;margin-top:22px">
+        <button class="d2-pill-gold" onclick="flashSetView('practice')">✎ Practice mode — produce it yourself, then compare →</button>
+        <div class="d2-item-note" style="margin-top:7px">word or full sentence · voice or typing · rated word by word</div>
+      </div>
     </div>
   `;
 
   flashBindSwipe();
+}
+
+// ── the practice sub-mode: its own focused screen ──
+function renderFlashPractice() {
+  const ca = document.getElementById('content-area');
+  if (idx >= deck.length) { renderResult(); return; }
+  const it = deck[idx];
+  const isAR = flashDir === 'ar';
+  ca.innerHTML = `
+    <div class="coach-wrap">
+      <button class="d2-back" onclick="flashSetView('browse')">← back to the cards</button>
+      <div class="f2-head">
+        <div>
+          <div class="d2-title" style="margin-bottom:0">Flashcard practice</div>
+          <div class="f2-counter">${idx + 1} of ${deck.length} · ${FLASH_SRC_LABEL[src] || 'deck'}</div>
+        </div>
+        <div class="f2-dir">
+          <button class="${isAR ? 'on' : ''}" onclick="setFlashDir('ar')">عربي → EN</button>
+          <button class="${isAR ? '' : 'on'}" onclick="setFlashDir('en')">EN → عربي</button>
+        </div>
+      </div>
+
+      ${flashPracticeHTML(it)}
+
+      <div class="f2-navround" style="margin-top:16px">
+        <button onclick="navCard(-1)" ${idx === 0 ? 'disabled' : ''}>‹</button>
+        <button onclick="navCard(1)" ${idx >= deck.length - 1 ? 'disabled' : ''}>›</button>
+      </div>
+      <div class="d2-note" style="text-align:center;margin-top:8px">the card stays hidden here — struggle first, then Check compares for you</div>
+    </div>
+  `;
   flashBindInput();
+}
+
+function flashSetView(v) {
+  flashView = v;
+  flashCompared = false; flashInput = '';
+  renderFlash();
 }
 
 // 5-dot window centered on the current card
@@ -129,7 +175,7 @@ function flashCardHTML(it, d, isAR) {
             <div class="f2-mid">
               ${isAR
                 ? `<div class="f2-ar">${escAttr(it.a)}</div><div class="f2-ph">${escAttr(it.p)}</div>`
-                : `<div class="f2-en-prompt">${escAttr(it.e)}</div><div class="f2-en-hint">say it in Arabic below — or flip anytime</div>`}
+                : `<div class="f2-en-prompt">${escAttr(it.e)}</div><div class="f2-en-hint">flip for the Arabic — or produce it in practice mode</div>`}
             </div>
             <div class="f2-hint">tap to flip · swipe to browse</div>
           </div>
