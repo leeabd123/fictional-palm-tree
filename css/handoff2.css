@@ -201,6 +201,10 @@ body.h2-page .content-area::before { display: none; }
   color: #fffbeb;
 }
 .h2-branch * { box-sizing: border-box; }
+/* the 3D stage must never sit behind the page-entry fade — on slow/software
+   renderers the entry animation can't finish and the stage stays invisible */
+.content-area > .h2-branch,
+.content-area.page-enter > .h2-branch { animation: none !important; opacity: 1 !important; }
 
 @media (prefers-reduced-motion: reduce) {
   .h2-root [style*="h2FloatUp"], .h2-root [style*="h2Breathe"] { animation: none !important; }

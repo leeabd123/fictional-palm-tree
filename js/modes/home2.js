@@ -21,6 +21,35 @@ function h2ThemeToggle() {
 let h2Domain = null;   // selected domain id, null = full tree
 let h2Node = null;     // selected moment id within the domain
 
+// ── label language toggle: any mix of Arabic / English / transliteration ──
+const H2_LANG_KEY = 'tariga_lang_v1';
+function h2Lang() {
+  try {
+    const v = JSON.parse(localStorage.getItem(H2_LANG_KEY) || 'null');
+    if (v && (v.ar || v.en || v.ph)) return v;
+  } catch (e) {}
+  return { ar: true, en: true, ph: false };
+}
+function h2LangToggle(k) {
+  const v = h2Lang();
+  v[k] = !v[k];
+  if (!v.ar && !v.en && !v.ph) v[k] = true;   // never let all three go dark
+  try { localStorage.setItem(H2_LANG_KEY, JSON.stringify(v)); } catch (e) {}
+  if (typeof mode !== 'undefined' && mode === 'branch' && typeof renderBranch === 'function') renderBranch();
+  else h2TreeUpdate();
+}
+function h2LangChipsHTML() {
+  const v = h2Lang();
+  const chip = (k, label, title) => `
+    <button onclick="event.stopPropagation();h2LangToggle('${k}')" title="${title}"
+      style="padding:5px 11px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:0.06em;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;
+      ${v[k] ? 'background:var(--gold-ghost-bg);border:1px solid var(--gold-border);color:var(--gold)'
+             : 'background:transparent;border:1px solid var(--surface-border);color:var(--text-muted)'}">${label}</button>`;
+  return `<div style="display:flex;gap:6px;align-items:center">
+    ${chip('ar', 'ع', 'Arabic script')}${chip('en', 'EN', 'English')}${chip('ph', 'a·b', 'transliteration')}
+  </div>`;
+}
+
 // ── helper math, verbatim from HomePage.tsx ──
 function h2Bezier(t, p0, p1, p2, p3) {
   const cX = 3 * (p1.x - p0.x), bX = 3 * (p2.x - p1.x) - cX, aX = p3.x - p0.x - cX - bX;
@@ -65,6 +94,15 @@ const H2_BRANCH = {
 const H2_VARS = { family: 'var(--gold)', friends: 'var(--teal)', community: 'var(--green)', identity: 'var(--purple)', culture: 'var(--coral)' };
 const H2_GLYPH = { family: '◆', friends: '●', community: '▲', identity: '■', culture: '✦' };
 
+// Arabic + transliteration for a moment, from the verified content
+function h2MomentAr(id) {
+  const g = GUIDED_SCENARIOS.find(x => x.id === id);
+  if (g && g.targets && g.targets[0]) return { ar: g.targets[0].ar, ph: g.targets[0].ph || '' };
+  const cs = CALL_SEQUENCES.find(x => x.id === id);
+  if (cs && cs.turns && cs.turns[0]) return { ar: cs.turns[0].ar, ph: cs.turns[0].ph || '' };
+  return { ar: '', ph: '' };
+}
+
 // the REAL tree: shipped curriculum + this browser's progress via dmDomains()
 function h2TreeData() {
   const KIND_META = { guided: 'guided · 2 min', call: 'phone call', big: 'big moment', comf: 'comfortable tier' };
@@ -82,7 +120,7 @@ function h2TreeData() {
       meta: d.doneN + ' of ' + d.total + ' · ' + d.tier,
       def, ts,
       moments: d.items.map(it => ({
-        id: it.id, title: it.title, kind: it.kind,
+        id: it.id, title: it.title, kind: it.kind, ...h2MomentAr(it.id),
         state: it.status === 'done' ? 'done' : it.status === 'next' ? 'next' : 'locked',
         canOpen: it.status !== 'locked',
         meta: KIND_META[it.kind] || 'guided',
@@ -90,6 +128,23 @@ function h2TreeData() {
     };
   });
   return out;
+}
+
+// small bark twigs off each branch so the flat tree reads as a real canopy
+// (and flows visually into the 3D branch view) — deterministic, decorative
+function h2TwigsHTML(def) {
+  const c = def.curve;
+  return [0.3, 0.55, 0.78].map((t, k) => {
+    const p = h2Bezier(t, c[0], c[1], c[2], c[3]);
+    const p2 = h2Bezier(Math.min(1, t + 0.02), c[0], c[1], c[2], c[3]);
+    let tx = p2.x - p.x, ty = p2.y - p.y;
+    const len = Math.sqrt(tx * tx + ty * ty) || 1; tx /= len; ty /= len;
+    const side = k % 2 ? 1 : -1;
+    const ang = Math.atan2(ty, tx) + side * 0.95;
+    const L = 30 + ((Math.abs(def.labelPos.x * 7 + k * 53)) % 22);
+    const pt = (f, lift) => ({ x: p.x + Math.cos(ang) * L * f, y: p.y + Math.sin(ang) * L * f - lift });
+    return `<path d="${h2TaperedPath([p, pt(0.4, 3), pt(0.75, 8), pt(1, 14)], 5.5, 1.2)}" fill="url(#h2TrunkGrad)" stroke="#1E100A" stroke-width="0.5" opacity="0.85"/>`;
+  }).join('');
 }
 
 function h2TreeCount() {
@@ -434,6 +489,7 @@ function h2TreeInnerHTML() {
     return `
       <g style="transition:opacity .5s;opacity:${isOther ? 0.2 : 1}">
         <path d="${pathD}" stroke="transparent" stroke-width="40" fill="none" ${!h2Domain ? `style="cursor:pointer" onclick="h2SelectDomain('${id}')"` : ''}></path>
+        ${h2TwigsHTML(def)}
         <path d="${h2TaperedPath(c, 15, 3)}" fill="url(#h2TrunkGrad)" stroke="#1E100A" stroke-width="0.75" opacity="0.92"></path>
         ${tMax > 0 ? `<polyline points="${h2Polyline(c[0], c[1], c[2], c[3], tMax)}" stroke="${d.color}" stroke-width="5" fill="none" stroke-linecap="round" filter="url(#h2PathGlow)"></polyline>` : ''}
         ${d.moments.map((m, i) => {
@@ -459,17 +515,28 @@ function h2TreeInnerHTML() {
         ${d.moments.map((m, i) => {
           const pt = h2Bezier(d.ts[i], def.curve[0], def.curve[1], def.curve[2], def.curve[3]);
           const isNodeSel = h2Node === m.id && isSelected;
+          const lang = h2Lang();
+          const dim = m.state === 'locked';
+          const line = 'max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
+          const labelLines = `
+            ${lang.ar && m.ar ? `<div dir="rtl" style="${line}font-family:'Noto Naskh Arabic',serif;font-size:9.5px;line-height:1.5;color:${dim ? 'var(--text-muted)' : 'var(--text-primary)'}">${escAttr(m.ar)}</div>` : ''}
+            ${lang.en ? `<div style="${line}font-size:7.5px;font-weight:700;letter-spacing:0.02em;line-height:1.4;color:${dim ? 'var(--text-muted)' : 'var(--text-primary)'}">${escAttr(m.title)}</div>` : ''}
+            ${lang.ph && m.ph ? `<div style="${line}font-size:6.5px;font-style:italic;line-height:1.4;color:${dim ? 'var(--text-muted)' : 'var(--purple)'}">${escAttr(m.ph)}</div>` : ''}`;
+          // flip the label to the inner side near the card edges so nothing clips
+          const zoomSide = pt.x > 560 ? 'left' : pt.x < 260 ? 'right' : def.labelSide;
           return `
           <div style="position:absolute;left:${pt.x}px;top:${pt.y}px;transform:translate(-50%,-50%)">
-            <div onclick="event.stopPropagation();${isSelected ? `h2SelectNode('${escAttr(m.id)}')` : ''}"
-              style="width:24px;height:24px;border-radius:50%;${isSelected ? 'pointer-events:auto;cursor:pointer' : 'pointer-events:none'}"></div>
-            <div class="h2-fade" style="position:absolute;top:50%;transform:translateY(-50%);${def.labelSide === 'left' ? 'right:16px;text-align:right' : 'left:16px;text-align:left'};opacity:${isSelected ? 1 : 0};pointer-events:none;white-space:nowrap">
-              <div style="font-size:6px;font-weight:700;letter-spacing:0.02em;color:${m.state === 'locked' ? 'var(--text-muted)' : 'var(--text-primary)'}">${escAttr(m.title)}</div>
+            <div onclick="event.stopPropagation();${isSelected ? `h2SelectNode('${escAttr(m.id)}')` : `h2SelectDomain('${id}')`}"
+              style="width:34px;height:34px;border-radius:50%;margin:-5px;pointer-events:auto;cursor:pointer"></div>
+            <div class="h2-fade" style="position:absolute;top:50%;transform:translateY(-50%);${zoomSide === 'left' ? 'right:14px;text-align:right' : 'left:14px;text-align:left'};opacity:${isSelected ? 1 : 0};pointer-events:none;white-space:nowrap">
+              <div style="display:inline-block;padding:2px 5px;border-radius:5px;background:color-mix(in srgb, var(--bg) 84%, transparent);border:0.5px solid var(--surface-border)">${labelLines}</div>
             </div>
-            <div class="h2-fade" style="position:absolute;z-index:50;display:flex;flex-direction:column;gap:4px;padding:10px;border-radius:8px;width:144px;top:8px;left:50%;transform:translateX(-50%);transform-origin:top;background:var(--bg);border:1px solid color-mix(in srgb, ${d.color} 50%, transparent);box-shadow:0 12px 32px -4px rgba(0,0,0,0.8), 0 0 16px color-mix(in srgb, ${d.color} 19%, transparent);${isNodeSel ? 'opacity:1;pointer-events:auto' : 'opacity:0;scale:0.9;pointer-events:none'}">
-              <div style="font-size:7px;font-weight:600;color:var(--text-primary);line-height:1.4">${escAttr(m.title)}</div>
-              <div style="font-size:5px;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;margin-top:2px;color:${d.color}">${escAttr(m.meta)}</div>
-              ${m.state === 'next' ? `<button onclick="event.stopPropagation();dmOpenItem('${m.kind}','${escAttr(m.id)}',false)" style="margin-top:6px;width:100%;padding:6px 0;border-radius:4px;font-size:5px;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;color:var(--bg);border:none;cursor:pointer;background-color:${d.color}">Start Session</button>` : ''}
+            <div class="h2-fade" style="position:absolute;z-index:50;display:flex;flex-direction:column;gap:4px;padding:10px;border-radius:8px;width:150px;top:10px;left:50%;transform:translateX(-50%);transform-origin:top;background:var(--bg);border:1px solid color-mix(in srgb, ${d.color} 50%, transparent);box-shadow:0 12px 32px -4px rgba(0,0,0,0.8), 0 0 16px color-mix(in srgb, ${d.color} 19%, transparent);${isNodeSel ? 'opacity:1;pointer-events:auto' : 'opacity:0;scale:0.9;pointer-events:none'}">
+              ${lang.ar && m.ar ? `<div dir="rtl" style="font-family:'Noto Naskh Arabic',serif;font-size:9px;color:var(--text-primary);line-height:1.5">${escAttr(m.ar)}</div>` : ''}
+              ${(lang.en || !(lang.ar && m.ar)) ? `<div style="font-size:8px;font-weight:600;color:var(--text-primary);line-height:1.4">${escAttr(m.title)}</div>` : ''}
+              ${lang.ph && m.ph ? `<div style="font-size:6.5px;font-style:italic;color:var(--purple);line-height:1.4">${escAttr(m.ph)}</div>` : ''}
+              <div style="font-size:5.5px;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;margin-top:2px;color:${d.color}">${escAttr(m.meta)}</div>
+              ${m.state === 'next' ? `<button onclick="event.stopPropagation();dmOpenItem('${m.kind}','${escAttr(m.id)}',false)" style="margin-top:6px;width:100%;padding:6px 0;border-radius:4px;font-size:5.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;color:var(--bg);border:none;cursor:pointer;background-color:${d.color}">Start Session</button>` : ''}
             </div>
           </div>`;
         }).join('')}
@@ -502,6 +569,8 @@ function h2TreeInnerHTML() {
       </svg>
       <div style="position:absolute;inset:0;pointer-events:none">${overlay}</div>
     </div>
+
+    <div style="position:absolute;top:20px;right:20px;z-index:50">${h2LangChipsHTML()}</div>
 
     <div class="h2-fade" style="position:absolute;top:24px;left:24px;z-index:50;${isZoomed ? '' : 'opacity:0;transform:translateY(-16px);pointer-events:none'}">
       <button onclick="h2TreeReset()" style="padding:10px 20px;border-radius:999px;backdrop-filter:blur(12px);color:var(--gold);font-size:12px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;display:flex;align-items:center;gap:12px;cursor:pointer;background:var(--bg);border:1px solid var(--gold-border);box-shadow:0 8px 24px rgba(0,0,0,0.4)">
