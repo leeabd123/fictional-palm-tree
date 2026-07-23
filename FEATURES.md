@@ -90,6 +90,20 @@ The default (warm) home was rebuilt 1:1 from the `tariga-handoff/` React mockups
 - The flat home tree carries decorative bark twigs (so it flows visually into the 3D views), 34px node hit targets that zoom straight into their domain, and zoomed node labels on contrast pills with edge-aware side flipping.
 - Neon (System B) keeps its own home; the handoff look applies to the default theme.
 
+## 8b-1a. The practice-modes glass shell (design_handoff_practice_modes)
+
+Every practice mode now shares the Flashcards-quality glass surface — one token system on `<body>`, so the **dark/light toggle governs the entire app** (sidebar included):
+- **Start screens**: each mode's first-time intro is the handoff's onboarding pattern — round gold badge, kicker, serif title, lede, three numbered step tiles, gold CTA, real deck meta — still skippable, still per-mode.
+- **Deep cards**: 58px headword card with translit/gloss/tag row, "Near-words & synonyms" chips (tap to hear), "In the wild" example panel.
+- **Starred**: two-column grid of glass star-cards (words pinned with a gold star), plus sentence rows; drill CTA kept.
+- **Guided**: mode header + a real step-dot progress row over the (unchanged) minimal THEY SAY / YOU SAY card.
+- **Shadowing**: audio row (gold play + animated waveform + deck meta), the current line highlighted between dimmed neighbours, **speed chips that really change playback rate** (0.5/0.75/1×, reset on leaving), record mic; echo-first reveal kept.
+- **Sentence builder**: "Build this" + dashed drop area + a **tappable tile bank** of the target's words (tiles fade once used) — typing/Arabizi/mic still count, same word-by-word rating.
+- **Speak & respond**: scenario chat-bubble card + mode header; weave chips, openers, voice-first mic and the whole coach loop untouched.
+- **Conversation**: glass thread card, chip-based scene/mode switching; blur-reveal and respond-mode logic untouched.
+- **Tune your ear**: option rows with green/coral answer tints per the reference; real quiz logic unchanged.
+- **Flashcards: untouched**, per the handoff's explicit "DO NOT CHANGE".
+
 ## 8b-2. Two complete design systems (design handoff)
 
 The handoff ships two full visual systems; a theme switch (How Tariga works page, or Founder tools) applies one consistently:

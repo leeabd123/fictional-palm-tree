@@ -94,11 +94,12 @@ function coachPromptHTML() {
   const mode = coachMode();
 
   return `
-    <div class="coach-wrap">
-      <div class="c2-head">
-        <div>
-          <div class="c2-title">Your coach</div>
-          <div class="c2-sub">Scenario ${coachIdx + 1} of ${SPEAK_QA.length} · answer it the way you would with family</div>
+    <div class="coach-wrap mode-anim">
+      <div class="mode-intro" style="margin-bottom:16px;padding-bottom:16px">
+        <div class="mode-badge"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clip-rule="evenodd"/></svg></div>
+        <div style="flex:1">
+          <div class="mode-kicker">Speak it · scenario ${coachIdx + 1} of ${SPEAK_QA.length}</div>
+          <div class="mode-lede">Answer the way you would with family — voice or text. The coach compares, it never grades.</div>
         </div>
         <div class="speak-q-nav" style="margin:0">
           <button class="arrow-btn" onclick="coachNav(-1)" ${coachIdx === 0 ? 'disabled' : ''}>←</button>
@@ -111,16 +112,15 @@ function coachPromptHTML() {
           ✦ You've answered this ${attempts.length === 1 ? 'once' : attempts.length + ' times'} — see your journey
         </button>` : ''}
 
-      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:6px 14px;margin:0 0 12px;font-size:11px;color:var(--text3);letter-spacing:.04em">
-        <span><b style="color:var(--accent2)">1</b> read the scene</span>
-        <span><b style="color:var(--accent2)">2</b> answer like you would with family — voice or text</span>
-        <span><b style="color:var(--accent2)">3</b> the coach compares, it never grades</span>
-      </div>
-
-      <div class="c2-qcard">
-        <div class="c2-qlabel">Say it in Sudanese Arabic</div>
-        <div class="c2-qtext">${esc(it.qen)}</div>
-        <div class="c2-sub" style="margin-top:10px">${esc(it.context)}</div>
+      <div class="c2-qcard ts-card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+          <span class="mode-badge" style="width:30px;height:30px;box-shadow:0 0 0 1px var(--gold-border)"><svg style="width:15px;height:15px" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14a3 3 0 003-3V5a3 3 0 00-6 0v6a3 3 0 003 3z"/><path d="M19 11a7 7 0 01-14 0H3a9 9 0 008 8.94V23h2v-3.06A9 9 0 0021 11h-2z"/></svg></span>
+          <span style="font-size:12px;color:var(--text-muted)">Scenario — ${esc(it.context)}</span>
+        </div>
+        <div class="bubble them" style="max-width:100%;direction:ltr;text-align:left;font-family:'DM Sans',sans-serif;font-size:19px;font-weight:500">
+          ${esc(it.qen)}
+          <div class="tl">${coachHintOpen ? esc(it.qar) + ' · ' + esc(it.qph) : 'say it in Sudanese Arabic'}</div>
+        </div>
         <button class="c2-hint-btn" onclick="coachToggleHint()">${coachHintOpen ? 'hide hint' : 'show hint — how it sounds'}</button>
         <div class="c2-hint" id="coach-hint" style="${coachHintOpen ? '' : 'display:none'}">
           <div class="c2-hint-ar">${esc(it.qar)}</div>

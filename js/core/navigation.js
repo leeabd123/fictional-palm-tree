@@ -23,6 +23,7 @@ function setMode(m){
   deepDeck=[];deepIdx=0;
   knowSet.clear();learnSet.clear();streak=[];usedVocabChips=new Set();shadowArHidden=true;buildArHidden=true;
   if(typeof flashView!=='undefined')flashView='browse';   // flashcards always open on browsing
+  window._sayArRate=undefined;   // shadowing speed chips don't leak into other modes
   updStats();tipIdx++;
   // Show intro screen first time for each mode
   if(!introShown[m]){ renderIntro(m); return; }

@@ -140,12 +140,13 @@ function renderGuided() {
   const done = getGuidedProgress();
 
   ca.innerHTML = `
-    <div class="coach-wrap">
+    <div class="coach-wrap mode-anim">
       <button class="d2-back" onclick="setMode('home')">← home</button>
-      <div class="c2-head">
-        <div>
-          <div class="c2-title">Guided · ${guidedDomain().label}</div>
-          <div class="c2-sub">${guidedIdx + 1} of ${guidedList().length}${done[it.id] ? ' · ✓ practiced' : ''}${it.verification_status === 'pending-review' ? ' · pending native review' : ''}</div>
+      <div class="mode-intro" style="margin-bottom:18px;padding-bottom:18px">
+        <div class="mode-badge"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg></div>
+        <div style="flex:1">
+          <div class="mode-kicker">Speak it · guided · ${guidedDomain().label}</div>
+          <div class="mode-lede">Step ${guidedIdx + 1} of ${guidedList().length}${done[it.id] ? ' · ✓ practiced' : ''}${it.verification_status === 'pending-review' ? ' · pending native review' : ''}</div>
         </div>
         <div class="speak-q-nav" style="margin:0">
           <button class="arrow-btn" onclick="guidedNav(-1)" ${guidedIdx === 0 ? 'disabled' : ''}>←</button>
@@ -153,7 +154,11 @@ function renderGuided() {
         </div>
       </div>
 
-      <div class="c2-qcard" style="text-align:center">
+      <div style="display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap">
+        ${guidedList().map((g, i) => `<div class="step-dot ${i <= guidedIdx ? 'on' : ''}"></div>`).join('')}
+      </div>
+
+      <div class="c2-qcard ts-card" style="text-align:center">
         <div class="d2-item-note" style="margin-bottom:${prompt ? '18px' : '12px'}">${escAttr(it.setup)}</div>
         ${prompt ? `
           <div style="font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--text3)">They say</div>
