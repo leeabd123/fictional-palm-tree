@@ -102,52 +102,8 @@ function renderHomeGate() {
     return;
   }
 
-  ca.innerHTML = `
-    <div class="home-wrap">
-      <div class="home-head">
-        <div>
-          <div class="home-logo">طريقة</div>
-          <div class="home-logo-sub">SUDANESE ARABIC TRAINER</div>
-        </div>
-        ${streak ? `<div class="home-streak"><span class="home-streak-dot"></span>${streak}-day streak</div>` : ''}
-      </div>
-      <div class="home-tagline">طريقة كلامك · TARIGAT KALAMAK · THE WAY YOU SPEAK</div>
-
-      <div class="home-greet-ar">${g.ar}</div>
-      <div class="home-greet-ph">${g.ph}</div>
-      <div class="home-greet-en">${profile.name ? escAttr(profile.name) + ' — ' : ''}${g.en}</div>
-
-      ${typeof warmupAvailable === 'function' && warmupAvailable() ? `
-      <button class="home-focus" style="width:100%;text-align:left;cursor:pointer;border-color:rgba(79,216,196,.3)" onclick="warmupStart()">
-        <div class="home-focus-label" style="color:var(--teal)">Welcome back — ease in first</div>
-        <div class="home-focus-title" style="font-size:18px">A ${warmupBuildSteps().length}-phrase warm-up from your own history</div>
-        <div class="home-focus-sub">review before new material — the forgetting curve is real ›</div>
-      </button>` : ''}
-
-      <div class="home-focus">
-        <div class="home-focus-label">Today's focus · ${dm.label}</div>
-        <div class="home-focus-title">${escAttr(focus.title)}</div>
-        <div class="home-focus-sub">${escAttr(focus.sub)}</div>
-        <button class="home-cta" style="margin:14px 0 0" onclick="homeStart()">
-          <span class="home-cta-orbwrap"><tariga-orb mode="idle"></tariga-orb></span>
-          <span class="home-cta-body">
-            <span class="home-cta-title">Start</span>
-            <span class="home-cta-sub">يلا نتكلم (yalla nitkallam) — let's talk</span>
-          </span>
-          <span class="home-cta-chev">›</span>
-        </button>
-      </div>
-
-      <div style="text-align:center;margin-top:16px">
-        <button class="c2-linklike" onclick="setMode('tree')">Explore the domain map instead →</button>
-      </div>
-
-      <div class="d2-item-note" style="text-align:center;margin:18px 0 8px">tip: press &amp; hold any Arabic word, anywhere in the app, to look it up and star it</div>
-      <div style="text-align:center;margin:4px 0 14px">
-        <button class="c2-linklike" onclick="setMode('about')">how Tariga works — the research behind it →</button>
-      </div>
-    </div>
-  `;
+  // warm system: the tariga-handoff intro gate (IntroScreen.tsx port)
+  renderHome2Gate();
 }
 
 // ── The home dashboard (handoff 3b, in both systems) — what home is for
@@ -189,99 +145,8 @@ function renderHomeDashboard() {
     return;
   }
 
-  // warm dashboard — the 3b structure in System A language
-  const ringC = 2 * Math.PI * 52;
-  const pathCard = (m, icon, title, sub, active) => (typeof modeHidden === 'function' && modeHidden(m)) ? '' : `
-    <button onclick="setMode('${m}')" style="text-align:left;padding:16px;border-radius:20px;cursor:pointer;font-family:inherit;
-      background:${active ? 'rgba(201,169,110,0.08)' : 'rgba(255,250,242,0.03)'};
-      border:1px solid ${active ? 'rgba(201,169,110,0.45)' : 'rgba(255,255,255,0.07)'};
-      ${active ? 'box-shadow:0 0 40px -14px rgba(201,169,110,0.6);' : ''}color:${active ? 'var(--text)' : 'var(--text2)'}">
-      <span style="display:block;font-size:17px">${icon}</span>
-      <span style="display:block;font-size:14px;font-weight:600;margin-top:8px;color:${active ? 'var(--text)' : 'var(--text2)'}">${title}</span>
-      <span style="display:block;font-size:10.5px;margin-top:3px;color:${active ? 'var(--accent2)' : 'var(--text3)'}">${sub}</span>
-    </button>`;
-  const srcInfo = SRC_LABELS[src] || SRC_LABELS.v1;
-
-  ca.innerHTML = `
-    <div class="home-wrap">
-      <div class="home-head">
-        <div>
-          <div class="home-logo">طريقة</div>
-          <div class="home-logo-sub">SUDANESE ARABIC TRAINER</div>
-        </div>
-        ${streak ? `<div class="home-streak"><span class="home-streak-dot"></span>${streak}-day streak</div>` : ''}
-      </div>
-
-      <div class="home-greet-ar" style="font-size:clamp(26px,7vw,34px) !important">${g.ar}</div>
-      <div class="home-greet-ph">${g.ph}${profile.name ? ' · ' + escAttr(profile.name) : ''}</div>
-
-      ${typeof warmupAvailable === 'function' && warmupAvailable() ? `
-      <button class="home-focus" style="width:100%;text-align:left;cursor:pointer;border-color:rgba(79,216,196,.3)" onclick="warmupStart()">
-        <div class="home-focus-label" style="color:var(--teal)">Welcome back — ease in first</div>
-        <div class="home-focus-title" style="font-size:18px">A ${warmupBuildSteps().length}-phrase warm-up from your own history</div>
-        <div class="home-focus-sub">review before new material ›</div>
-      </button>` : ''}
-
-      <div class="home-focus" style="padding:16px 18px">
-        <div class="home-focus-label">Today's focus · ${dm.label}</div>
-        <div class="home-focus-title" style="font-size:18px">${escAttr(focus.title)}</div>
-        <button class="home-cta" style="margin:12px 0 0;padding:10px 14px" onclick="homeStart()">
-          <span class="home-cta-body"><span class="home-cta-title" style="font-size:14px">Start</span></span>
-          <span class="home-cta-chev">›</span>
-        </button>
-      </div>
-
-      <div class="home-stats">
-        <div class="home-ring-wrap">
-          <svg viewBox="0 0 120 120" class="home-ring">
-            <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="9"/>
-            <circle cx="60" cy="60" r="52" fill="none" stroke="url(#homeRingGrad)" stroke-width="9"
-              stroke-linecap="round" stroke-dasharray="${ringC}" stroke-dashoffset="${ringC * (1 - pct / 100)}"
-              transform="rotate(-90 60 60)" class="home-ring-fill"/>
-            <defs><linearGradient id="homeRingGrad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#4fd8c4"/><stop offset="100%" stop-color="#56c98f"/>
-            </linearGradient></defs>
-          </svg>
-          <div class="home-ring-label"><b>${pct}%</b><span>COACHED</span></div>
-        </div>
-        <div class="home-stat-rows">
-          <div class="home-stat-row"><span>Guided practiced</span><b class="c-teal">${gDone}</b></div>
-          <div class="home-stat-row"><span>Coach attempts</span><b class="c-gold">${attempts}</b></div>
-          <div class="home-stat-row"><span>Starred to review</span><b class="c-green">${starredN}</b></div>
-        </div>
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px">
-        ${pathCard('flash', '❏', 'Flashcards', deck.length + ' in deck', false)}
-        ${pathCard('speak', '◉', 'Your coach', 'scenario ' + Math.min(coached + 1, SPEAK_QA.length) + ' waiting →', true)}
-        ${pathCard('listen', '≣', 'Tune your ear', 'podcast lines', false)}
-        ${pathCard('journey', '✦', 'Your journey', 'then → now', false)}
-      </div>
-
-      <div class="home-path-label" style="margin-top:22px">FULL PRACTICE LIBRARY</div>
-      <div class="home-grid">
-        ${homeCard('guided', '◆', 'Guided', GUIDED_SCENARIOS.length + ' scenarios · 5 domains', true)}
-        ${homeCard('freeform', comfortUnlocked(focusDomain()) ? '✧' : '◌', 'Free-form', comfortUnlocked(focusDomain()) ? 'no scaffolding — just you' : 'unlocks at Comfortable tier')}
-        ${homeCard('livecall', comfortUnlocked('family') ? '◉' : '◌', 'Live call', comfortUnlocked('family') ? 'habooba answers for real' : 'unlocks with Family comfort')}
-        ${homeCard('tree', '◈', 'Domain map', 'your whole journey, one tree')}
-        ${homeCard('convo', '≋', 'Conversation', 'the real podcast')}
-        ${homeCard('contribute', '♡', 'Contribute', 'preserve it · one prompt')}
-      </div>
-
-      <button class="home-src" onclick="homeCycleSrc()">
-        <span class="home-src-dot"></span>
-        <span class="home-src-body">
-          <span class="home-src-title">${srcInfo[0]}</span>
-          <span class="home-src-sub">${srcInfo[1]}</span>
-        </span>
-        <span class="home-src-switch">switch ›</span>
-      </button>
-
-      <div style="text-align:center;margin:14px 0">
-        <button class="c2-linklike" onclick="setMode('about')">how Tariga works — the research behind it →</button>
-      </div>
-    </div>
-  `;
+  // warm system: the tariga-handoff dashboard (HomePage.tsx port)
+  renderHomeDashboard2();
 }
 
 // the exploration half of the §22 split — rendered by the Domain Map screen

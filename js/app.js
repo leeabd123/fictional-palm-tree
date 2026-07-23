@@ -22,7 +22,7 @@ const ARCHIVED_MODES = ['mc', 'deepquiz', 'flow', 'trans', 'vocab', 'ref'];
 
 // Designed screens carry their own headers — hide the legacy top bar +
 // stats strip there. Card/quiz modes keep them (the counter is the UI).
-const SELF_HEADED_MODES = ['home', 'speak', 'journey', 'listen', 'contribute', 'map', 'flash', 'guided', 'call', 'warmup', 'freeform', 'review', 'livecall', 'speed', 'about', 'admin', 'tree',
+const SELF_HEADED_MODES = ['home', 'speak', 'journey', 'listen', 'contribute', 'map', 'flash', 'guided', 'call', 'warmup', 'freeform', 'review', 'livecall', 'speed', 'about', 'admin', 'tree', 'branch',
   'shadow', 'build', 'deep', 'starred', 'mc', 'deepquiz', 'flow', 'trans', 'vocab', 'convo'];
 
 const _originalSetMode = setMode;
@@ -34,6 +34,7 @@ setMode = function(m){
   const ca = document.getElementById('content-area');
   if(ca){ ca.classList.remove('page-enter'); void ca.offsetWidth; ca.classList.add('page-enter'); }
   document.body.classList.toggle('chromeless', SELF_HEADED_MODES.includes(m));
+  document.body.classList.remove('h2-page');   // full-bleed pages re-add it themselves
   _originalSetMode(m);
   if (typeof logEvent === 'function') logEvent('mode_enter', { mode: m });
   if(ARCHIVED_MODES.includes(m) && !archiveOpen){
@@ -43,7 +44,7 @@ setMode = function(m){
 };
 
 // Bottom tab bar active state follows the mode
-const TAB_FOR_MODE = {home:'home', map:'home', guided:'home', call:'home', warmup:'home', freeform:'home', review:'more', livecall:'speak', speed:'home', about:'more', admin:'more', tree:'journey', flash:'flash', deep:'flash', starred:'flash',
+const TAB_FOR_MODE = {home:'home', map:'home', guided:'home', call:'home', warmup:'home', freeform:'home', review:'more', livecall:'speak', speed:'home', about:'more', admin:'more', tree:'journey', branch:'journey', flash:'flash', deep:'flash', starred:'flash',
   speak:'speak', shadow:'speak', build:'speak', journey:'journey'};
 function syncTabBar(m){
   const tab = TAB_FOR_MODE[m] || 'more';
