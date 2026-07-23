@@ -17,7 +17,7 @@ function setMode(m){
     const el=document.getElementById('nav-'+x);
     if(el) el.className='nav-btn'+(x===m?' on':'');
   });
-  const titles={flash:'Flashcards',deep:'Deep cards + synonyms',shadow:'Shadowing',mc:'Quiz',build:'Sentence builder',flow:'Flow translation',speak:'Speak & respond — your coach',ref:'Full reference',trans:'Transitions guide',vocab:'Vocab lists',deepquiz:'Deep quiz',convo:'Conversation mode',listen:'Tune your ear',contribute:'Contribute — preserve the dialect',home:'\u0637\u0631\u064a\u0642\u0629',journey:'Your journey',starred:'Starred items',map:'Word origins',guided:'Guided practice',call:'Phone call',warmup:'Easing back in',freeform:'Free-form',review:'Reviewer mode',livecall:'Live call',speed:'Speed round',about:'How Tariga works',admin:'Founder tools',tree:'The domain map'};
+  const titles={flash:'Flashcards',deep:'Deep cards + synonyms',shadow:'Shadowing',mc:'Quiz',build:'Sentence builder',flow:'Flow translation',speak:'Speak & respond — your coach',ref:'Full reference',trans:'Transitions guide',vocab:'Vocab lists',deepquiz:'Deep quiz',convo:'Conversation mode',listen:'Tune your ear',contribute:'Contribute — preserve the dialect',home:'\u0637\u0631\u064a\u0642\u0629',journey:'Your journey',starred:'Starred items',map:'Word origins',guided:'Guided practice',call:'Phone call',warmup:'Easing back in',freeform:'Free-form',review:'Reviewer mode',livecall:'Live call',speed:'Speed round',about:'How Tariga works',admin:'Founder tools',tree:'The domain map',branch:'Branch detail'};
   document.getElementById('top-title').textContent=titles[m]||m;
   deck=getSrc();idx=0;flipped=false;mcAns=false;revShown=false;
   deepDeck=[];deepIdx=0;
@@ -57,6 +57,7 @@ function render(){
   if(mode==='about'){renderAbout();return;}
   if(mode==='admin'){renderAdmin();return;}
   if(mode==='tree'){renderTree();return;}
+  if(mode==='branch'){renderBranch();return;}
   renderFlash();
 }
 

@@ -1,0 +1,207 @@
+/* ══════════════════════════════════════════════════════════
+   HANDOFF 2 — the tariga-handoff design system (dark + light)
+   Ported 1:1 from tariga-handoff/CLAUDE_CODE_TASK.md and the
+   src/ mockups. Scoped: all tokens live on .tariga-theme-dark /
+   .tariga-theme-light wrappers so the rest of the app is untouched.
+   ══════════════════════════════════════════════════════════ */
+
+.tariga-theme-dark {
+  --bg: #0f0d0b;
+  --surface: rgba(255, 250, 242, 0.04);
+  --surface-border: rgba(255, 255, 255, 0.08);
+  --surface-hover: rgba(255, 250, 242, 0.07);
+  --gold: #c9a96e;
+  --gold-light: #e8c99a;
+  --gold-border: rgba(201, 169, 110, 0.35);
+  --gold-ghost-bg: rgba(201, 169, 110, 0.12);
+  --teal: #4fd8c4;
+  --green: #56c98f;
+  --purple: #a78bfa;
+  --coral: #e08a7a;
+  --text-primary: #f6f1e8;
+  --text-secondary: #a09e9a;
+  --text-muted: #7a756e;
+  --glass-shadow: 0 20px 44px -26px rgba(0,0,0,0.85);
+  --ambient-gold: rgba(201, 169, 110, 0.13);
+  --tree-trunk-start: #7d6544;
+  --tree-trunk-end: #c9a96e;
+  --tree-dim: rgba(255, 250, 242, 0.15);
+  --card-blur: blur(16px);
+  --ring-bg: rgba(255,255,255,0.06);
+  --glow-green: 0 0 12px rgba(86, 201, 143, 0.4);
+  --glow-gold: 0 0 12px rgba(232, 201, 154, 0.4);
+  --glow-teal: 0 0 12px rgba(79, 216, 196, 0.4);
+}
+
+.tariga-theme-light {
+  --bg: #f7f2e8;
+  --surface: rgba(255, 255, 255, 0.5);
+  --surface-border: rgba(169, 128, 62, 0.2);
+  --surface-hover: rgba(255, 255, 255, 0.8);
+  --gold: #a9803e;
+  --gold-light: #8a662e;
+  --gold-border: rgba(169, 128, 62, 0.4);
+  --gold-ghost-bg: rgba(169, 128, 62, 0.1);
+  --teal: #14a38f;
+  --green: #2c9f65;
+  --purple: #7b57db;
+  --coral: #c96a58;
+  --text-primary: #2d2926;
+  --text-secondary: #6e6962;
+  --text-muted: #969088;
+  --glass-shadow: 0 10px 30px -10px rgba(169, 128, 62, 0.15);
+  --ambient-gold: rgba(169, 128, 62, 0.08);
+  --tree-trunk-start: #8a662e;
+  --tree-trunk-end: #a9803e;
+  --tree-dim: rgba(169, 128, 62, 0.2);
+  --card-blur: blur(20px);
+  --ring-bg: rgba(169, 128, 62, 0.15);
+  --glow-green: none;
+  --glow-gold: none;
+  --glow-teal: none;
+}
+
+.font-serif-ar { font-family: 'Instrument Serif', 'Noto Naskh Arabic', serif; }
+.font-sans-body { font-family: 'DM Sans', sans-serif; }
+
+/* full-bleed pages: the new home + branch detail own their layout */
+body.h2-page .content-area { max-width: none; padding: 0; }
+body.h2-page .content-area::before { display: none; }
+
+.h2-root {
+  font-family: 'DM Sans', sans-serif;
+  background-color: var(--bg);
+  color: var(--text-primary);
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+  transition: background-color 0.5s ease;
+}
+.h2-root ::selection { background: var(--gold-ghost-bg); color: var(--gold); }
+.h2-root button { font-family: inherit; }
+
+/* ── keyframes (verbatim from the mockups) ── */
+@keyframes h2Breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+@keyframes tariga-orb-breathe { 0%, 100% { transform: scale(0.96); } 50% { transform: scale(1.04); } }
+@keyframes h2FloatUp {
+  0% { transform: translateY(0px) rotate(0deg); opacity: 0; }
+  20% { opacity: 0.8; }
+  80% { opacity: 0.5; }
+  100% { transform: translateY(-400px) rotate(360deg); opacity: 0; }
+}
+@keyframes h2Shimmer { 100% { transform: translateX(100%); } }
+@keyframes h2Pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+@keyframes h2RingIn { from { stroke-dashoffset: var(--h2-ring-c); } }
+
+/* ── glass card + tiles (tilt transforms applied inline by JS) ── */
+.h2-card {
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  backdrop-filter: var(--card-blur);
+  -webkit-backdrop-filter: var(--card-blur);
+  box-shadow: var(--glass-shadow);
+  transform: perspective(1000px) rotateX(0deg) rotateY(0deg);
+  transition: transform 0.5s ease-out, box-shadow 0.3s;
+}
+.h2-card.active {
+  border-color: var(--gold-border);
+  box-shadow: 0 0 30px -10px var(--gold-border), var(--glass-shadow);
+}
+.h2-sheen {
+  position: absolute; inset: 0;
+  pointer-events: none; z-index: 1;
+  background: linear-gradient(105deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 35%, rgba(255,255,255,0) 100%);
+  opacity: 0.3;
+  transition: all 0.3s;
+}
+.h2-tile {
+  position: relative;
+  border-radius: 20px;
+  padding: 24px;
+  display: flex; flex-direction: column; gap: 16px;
+  cursor: pointer;
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  backdrop-filter: var(--card-blur);
+  -webkit-backdrop-filter: var(--card-blur);
+  box-shadow: var(--glass-shadow);
+  transform: perspective(1000px) rotateX(0deg) rotateY(0deg);
+  transition: transform 0.5s ease-out, box-shadow 0.3s, translate 0.3s;
+  text-align: left;
+  color: inherit;
+}
+.h2-tile:hover { translate: 0 -4px; }
+.h2-tile.active { border-color: var(--gold-border); box-shadow: 0 0 24px -8px var(--gold-border), var(--glass-shadow); }
+.h2-tile.active:hover { translate: 0 -6px; }
+
+/* ── theme toggle ── */
+.h2-toggle {
+  width: 56px; height: 30px; border-radius: 999px;
+  position: relative; display: flex; align-items: center;
+  padding: 0 6px; cursor: pointer;
+  background: var(--surface); border: 1px solid var(--surface-border);
+  transition: background 0.3s;
+}
+.h2-toggle-knob {
+  position: absolute; width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--gold);
+  transition: transform 0.3s, background 0.3s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+/* ── nav links ── */
+.h2-navlink {
+  font-size: 14px; font-weight: 500; color: var(--text-secondary);
+  background: none; border: none; cursor: pointer; padding: 0;
+  transition: color 0.2s;
+}
+.h2-navlink:hover { color: var(--text-primary); }
+.h2-navlink.on { color: var(--gold); }
+.h2-navlink.on:hover { color: var(--gold-light); }
+
+/* ── responsive ── */
+.h2-wrap { position: relative; z-index: 10; width: 100%; max-width: 1280px; margin: 0 auto; padding: 32px 32px 96px; display: flex; flex-direction: column; }
+.h2-hero { display: flex; gap: 24px; margin-top: 24px; align-items: stretch; }
+.h2-hero-left { flex: 1; display: flex; flex-direction: column; }
+.h2-hero-right { width: 420px; flex-shrink: 0; display: flex; flex-direction: column; }
+.h2-tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 32px; }
+@media (max-width: 1024px) {
+  .h2-hero { flex-direction: column; }
+  .h2-hero-right { width: 100%; }
+  .h2-tiles { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+  .h2-navlinks { display: none; }
+  .h2-tiles { grid-template-columns: 1fr; }
+  .h2-greet-ar { font-size: 64px !important; }
+  .h2-greet-sub { font-size: 28px !important; }
+  .h2-wrap { padding: 24px 20px 110px; }
+}
+
+/* tree card transform layer */
+.h2-tree-layer {
+  position: absolute; inset: 0;
+  transition: transform 700ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+.h2-fade { transition: opacity 0.5s, transform 0.5s; }
+.h2-hidden { opacity: 0 !important; pointer-events: none !important; }
+
+/* branch detail (Parallax) is always its own dark world */
+.h2-branch {
+  position: fixed; inset: 0; z-index: 60;
+  overflow: hidden; user-select: none; touch-action: none;
+  background: #14100E;
+  font-family: 'DM Sans', sans-serif;
+  color: #fffbeb;
+}
+.h2-branch * { box-sizing: border-box; }
+
+@media (prefers-reduced-motion: reduce) {
+  .h2-root [style*="h2FloatUp"], .h2-root [style*="h2Breathe"] { animation: none !important; }
+}
