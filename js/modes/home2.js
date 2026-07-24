@@ -12,9 +12,18 @@ const H2_THEME_KEY = 'tariga_theme2_v1';
 function h2Theme() {
   try { return localStorage.getItem(H2_THEME_KEY) === 'light' ? 'light' : 'dark'; } catch (e) { return 'dark'; }
 }
+// one toggle governs the whole app: the body carries the theme class so
+// every screen (re-skinned practice modes + legacy chrome) reads the tokens
+function h2ApplyBodyTheme() {
+  const neon = (typeof neonOn === 'function') && neonOn();
+  const light = !neon && h2Theme() === 'light';   // neon is its own dark world
+  document.body.classList.toggle('tariga-theme-light', light);
+  document.body.classList.toggle('tariga-theme-dark', !light);
+}
 function h2ThemeToggle() {
   try { localStorage.setItem(H2_THEME_KEY, h2Theme() === 'dark' ? 'light' : 'dark'); } catch (e) {}
-  renderHomeDashboard();
+  h2ApplyBodyTheme();
+  if (typeof mode !== 'undefined' && mode === 'home') renderHomeDashboard();
 }
 
 // tree interaction state (the mockup's useState)
@@ -522,13 +531,17 @@ function h2TreeInnerHTML() {
             ${lang.ar && m.ar ? `<div dir="rtl" style="${line}font-family:'Noto Naskh Arabic',serif;font-size:9.5px;line-height:1.5;color:${dim ? 'var(--text-muted)' : 'var(--text-primary)'}">${escAttr(m.ar)}</div>` : ''}
             ${lang.en ? `<div style="${line}font-size:7.5px;font-weight:700;letter-spacing:0.02em;line-height:1.4;color:${dim ? 'var(--text-muted)' : 'var(--text-primary)'}">${escAttr(m.title)}</div>` : ''}
             ${lang.ph && m.ph ? `<div style="${line}font-size:6.5px;font-style:italic;line-height:1.4;color:${dim ? 'var(--text-muted)' : 'var(--purple)'}">${escAttr(m.ph)}</div>` : ''}`;
-          // flip the label to the inner side near the card edges so nothing clips
-          const zoomSide = pt.x > 560 ? 'left' : pt.x < 260 ? 'right' : def.labelSide;
+          // flip the label to the inner side near the card edges so nothing
+          // clips — and nudge alternate labels up/down so neighbours along
+          // the branch never crowd each other
+          const zoomSide = pt.x > 560 ? 'left' : pt.x < 260 ? 'right'
+            : (i % 2 === 1 ? (def.labelSide === 'left' ? 'right' : 'left') : def.labelSide);
+          const nudge = (i % 2 ? 15 : -15);
           return `
           <div style="position:absolute;left:${pt.x}px;top:${pt.y}px;transform:translate(-50%,-50%)">
             <div onclick="event.stopPropagation();${isSelected ? `h2SelectNode('${escAttr(m.id)}')` : `h2SelectDomain('${id}')`}"
               style="width:34px;height:34px;border-radius:50%;margin:-5px;pointer-events:auto;cursor:pointer"></div>
-            <div class="h2-fade" style="position:absolute;top:50%;transform:translateY(-50%);${zoomSide === 'left' ? 'right:14px;text-align:right' : 'left:14px;text-align:left'};opacity:${isSelected ? 1 : 0};pointer-events:none;white-space:nowrap">
+            <div class="h2-fade" style="position:absolute;top:calc(50% + ${nudge}px);transform:translateY(-50%);${zoomSide === 'left' ? 'right:14px;text-align:right' : 'left:14px;text-align:left'};opacity:${isSelected ? 1 : 0};pointer-events:none;white-space:nowrap">
               <div style="display:inline-block;padding:2px 5px;border-radius:5px;background:color-mix(in srgb, var(--bg) 84%, transparent);border:0.5px solid var(--surface-border)">${labelLines}</div>
             </div>
             <div class="h2-fade" style="position:absolute;z-index:50;display:flex;flex-direction:column;gap:4px;padding:10px;border-radius:8px;width:150px;top:10px;left:50%;transform:translateX(-50%);transform-origin:top;background:var(--bg);border:1px solid color-mix(in srgb, ${d.color} 50%, transparent);box-shadow:0 12px 32px -4px rgba(0,0,0,0.8), 0 0 16px color-mix(in srgb, ${d.color} 19%, transparent);${isNodeSel ? 'opacity:1;pointer-events:auto' : 'opacity:0;scale:0.9;pointer-events:none'}">

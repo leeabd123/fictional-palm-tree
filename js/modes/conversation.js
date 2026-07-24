@@ -11,27 +11,35 @@ function renderConvo() {
   const scene = CONVO_SCENES[convoSceneIdx];
   const total = CONVO_SCENES.length;
   ca.innerHTML = `
-    <div class="coach-wrap">
+    <div class="coach-wrap mode-anim">
       <button class="d2-back" onclick="setMode('home')">← all modes</button>
-      <div class="d2-title">Conversation mode</div>
-      <div class="d2-note">Scene ${convoSceneIdx + 1} of ${total} · ${escAttr(scene.scene)}</div>
-      <div class="d2-tab-row">
-        <button class="d2-tab ${convoMode === 'full' ? 'on' : ''}" onclick="setConvoMode('full')">Full scene read</button>
-        <button class="d2-tab ${convoMode === 'respond' ? 'on' : ''}" onclick="setConvoMode('respond')">Respond mode</button>
+      <div class="mode-intro">
+        <div class="mode-badge"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7z" clip-rule="evenodd"/></svg></div>
+        <div>
+          <div class="mode-kicker">Immerse · conversation · scene ${convoSceneIdx + 1} of ${total}</div>
+          <div class="mode-lede">${escAttr(scene.scene)} — a real podcast exchange that stays in Sudanese. Translations sit quietly underneath, only when you reveal them.</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px">
+        <button class="m-chip ${convoMode === 'full' ? 'gold' : ''}" onclick="setConvoMode('full')">Full scene read</button>
+        <button class="m-chip ${convoMode === 'respond' ? 'gold' : ''}" onclick="setConvoMode('respond')">Respond mode</button>
         <span style="flex:1"></span>
-        <button class="d2-tab" onclick="revealAllConvo()">Reveal all</button>
-        <button class="d2-tab" onclick="hideAllConvo()">Hide all</button>
+        ${CONVO_SCENES.map((sc, i) => `<button class="m-chip ${convoSceneIdx === i ? 'gold' : ''}" onclick="goConvoScene(${i})">${i + 1}</button>`).join('')}
+        <button class="m-chip" onclick="revealAllConvo()">Reveal all</button>
+        <button class="m-chip" onclick="hideAllConvo()">Hide all</button>
       </div>
-      <div class="d2-tab-row" style="margin-bottom:10px">
-        ${CONVO_SCENES.map((sc, i) => `<button class="d2-tab ${convoSceneIdx === i ? 'on' : ''}" onclick="goConvoScene(${i})">${i + 1}</button>`).join('')}
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:14px">${escAttr(scene.desc)}</div>
+
+      <div class="ts-card" style="padding:24px 26px">
+        <div class="d2-thread">
+          ${convoMode === 'full' ? renderFullScene(scene) : renderRespondScene(scene)}
+        </div>
       </div>
-      <div class="d2-note" style="margin-bottom:12px">${escAttr(scene.desc)}</div>
-      <div class="d2-thread">
-        ${convoMode === 'full' ? renderFullScene(scene) : renderRespondScene(scene)}
-      </div>
+
       <div class="d2-pill-row" style="margin-top:18px">
-        <button class="d2-tab" onclick="navConvo(-1)" ${convoSceneIdx === 0 ? 'disabled' : ''}>← prev scene</button>
-        <button class="d2-pill-gold" onclick="navConvo(1)" ${convoSceneIdx >= total - 1 ? 'disabled' : ''}>next scene →</button>
+        <button class="m-chip" style="padding:9px 22px;font-size:13px" onclick="navConvo(-1)" ${convoSceneIdx === 0 ? 'disabled' : ''}>← prev scene</button>
+        <button class="start-cta" style="padding:9px 24px;font-size:14px" onclick="navConvo(1)" ${convoSceneIdx >= total - 1 ? 'disabled' : ''}>next scene →</button>
       </div>
     </div>
   `;

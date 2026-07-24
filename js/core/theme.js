@@ -18,6 +18,8 @@ function neonOn() {
 
 function themeApply() {
   document.body.classList.toggle('neon', neonOn());
+  // keep the shell (light/dark) body class in step — neon forces dark
+  if (typeof h2ApplyBodyTheme === 'function') h2ApplyBodyTheme();
 }
 
 function themeSet(t) {

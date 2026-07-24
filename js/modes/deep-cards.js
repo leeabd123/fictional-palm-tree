@@ -1,5 +1,7 @@
-// Deep cards + synonyms — designed screen: one glass card per word with
-// the example inset and teal "Swap in — synonyms" chips.
+// Deep cards + synonyms — re-skinned to the practice-modes handoff:
+// mode-intro header, one big glass card with the 58px headword, the
+// translit/gloss/tag row, description, "Near-words & synonyms" chips,
+// and "In the wild" example panels. Same deck, nav, star and speak logic.
 let deepIdx=0, deepDeck=[];
 
 function renderDeepCards(){
@@ -17,43 +19,50 @@ function renderDeepCards(){
   const it=deepDeck[deepIdx];
   const syns=SYNONYMS[it.a]||[];
   ca.innerHTML=`
-    <div class="coach-wrap">
+    <div class="coach-wrap mode-anim">
       <button class="d2-back" onclick="setMode('home')">← all modes</button>
-      <div class="d2-title" style="margin-bottom:6px">Deep cards + synonyms <span class="sub">· ${deepIdx+1} of ${deepDeck.length}</span></div>
-      <div class="d2-note" style="margin:0 0 14px">One word at a time, in depth — what it means, when you'd use it, and the
-        real sentence it was heard in. Read it, tap the speaker, <b>say the example out loud</b>, then try the same
-        sentence again with a synonym swapped in.</div>
-      <div class="d2-card">
-        <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
-          <div class="f2-ar" style="font-size:34px;text-align:left">${escAttr(it.a)}</div>
-          <div class="d2-star-ph" style="font-size:13px">${escAttr(it.p)}</div>
-          <span class="f2-tag">${escAttr(it.cat)} · ${escAttr(it.type)}</span>
-          <span style="margin-left:auto;display:inline-flex;gap:4px;align-items:center">
-            <button class="d2-icon-btn" onclick="sayAr('${encodeURIComponent(it.a)}')" title="hear it">${UI_SPK}</button>
-            ${starBtnHTML(it.a)}
-          </span>
+      <div class="mode-intro">
+        <div class="mode-badge"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a1 1 0 012 0v1.07A7.002 7.002 0 0117 10a1 1 0 11-2 0 5 5 0 10-5 5 1 1 0 110 2 7 7 0 01-1-13.93V2z"/></svg></div>
+        <div style="flex:1">
+          <div class="mode-kicker">Build vocab · deep · ${deepIdx+1} of ${deepDeck.length}</div>
+          <div class="mode-lede">One word, fully unpacked — its near-synonyms, register, and how it actually lands in a sentence. Say the example out loud.</div>
         </div>
-        <div class="d2-label" style="margin-top:14px">What it means</div>
-        <div style="font-size:15px;color:var(--accent2);font-weight:600;margin-top:4px">${escAttr(it.e)}</div>
-        <div class="d2-label" style="margin-top:12px">When you'd use it</div>
-        <div class="d2-when-body" style="margin-top:4px">${escAttr(it.ctx)}</div>
-        <div class="d2-label" style="margin:14px 0 6px">Heard in the podcast — say it out loud</div>
-        <div class="d2-inset" style="margin-top:0">
-          <div class="d2-inset-ar">${escAttr(it.ex)}</div>
-          <div class="d2-inset-ph">${getExPh(it)}</div>
-          <div class="d2-inset-en">${escAttr(it.exen)}</div>
-        </div>
-        ${syns.length?`
-        <div class="d2-label" style="margin:18px 0 2px">Swap in — synonyms</div>
-        <div class="d2-item-note" style="margin:0 0 10px">same slot, different flavor — say the example again with one of these in place of ${escAttr(it.a)}</div>
-        <div style="display:flex;flex-wrap:wrap;gap:8px">
-          ${syns.map(s=>`<span class="d2-syn-chip">
-            <span class="d2-syn-ar">${escAttr(s.a)}</span>
-            <span class="d2-syn-ph">${escAttr(s.ph)} · ${escAttr(s.en)}</span>
-          </span>`).join('')}
-        </div>`:''}
+        <span style="display:inline-flex;gap:6px;align-items:center">
+          <button class="d2-icon-btn" onclick="sayAr('${encodeURIComponent(it.a)}')" title="hear it">${UI_SPK}</button>
+          ${starBtnHTML(it.a)}
+        </span>
       </div>
-      <div class="f2-navround">
+
+      <div class="ts-card" style="padding:36px 40px">
+        <div style="font-family:'Instrument Serif','Noto Naskh Arabic',serif;font-size:clamp(40px,9vw,58px);direction:rtl;text-align:right;color:var(--text-primary);line-height:1.3">${escAttr(it.a)}</div>
+        <div style="display:flex;align-items:baseline;gap:14px;margin-top:4px;flex-wrap:wrap">
+          <span style="font-size:16px;color:var(--purple);font-style:italic">${escAttr(it.p)}</span>
+          <span style="font-size:16px;color:var(--text-primary)">${escAttr(it.e)}</span>
+          <span style="font-size:11px;color:var(--text-muted);border:1px solid var(--surface-border);border-radius:20px;padding:2px 9px">${escAttr(it.cat)} · ${escAttr(it.type)}</span>
+        </div>
+        <div style="font-size:14px;color:var(--text-secondary);line-height:1.8;margin-top:18px">${escAttr(it.ctx)}</div>
+
+        ${syns.length?`
+        <div style="height:1px;background:var(--surface-border);margin:26px 0"></div>
+        <div class="ts-label" style="margin:0 0 12px">Near-words &amp; synonyms — same slot, different flavor</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          ${syns.map((s,i)=>`<span class="m-chip ${i===0?'gold':''}" style="font-family:'Instrument Serif','Noto Naskh Arabic',serif;font-size:18px;direction:rtl" onclick="sayAr('${encodeURIComponent(s.a)}')" title="${escAttr(s.en)}">${escAttr(s.a)} · ${escAttr(s.ph)}</span>`).join('')}
+        </div>`:''}
+
+        <div class="ts-label" style="margin:26px 0 12px">In the wild — say it out loud</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="padding:14px 18px;border-radius:12px;background:var(--surface-hover);border:1px solid var(--surface-border)">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+              <span style="flex:1;font-family:'Instrument Serif','Noto Naskh Arabic',serif;font-size:24px;direction:rtl;text-align:right;color:var(--text-primary);line-height:1.6">${escAttr(it.ex)}</span>
+              ${typeof speakerSVG==='function'?speakerSVG('var(--gold)',encodeURIComponent(it.ex)):''}
+            </div>
+            <div style="font-size:12px;color:var(--purple);font-style:italic;margin-top:4px">${getExPh(it)}</div>
+            <div style="font-size:13px;color:var(--text-secondary);margin-top:4px">${escAttr(it.exen)}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="f2-navround" style="margin-top:18px">
         <button onclick="deepNav(-1)" ${deepIdx===0?'disabled':''}>‹</button>
         <button onclick="deepNav(1)">›</button>
       </div>

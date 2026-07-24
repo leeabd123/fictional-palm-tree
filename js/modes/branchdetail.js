@@ -389,9 +389,15 @@ function b3Apply() {
   if (scaleEl) scaleEl.style.transform = `scale(${focus.scale})`;
   if (focusEl) focusEl.style.transform = `translate3d(${focus.x}px, ${focus.y}px, ${focus.z}px)`;
   if (rotEl) rotEl.style.transform = `rotateX(${b3Rotation.x}deg) rotateY(${b3Rotation.y}deg)`;
+  // counter-rotate to face the camera, then lift along the view axis so
+  // label pills sit IN FRONT of branch segments (selected node pops out
+  // furthest — "come out from under the branch")
   const counterTf = ` rotateY(${-b3Rotation.y}deg) rotateX(${-b3Rotation.x}deg)`;
+  const view = b3GetView();
   document.querySelectorAll('.b3-counter').forEach(el => {
-    el.style.transform = (el.dataset.base || '') + counterTf;
+    const btn = el.querySelector('.b3-nodebtn');
+    const lift = btn ? ((view === 'orbit' ? 40 : 14) + (btn.dataset.node === b3Selected ? 100 : 0)) : 0;
+    el.style.transform = (el.dataset.base || '') + counterTf + (lift ? ` translateZ(${lift}px)` : '');
   });
   document.querySelectorAll('.b3-nodebtn').forEach(btn => {
     btn.style.transform = `translate(-50%,-50%) scale(${btn.dataset.node === b3Selected ? 1.25 : 1})`;

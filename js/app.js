@@ -55,6 +55,7 @@ function syncTabBar(m){
 deck = getSrc();
 updStats();
 if (typeof visApplyModes === 'function') visApplyModes();
+if (typeof h2ApplyBodyTheme === 'function') h2ApplyBodyTheme();
 setMode('home');
 maybeShowIntro();
 adminBootCheck();

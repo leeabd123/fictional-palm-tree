@@ -27,7 +27,7 @@ const MIC_SVG = `<svg width="19" height="19" viewBox="0 0 20 20" fill="#dcd2ff">
 function sayAr(enc) {
   if (!('speechSynthesis' in window)) return;
   const u = new SpeechSynthesisUtterance(decodeURIComponent(enc));
-  u.lang = 'ar-SA'; u.rate = 0.88;
+  u.lang = 'ar-SA'; u.rate = window._sayArRate || 0.88;   // shadowing speed chips set this
   window.speechSynthesis.cancel();
   window.speechSynthesis.speak(u);
 }

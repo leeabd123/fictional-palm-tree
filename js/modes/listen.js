@@ -80,20 +80,25 @@ function renderListen() {
   const speakerLabel = (l) => l.speaker === 'host' ? 'Wansa said' : 'Solja said';
 
   ca.innerHTML = `
-    <div class="coach-wrap">
+    <div class="coach-wrap mode-anim">
       <button class="d2-back" onclick="setMode('home')">← all modes</button>
-      <div class="d2-title lav" style="margin-bottom:4px">Tune your ear</div>
-      <div class="d2-note">${listenTotal ? `${listenRight} / ${listenTotal} this session · ` : ''}${listenIdx + 1} of ${listenPool.length}</div>
-      <div class="d2-tab-row">
-        <button class="d2-tab ${listenKind === 'meaning' ? 'on' : ''}" onclick="listenSetKind('meaning')">Meaning</button>
-        <button class="d2-tab ${listenKind === 'next' ? 'on' : ''}" onclick="listenSetKind('next')">What comes next?</button>
-        <button class="d2-tab ${listenKind === 'dicto' ? 'on' : ''}" onclick="listenSetKind('dicto')">Reconstruct ${UI_SPK}</button>
+      <div class="mode-intro">
+        <div class="mode-badge"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg></div>
+        <div>
+          <div class="mode-kicker">Immerse · listening · ${listenIdx + 1} of ${listenPool.length}${listenTotal ? ` · ${listenRight}/${listenTotal} this session` : ''}</div>
+          <div class="mode-lede">Play the line and pick what you heard — trust your ear. Guess before you're sure; the guess is the exercise.</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px">
+        <button class="m-chip ${listenKind === 'meaning' ? 'gold' : ''}" onclick="listenSetKind('meaning')">Meaning</button>
+        <button class="m-chip ${listenKind === 'next' ? 'gold' : ''}" onclick="listenSetKind('next')">What comes next?</button>
+        <button class="m-chip ${listenKind === 'dicto' ? 'gold' : ''}" onclick="listenSetKind('dicto')">Reconstruct</button>
         <span style="flex:1"></span>
-        <button class="d2-tab ${listenLayers.ar ? 'on' : ''}" onclick="listenToggle('ar')">عربي</button>
-        <button class="d2-tab ${listenLayers.ph ? 'on' : ''}" onclick="listenToggle('ph')">phonetic</button>
+        <button class="m-chip ${listenLayers.ar ? 'gold' : ''}" onclick="listenToggle('ar')">عربي</button>
+        <button class="m-chip ${listenLayers.ph ? 'gold' : ''}" onclick="listenToggle('ph')">phonetic</button>
       </div>
 
-      <div style="padding:22px;border-radius:22px;background:rgba(255,250,242,0.035);border:1px solid rgba(255,255,255,0.08);backdrop-filter:blur(18px);margin-bottom:16px">
+      <div class="ts-card" style="padding:22px;margin-bottom:16px">
         ${(() => {
           const NE = typeof neonOn === 'function' && neonOn();
           const playGrad = NE ? 'linear-gradient(140deg,#0891b2,#22d3ee)' : 'linear-gradient(140deg,#c9a96e,#e8c99a)';
@@ -114,16 +119,20 @@ function renderListen() {
         ${!listenLayers.ar && !listenLayers.ph ? '<div class="d2-note" style="font-style:italic;margin:8px 0 0">Turn on at least one layer to read the line.</div>' : ''}
       </div>
 
-      <div class="d2-note" style="text-align:center">${listenKind === 'meaning' ? 'What is he saying? Guess before you\'re sure — the guess is the exercise.' : 'Predict the reply before you tap.'}</div>
-      <div class="d2-opts-col">
+      <div class="ts-label" style="text-align:right;margin-bottom:12px">${listenKind === 'meaning' ? 'What did you hear?' : 'What comes next?'}</div>
+      <div style="display:flex;flex-direction:column;gap:12px">
         ${listenOptions.map((o, i) => {
-          let cls = 'd2-opt';
+          let cls = 'opt';
           if (answered) {
             if (i === listenPicked && i === correctIdx) cls += ' correct';
             else if (i === listenPicked) cls += ' wrong';
             else if (i === correctIdx) cls += ' correct';
           }
-          return `<button class="${cls}" onclick="listenPick(${i})" ${answered ? 'disabled' : ''}>${escAttr(o.en)}</button>`;
+          return `<button class="${cls}" onclick="listenPick(${i})" ${answered ? 'disabled' : ''}>
+            <span style="flex:1;font-size:15px;color:var(--text-primary);text-align:left;line-height:1.5">${escAttr(o.en)}</span>
+            ${answered && i === correctIdx ? '<span style="color:var(--green);font-weight:700">✓</span>' : ''}
+            ${answered && i === listenPicked && i !== correctIdx ? '<span style="color:var(--coral);font-weight:700">✕</span>' : ''}
+          </button>`;
         }).join('')}
       </div>
 
