@@ -77,13 +77,13 @@ function renderBuild() {
 
       <div class="ts-card" style="padding:30px 36px">
         <div class="ts-label">Build this</div>
-        <div style="font-size:20px;color:var(--text-primary);margin-top:8px;line-height:1.5">“${escAttr(it.exen)}”</div>
-        <div style="font-size:12.5px;color:var(--text-muted);margin-top:6px">${escAttr(it.ctx)} · built around <b dir="rtl" style="color:var(--gold)">${escAttr(it.a)}</b> <span style="color:var(--purple);font-style:italic">${escAttr(it.p)}</span></div>
+        <div style="font-size:25px;font-weight:600;color:var(--text-primary);margin-top:8px;line-height:1.45">“${escAttr(it.exen)}”</div>
+        <div style="font-size:13.5px;color:var(--text-muted);margin-top:8px">${escAttr(it.ctx)} · built around <b dir="rtl" style="color:var(--gold)">${escAttr(it.a)}</b> <span style="color:var(--purple);font-style:italic">${escAttr(it.p)}</span></div>
 
         <div style="min-height:64px;margin-top:22px;padding:10px 14px;border-radius:14px;border:1px dashed var(--gold-border);background:var(--surface-hover)">
           <textarea id="build-input" dir="auto" rows="2" ${buildChecked ? 'disabled' : ''}
             placeholder="tap the tiles below — or type here (Arabizi counts too)…"
-            style="width:100%;background:transparent;border:none;outline:none;resize:none;color:var(--text-primary);font-family:'Instrument Serif','Noto Naskh Arabic',serif;font-size:22px;line-height:1.7;text-align:right;direction:rtl"></textarea>
+            style="width:100%;background:transparent;border:none;outline:none;resize:none;color:var(--text-primary);font-family:'Instrument Serif','Noto Naskh Arabic',serif;font-size:26px;line-height:1.7;text-align:right;direction:rtl"></textarea>
         </div>
 
         ${!buildChecked ? `

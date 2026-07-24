@@ -164,9 +164,9 @@ function renderGuided() {
           <div style="font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--text3)">They say</div>
           <div dir="rtl" style="font-size:clamp(27px,7.5vw,38px);line-height:1.7;color:var(--text);margin-top:10px">${escAttr(prompt.ar)}
             ${typeof speakerSVG === 'function' ? speakerSVG('#a09e9a', encodeURIComponent(prompt.ar)) : ''}</div>
-          <div class="d2-inset-ph" style="font-size:14.5px;margin-top:6px">${escAttr(prompt.ph)}</div>
-          <div style="font-size:12.5px;color:var(--text3);margin-top:4px">${escAttr(prompt.en)}</div>
-          <div style="height:1px;background:rgba(255,255,255,.08);margin:20px auto;max-width:200px"></div>` : ''}
+          <div class="d2-inset-ph" style="font-size:15px;margin-top:6px">${escAttr(prompt.ph)}</div>
+          <div style="font-size:14px;color:var(--text2);margin-top:4px">${escAttr(prompt.en)}</div>
+          <div style="height:1px;background:var(--surface-border);margin:20px auto;max-width:200px"></div>` : ''}
         <div style="font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent2)">You say — in Arabic</div>
         <div style="font-size:clamp(20px,5.5vw,27px);font-weight:600;line-height:1.45;color:var(--text);margin:10px auto 0;max-width:420px">${escAttr(it.say_en)}</div>
         ${hasGenderVariants ? `
@@ -198,7 +198,7 @@ function renderGuided() {
         ${it.reply ? `
         <div class="d2-gold-box">
           <div class="d2-label gold" style="margin-bottom:8px">They answer back —</div>
-          <div class="d2-inset-ar" style="font-size:18px">${escAttr(it.reply.ar)}</div>
+          <div class="d2-inset-ar" style="font-size:23px">${escAttr(it.reply.ar)}</div>
           <div class="d2-inset-ph">${escAttr(it.reply.ph)}</div>
           <div class="d2-inset-en">${escAttr(it.reply.en)}</div>
         </div>` : ''}
