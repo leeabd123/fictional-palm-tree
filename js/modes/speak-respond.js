@@ -117,7 +117,7 @@ function coachPromptHTML() {
           <span class="mode-badge" style="width:30px;height:30px;box-shadow:0 0 0 1px var(--gold-border)"><svg style="width:15px;height:15px" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14a3 3 0 003-3V5a3 3 0 00-6 0v6a3 3 0 003 3z"/><path d="M19 11a7 7 0 01-14 0H3a9 9 0 008 8.94V23h2v-3.06A9 9 0 0021 11h-2z"/></svg></span>
           <span style="font-size:12px;color:var(--text-muted)">Scenario — ${esc(it.context)}</span>
         </div>
-        <div class="bubble them" style="max-width:100%;direction:ltr;text-align:left;font-family:'DM Sans',sans-serif;font-size:19px;font-weight:500">
+        <div class="bubble them" style="max-width:100%;direction:ltr;text-align:left;font-family:'DM Sans',sans-serif;font-size:22px;font-weight:500">
           ${esc(it.qen)}
           <div class="tl">${coachHintOpen ? esc(it.qar) + ' · ' + esc(it.qph) : 'say it in Sudanese Arabic'}</div>
         </div>
@@ -577,7 +577,7 @@ function coachFeedbackHTML() {
                 <span class="c2-swap-to" dir="auto">${esc(s.to)}</span>
               </span>`).join('')}` : ''}
           </div>` : ''}
-          <div class="c2-sug-say" style="border-top:1px solid rgba(255,255,255,.06)">Now say the upgraded version out loud. Twice. That's the whole trick.</div>
+          <div class="c2-sug-say" style="border-top:1px solid var(--surface-border)">Now say the upgraded version out loud. Twice. That's the whole trick.</div>
         </div>
 
         <div class="coach-stagger" ${delay()} style="text-align:center">

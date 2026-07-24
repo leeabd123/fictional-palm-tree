@@ -51,16 +51,16 @@ function renderShadow(){
               <span class="blur-ar">${escAttr(it.a)}</span>
               say it out loud first — tap to reveal الجواب
             </button>
-            <div style="font-size:14px;color:var(--text-secondary);text-align:center">“${escAttr(it.e)}”</div>
+            <div style="font-size:16px;color:var(--text-secondary);text-align:center">“${escAttr(it.e)}”</div>
           `:`
             <div style="padding:14px 18px;border-radius:12px;background:var(--gold-ghost-bg);border:1px solid var(--gold-border)">
-              <div style="font-family:'Instrument Serif','Noto Naskh Arabic',serif;font-size:30px;direction:rtl;text-align:right;color:var(--text-primary);line-height:1.6">${escAttr(it.a)}</div>
-              <div style="font-size:13px;color:var(--text-secondary);margin-top:5px">${escAttr(it.e)} — <span style="color:var(--purple);font-style:italic">${escAttr(it.p)}</span></div>
+              <div style="font-family:'Instrument Serif','Noto Naskh Arabic',serif;font-size:38px;direction:rtl;text-align:right;color:var(--text-primary);line-height:1.6">${escAttr(it.a)}</div>
+              <div style="font-size:15px;color:var(--text-secondary);margin-top:6px">${escAttr(it.e)} — <span style="color:var(--purple);font-style:italic">${escAttr(it.p)}</span></div>
             </div>
             <div style="padding:12px 16px;border-radius:12px;background:var(--surface-hover);border:1px solid var(--surface-border)">
-              <div style="font-family:'Instrument Serif','Noto Naskh Arabic',serif;font-size:20px;direction:rtl;text-align:right;color:var(--text-primary);line-height:1.7">${escAttr(it.ex)}</div>
-              <div style="font-size:12px;color:var(--purple);font-style:italic;margin-top:3px">${getExPh(it)}</div>
-              <div style="font-size:12.5px;color:var(--text-secondary);margin-top:3px">${escAttr(it.exen)}</div>
+              <div style="font-family:'Instrument Serif','Noto Naskh Arabic',serif;font-size:25px;direction:rtl;text-align:right;color:var(--text-primary);line-height:1.7">${escAttr(it.ex)}</div>
+              <div style="font-size:13.5px;color:var(--purple);font-style:italic;margin-top:4px">${getExPh(it)}</div>
+              <div style="font-size:14px;color:var(--text-secondary);margin-top:3px">${escAttr(it.exen)}</div>
             </div>
           `}
           ${next?`<div style="opacity:.4"><div style="font-family:'Instrument Serif','Noto Naskh Arabic',serif;font-size:24px;direction:rtl;text-align:right;color:var(--text-primary)">${escAttr(next.a)}</div></div>`:''}
